@@ -48,7 +48,7 @@ the one the server lives in.
 
 ## Tools
 
-Exactly five, all reads:
+Exactly eight, all reads:
 
 | Tool | Arguments | Returns |
 |---|---|---|
@@ -56,7 +56,10 @@ Exactly five, all reads:
 | `wiki_read_page` | `page` — id, repo-relative path, stem, or title | `page`, parsed `frontmatter`, full `text` |
 | `wiki_read_source` | `path` — repo-relative raw path | `path`, `sensitivity`, `text` — or a refusal (below) |
 | `wiki_neighbors` | `page`, optional `type`, `direction`: `out` \| `in` \| `both` | The page's typed wikilink edges (the Lens's graph) |
+| `wiki_path` | `from_page`, `to_page` (both required), `max_depth` (default 6) | Shortest directed wikilink path (`from`, `to`, `path`, `relations`), or `path: null` with a `note` when no directed path exists |
 | `wiki_census` | — | Page/edge counts by relation and kind, orphan pages and `orphan_count` |
+| `wiki_claim` | optional `query` substring filter (default: all claim pages) | Claim pages with their lifecycle `status` and outcome counts |
+| `wiki_cite` | optional `page`, optional `cite_id` | Verbatim cited passages from the citation lockfile; a passage the sensitivity gate bars is withheld, with the reason stated (below) |
 
 ## The gates still apply
 
@@ -98,6 +101,12 @@ not re-implemented**, from the traversal door
   withheld — its snippet and text never leave the process —
   and reported only as part of `withheld_count`.
 
+  The same gate applies inside `wiki_cite`: a citation whose
+  source class bars this door's identity returns its citation
+  record with the verbatim passage withheld (`quote: null`)
+  and the reason stated — the citation is not hidden, the
+  passage is.
+
 Refusals and failures come back as MCP error results
 (`isError: true`) whose text states the reason; a missing page
 and a barred source are both errors, never empty successes.
@@ -110,9 +119,11 @@ python3 -m unittest discover -s tests        # fixture wiki only
 ```
 
 The suite speaks real JSON-RPC to the server against a fixture
-wiki in a temp dir, and pins: the handshake, the exact five-tool
+wiki in a temp dir, and pins: the handshake, the exact eight-tool
 surface, severance cutting a hunted claim while the record stays
 findable otherwise, wholesale page severance, the
 credential-adjacent refusal (read and search), the
-unclassified stamp, and byte-identical fixture checksums after
+unclassified stamp, the shortest-path and no-path cases, claim
+listing with lifecycle status, verbatim citations with a gated
+passage withheld, and byte-identical fixture checksums after
 a full call battery (the door writes nothing).

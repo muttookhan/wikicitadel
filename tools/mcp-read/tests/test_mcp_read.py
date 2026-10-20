@@ -8,7 +8,8 @@ server.py, pointed (--root) at a FIXTURE wiki in a temp dir
 built exactly the way scripts/tests/test_wiki_traverse.py
 builds its fixture (the door's own dependencies copied in:
 wiki_traverse.py, wiki_validate.py, wiki_search.py,
-tools/lens/lenslib.py). The fixture carries, on purpose:
+wiki_claims.py, tools/lens/lenslib.py). The fixture carries,
+on purpose:
 
   - a claim-severed page (gamma): its severed claim must be
     cut by wiki_search when the query hunts it, and the page
@@ -19,10 +20,18 @@ tools/lens/lenslib.py). The fixture carries, on purpose:
     surfaced by wiki_search even at scope=all;
   - a personal raw (diary) and an unclassified raw (plain):
     the door's stance (the owner's agent, never the owner)
-    serves the first and serves the second STAMPED.
+    serves the first and serves the second STAMPED;
+  - a claim page (alpha, carrying a `claim:` field and an
+    empty outcomes log): listed by wiki_claim with its
+    lifecycle status;
+  - a citation lockfile over alpha citing the open note
+    (served verbatim by wiki_cite) and the secret note
+    (its passage WITHHELD by wiki_cite, because the cited
+    source is credential-adjacent and the door's identity
+    is not the owner).
 
 It also pins the protocol handshake, the tools/list shape
-(exactly the five read tools — the read/write split is the
+(exactly the eight read tools — the read/write split is the
 point), and the no-write proof: sha256 of every fixture
 content file identical before and after a call battery.
 
@@ -46,6 +55,7 @@ SCRIPTS = REPO / "scripts"
 ALPHA = """---
 title: Alpha
 type: entity
+claim: "Alpha is the first fixture page."
 sources:
   - raw/sources/open-note.md
 ---
@@ -102,6 +112,24 @@ SENSITIVITY = {
     ],
 }
 
+LOCKFILE = {
+    "tool": "fixture lockfile", "generated": "2026-10-20",
+    "citations": [
+        {"id": "c9001", "page": "wiki/entities/alpha.md",
+         "page_line": 12, "claim": "Alpha rests on the open note.",
+         "source": "raw/sources/open-note.md", "range": [1, 1],
+         "selector": {"type": "TextQuoteSelector",
+                      "exact": "VERBATIM OPEN PASSAGE",
+                      "prefix": "", "suffix": ""}},
+        {"id": "c9002", "page": "wiki/entities/alpha.md",
+         "page_line": 13, "claim": "Alpha cites the key record.",
+         "source": "raw/sources/secret-note.md", "range": [1, 1],
+         "selector": {"type": "TextQuoteSelector",
+                      "exact": "VERBATIM SECRET PASSAGE",
+                      "prefix": "", "suffix": ""}},
+    ],
+}
+
 SEVERANCE = {
     "kind": "retrieval-severance", "version": 1,
     "purpose": "fixture severance list",
@@ -137,7 +165,7 @@ class McpReadFixture(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.tmp, True)
         scripts = self._mk("scripts")
         for name in ("wiki_traverse.py", "wiki_validate.py",
-                     "wiki_search.py"):
+                     "wiki_search.py", "wiki_claims.py"):
             shutil.copy(SCRIPTS / name, scripts / name)
         lens = self._mk("tools", "lens")
         shutil.copy(REPO / "tools" / "lens" / "lenslib.py",
@@ -164,6 +192,9 @@ class McpReadFixture(unittest.TestCase):
             json.dumps(SENSITIVITY), encoding="utf-8")
         (ev / "retrieval-severance.json").write_text(
             json.dumps(SEVERANCE), encoding="utf-8")
+        (ev / "citation-lockfile.json").write_text(
+            json.dumps(LOCKFILE), encoding="utf-8")
+        (ev / "outcomes.jsonl").write_text("", encoding="utf-8")
 
     def _mk(self, *parts):
         d = self.tmp.joinpath(*parts)
@@ -218,7 +249,8 @@ class TestProtocol(McpReadFixture):
         self.assertEqual(
             {t["name"] for t in tools},
             {"wiki_search", "wiki_read_page", "wiki_read_source",
-             "wiki_neighbors", "wiki_census"})
+             "wiki_neighbors", "wiki_path", "wiki_census",
+             "wiki_claim", "wiki_cite"})
         for t in tools:
             self.assertEqual(t["inputSchema"]["type"], "object")
             self.assertIn("description", t)
@@ -364,6 +396,82 @@ class TestGraph(McpReadFixture):
                          len(payload["orphans"]))
 
 
+class TestPathClaimCite(McpReadFixture):
+    def test_path_found(self):
+        is_err, payload = self.call(
+            "wiki_path", {"from_page": "alpha", "to_page": "beta"})
+        self.assertFalse(is_err, payload)
+        self.assertEqual(payload["from"], "wiki/entities/alpha.md")
+        self.assertEqual(payload["to"], "wiki/entities/beta.md")
+        self.assertEqual(payload["path"],
+                         ["wiki/entities/alpha.md",
+                          "wiki/entities/beta.md"])
+        self.assertEqual(payload["relations"], ["grounds"])
+        self.assertIsNone(payload["note"])
+
+    def test_path_no_path(self):
+        is_err, payload = self.call(
+            "wiki_path", {"from_page": "dead", "to_page": "alpha"})
+        self.assertFalse(is_err, payload)
+        self.assertEqual(payload["from"], "wiki/entities/dead.md")
+        self.assertEqual(payload["to"], "wiki/entities/alpha.md")
+        self.assertIsNone(payload["path"])
+        self.assertIsNone(payload["relations"])
+        self.assertIn("no connection", payload["note"])
+
+    def test_claim_lists_fixture_claim_pages(self):
+        is_err, payload = self.call("wiki_claim", {})
+        self.assertFalse(is_err, payload)
+        self.assertEqual(len(payload["claims"]), 1)
+        row = payload["claims"][0]
+        self.assertEqual(row["page"], "wiki/entities/alpha.md")
+        self.assertEqual(row["claim"],
+                         "Alpha is the first fixture page.")
+        self.assertEqual(row["status"], "candidate")
+        self.assertEqual(row["outcome_n"], 0)
+        self.assertEqual(row["outcome_supports"], 0)
+        self.assertEqual(row["outcome_contradicts"], 0)
+
+    def test_claim_query_filter(self):
+        is_err, payload = self.call(
+            "wiki_claim", {"query": "first fixture"})
+        self.assertFalse(is_err, payload)
+        self.assertEqual([r["page"] for r in payload["claims"]],
+                         ["wiki/entities/alpha.md"])
+        is_err, payload = self.call(
+            "wiki_claim", {"query": "no-such-claim-text"})
+        self.assertFalse(is_err, payload)
+        self.assertEqual(payload["claims"], [])
+
+    def test_cite_returns_verbatim_passage(self):
+        is_err, payload = self.call(
+            "wiki_cite", {"page": "alpha"})
+        self.assertFalse(is_err, payload)
+        by_id = {c["id"]: c for c in payload["citations"]}
+        self.assertEqual(by_id["c9001"]["quote"],
+                         "VERBATIM OPEN PASSAGE")
+        self.assertEqual(by_id["c9001"]["sensitivity"], "internal")
+        is_err, payload = self.call(
+            "wiki_cite", {"cite_id": "c9001"})
+        self.assertFalse(is_err, payload)
+        self.assertEqual(len(payload["citations"]), 1)
+        self.assertEqual(payload["citations"][0]["quote"],
+                         "VERBATIM OPEN PASSAGE")
+
+    def test_cite_withholds_gated_passage(self):
+        is_err, payload = self.call(
+            "wiki_cite", {"page": "alpha"})
+        self.assertFalse(is_err, payload)
+        by_id = {c["id"]: c for c in payload["citations"]}
+        self.assertIsNone(by_id["c9002"]["quote"])
+        self.assertEqual(by_id["c9002"]["sensitivity"],
+                         "credential-adjacent")
+        self.assertIn("credential-adjacent",
+                      by_id["c9002"]["refused"])
+        self.assertNotIn("VERBATIM SECRET PASSAGE",
+                         json.dumps(payload))
+
+
 class TestNoWrite(McpReadFixture):
     def test_battery_leaves_fixture_byte_identical(self):
         before = tree_checksums(self.tmp)
@@ -373,7 +481,11 @@ class TestNoWrite(McpReadFixture):
         self.call("wiki_read_source",
                   {"path": "raw/sources/open-note.md"})
         self.call("wiki_neighbors", {"page": "alpha"})
+        self.call("wiki_path", {"from_page": "alpha",
+                                "to_page": "beta"})
         self.call("wiki_census", {})
+        self.call("wiki_claim", {})
+        self.call("wiki_cite", {"page": "alpha"})
         self.assertEqual(tree_checksums(self.tmp), before)
 
     def test_server_source_names_no_write_api(self):
@@ -385,6 +497,38 @@ class TestNoWrite(McpReadFixture):
         for verb in ("write_text", "write_bytes", "os.remove",
                      "os.rename", "shutil"):
             self.assertNotIn(verb, text)
+
+
+class TestRelativeRoot(McpReadFixture):
+    def test_relative_root_claim_and_census(self):
+        # Regression: a door started with a RELATIVE --root crashed
+        # wiki_claim (the traversal door computes page paths
+        # relative to the root while its page walk yields absolute
+        # paths). The door now resolves its root at construction;
+        # the crash also killed the server, which the dispatch
+        # guard now prevents for any tool error.
+        inp = "".join(json.dumps(r) + "\n" for r in (
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize",
+             "params": {}},
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+             "params": {"name": "wiki_claim", "arguments": {}}},
+            {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+             "params": {"name": "wiki_census", "arguments": {}}}))
+        proc = subprocess.run(
+            [sys.executable, str(SERVER), "--root", self.tmp.name],
+            input=inp, capture_output=True, text=True,
+            cwd=str(self.tmp.parent))
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        out = {}
+        for line in proc.stdout.splitlines():
+            if line.strip():
+                msg = json.loads(line)
+                if "id" in msg:
+                    out[msg["id"]] = msg
+        self.assertFalse(out[2]["result"].get("isError", False))
+        claim = json.loads(out[2]["result"]["content"][0]["text"])
+        self.assertTrue(claim["claims"])
+        self.assertFalse(out[3]["result"].get("isError", False))
 
 
 if __name__ == "__main__":

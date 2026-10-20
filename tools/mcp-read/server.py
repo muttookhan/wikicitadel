@@ -25,6 +25,12 @@ applies its read rule verbatim:
     the engine's own, never a re-implementation; results the
     sensitivity gate bars are then withheld (see _search).
 
+Tools (eight, all reads): wiki_search, wiki_read_page,
+wiki_read_source, wiki_neighbors, wiki_path, wiki_census,
+wiki_claim, wiki_cite. The last three are thin wrappers over
+the traversal door's path / claim / cite commands, imported
+the same way — never re-implemented here.
+
 The door's identity stance (a design decision, stated here
 because it decides what the gate does): the door runs as the
 owner's local agent — identity "agent", the traversal door's
@@ -82,9 +88,25 @@ TOOLS = [
          "direction": {"type": "string",
                        "enum": ["out", "in", "both"],
                        "default": "both"}}, "required": ["page"]}},
+    {"name": "wiki_path",
+     "description": "Shortest directed wikilink path between two pages, with the relation of each step; reports when no directed path exists (and whether an undirected connection does).",
+     "inputSchema": {"type": "object", "properties": {
+         "from_page": {"type": "string"},
+         "to_page": {"type": "string"},
+         "max_depth": {"type": "integer", "default": 6}},
+         "required": ["from_page", "to_page"]}},
     {"name": "wiki_census",
      "description": "Corpus census: page and edge counts by relation/kind, and the orphan pages.",
      "inputSchema": {"type": "object", "properties": {}}},
+    {"name": "wiki_claim",
+     "description": "Claim pages and their lifecycle status (candidate / rule / retired, with outcome counts), optionally filtered by a substring of the claim text or page path.",
+     "inputSchema": {"type": "object", "properties": {
+         "query": {"type": "string", "default": ""}}}},
+    {"name": "wiki_cite",
+     "description": "Verbatim cited passages from the citation lockfile, for a page or for one citation by id; a passage whose source class the sensitivity gate bars for this door's fixed identity is withheld, with the reason stated.",
+     "inputSchema": {"type": "object", "properties": {
+         "page": {"type": "string"},
+         "cite_id": {"type": "string"}}}},
 ]
 
 
@@ -101,8 +123,12 @@ def _load_module(name, path):
 
 class ReadDoor:
     def __init__(self, root: Path):
-        self.root = root
-        traverse_path = root / "scripts" / "wiki_traverse.py"
+        # Resolved once, here: the traversal door computes page
+        # paths relative to the root, and a relative root (a plain
+        # `--root .` start) crashes its claim/cite verbs against
+        # the absolute paths its page walk yields.
+        self.root = Path(root).resolve()
+        traverse_path = self.root / "scripts" / "wiki_traverse.py"
         if not traverse_path.is_file():
             raise DoorError(
                 f"no traversal door at {traverse_path} — the read "
@@ -192,11 +218,24 @@ class ReadDoor:
         return self.traverse.cmd_neighbours(
             self.root, DOOR_IDENTITY, name, etype, direction, True)
 
+    def _path(self, a: str, b: str, max_depth: int = 6) -> dict:
+        return self.traverse.cmd_path(
+            self.root, DOOR_IDENTITY, a, b, int(max_depth), True)
+
     def _census(self) -> dict:
         out = self.traverse.cmd_census(self.root, DOOR_IDENTITY,
                                        True)
         out["orphan_count"] = len(out.get("orphans", []))
         return out
+
+    def _claim(self, query: str = "") -> dict:
+        return self.traverse.cmd_claim(
+            self.root, DOOR_IDENTITY, query, True)
+
+    def _cite(self, page=None, cite_id=None) -> dict:
+        return self.traverse.cmd_cite(
+            self.root, DOOR_IDENTITY, page or None,
+            cite_id or None, True)
 
     # -- JSON-RPC handling (gateway server.py's shape) -----------------
     @staticmethod
@@ -264,8 +303,19 @@ class ReadDoor:
                 return self._result(self._neighbors(
                     str(args.get("page") or args.get("path") or ""),
                     args.get("type"), direction))
+            if name == "wiki_path":
+                return self._result(self._path(
+                    str(args.get("from_page") or ""),
+                    str(args.get("to_page") or ""),
+                    args.get("max_depth", 6)))
             if name == "wiki_census":
                 return self._result(self._census())
+            if name == "wiki_claim":
+                return self._result(self._claim(
+                    str(args.get("query") or "")))
+            if name == "wiki_cite":
+                return self._result(self._cite(
+                    args.get("page"), args.get("cite_id")))
             return self._result(
                 {"error": f"unknown tool: {name}"}, is_error=True)
         except Refusal as exc:
@@ -273,6 +323,10 @@ class ReadDoor:
                                 is_error=True)
         except DoorError as exc:
             return self._result({"error": str(exc)}, is_error=True)
+        except Exception as exc:  # one bad call must not kill the door
+            return self._result(
+                {"error": f"{type(exc).__name__}: {exc}"},
+                is_error=True)
 
 
 def serve(argv=None) -> int:
