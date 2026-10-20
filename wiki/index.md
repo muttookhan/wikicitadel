@@ -19,6 +19,8 @@ on the owner.
 ## Concepts
 
 - [[standing-approval]] — tombstoned: the blanket form, retired with its reason stated.
+- [[demo-guide-ja]] — the demo guide in Japanese: proof the seed corpus carries non-English pages natively.
+- [[demo-guide-ko]] — the demo guide in Korean: the same proof, a second script family.
 
 ## Sources
 

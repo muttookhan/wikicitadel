@@ -2,6 +2,12 @@
 
 Append-only. Latest first.
 
+## 2026-01-16 — i18n demo pages
+
+- Added two fictional demo pages, [[demo-guide-ja]] (Japanese) and
+  [[demo-guide-ko]] (Korean), proving the seed corpus carries
+  non-English pages natively; indexed under Concepts.
+
 ## 2026-01-15 — founding
 
 - Installation created from the WikiCitadel seed. Schema: `AGENTS.md`.
