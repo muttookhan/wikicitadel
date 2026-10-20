@@ -1,0 +1,76 @@
+{
+  "fixtures": [
+    {
+      "file": "attack-plain-instruction.md",
+      "expect": "blocked",
+      "gate": "sanitiser-scan",
+      "owasp": "LLM01 Prompt Injection",
+      "atlas": "AML.T0051 LLM Prompt Injection",
+      "note": "bare override directive in prose"
+    },
+    {
+      "file": "attack-zero-width.md",
+      "expect": "blocked",
+      "gate": "sanitiser-scan",
+      "owasp": "LLM01 Prompt Injection",
+      "atlas": "AML.T0051.001 Indirect Prompt Injection",
+      "note": "directive split by zero-width codepoints; normalisation must expose it"
+    },
+    {
+      "file": "attack-bidi.md",
+      "expect": "blocked",
+      "gate": "sanitiser-scan",
+      "owasp": "LLM01 Prompt Injection",
+      "atlas": "AML.T0051.001 Indirect Prompt Injection",
+      "note": "bidi override controls wrap a directive"
+    },
+    {
+      "file": "attack-hidden-html.md",
+      "expect": "blocked",
+      "gate": "sanitiser-scan",
+      "owasp": "LLM01 Prompt Injection",
+      "atlas": "AML.T0051.001 Indirect Prompt Injection",
+      "note": "display:none element carries the directive"
+    },
+    {
+      "file": "attack-white-text.md",
+      "expect": "blocked",
+      "gate": "sanitiser-scan",
+      "owasp": "LLM01 Prompt Injection",
+      "atlas": "AML.T0051.001 Indirect Prompt Injection",
+      "note": "white-on-white span carries the directive"
+    },
+    {
+      "file": "attack-html-comment.md",
+      "expect": "blocked",
+      "gate": "sanitiser-scan",
+      "owasp": "LLM01 Prompt Injection",
+      "atlas": "AML.T0051.001 Indirect Prompt Injection",
+      "note": "HTML comment carries the directive + role hijack"
+    },
+    {
+      "file": "attack-base64.md",
+      "expect": "blocked",
+      "gate": "sanitiser-scan",
+      "owasp": "LLM01 Prompt Injection",
+      "atlas": "AML.T0054 LLM Jailbreak",
+      "note": "base64-smuggled directive"
+    },
+    {
+      "file": "attack-chat-template.md",
+      "expect": "blocked",
+      "gate": "sanitiser-scan",
+      "owasp": "LLM01 Prompt Injection",
+      "atlas": "AML.T0051 LLM Prompt Injection",
+      "note": "chat-template markers forge a system turn"
+    },
+    {
+      "file": "benign-control.md",
+      "expect": "pass",
+      "gate": "sanitiser-scan",
+      "owasp": null,
+      "atlas": null,
+      "note": "security prose without trigger phrases, a benign base64 sentence, a benign HTML comment, and 'you are now a member' prose must NOT be stopped"
+    }
+  ]
+}

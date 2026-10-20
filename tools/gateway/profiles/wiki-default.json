@@ -1,0 +1,112 @@
+{
+ "axes": {
+  "comment": "Two orthogonal axes (Phase-2 item 7; pattern: kelly-create/LLM-WIKI-skills, no license - idea only, re-implemented). Status is LIFECYCLE (where a page is in its life); confidence is EVIDENCE STRENGTH (how well its claims are backed). The vocabularies are disjoint on purpose: a value from one axis written on the other is a validation warning. confidence 'high' is a human-only ceiling - reserved for claims the Owner personally verified; no agent and no source count can award it.",
+  "confidence": [
+   "observed",
+   "inferred",
+   "low",
+   "medium",
+   "high"
+  ],
+  "status": [
+   "draft",
+   "verified",
+   "published",
+   "archived",
+   "active",
+   "needs-verification",
+   "superseded",
+   "deprecated"
+  ]
+ },
+ "comment": "Lifecycle profile for the LLM Wiki (harvest item 7, pattern: atomicstrata/llm-wiki-compiler, MIT; versioned fields + grandfathering: Phase-2 item 5, pattern: pyrite-wiki/pyrite, MIT). warn-legacy is deliberate: violations are recorded (gateway proposal meta, validator warnings) and never refuse a write. Flipping mode to enforce is an Owner decision (Phase 2 gate) and has NOT been taken. Schema v2 adds the field 'status' (since_version 2): pages declaring _schema_version >= 2 must carry it (error); older pages are grandfathered (warning only).",
+ "mode": "warn-legacy",
+ "name": "wiki-default",
+ "page_types": {
+  "concept": {
+   "required_fields": [
+    "title",
+    "type",
+    "created",
+    "updated",
+    "sources",
+    "tags",
+    {
+     "field": "status",
+     "since_version": 2
+    }
+   ]
+  },
+  "entity": {
+   "required_fields": [
+    "title",
+    "type",
+    "created",
+    "updated",
+    "sources",
+    "tags",
+    {
+     "field": "status",
+     "since_version": 2
+    }
+   ]
+  },
+  "query": {
+   "required_fields": [
+    "title",
+    "type",
+    "created",
+    "updated",
+    "sources",
+    "tags",
+    {
+     "field": "status",
+     "since_version": 2
+    }
+   ]
+  },
+  "source": {
+   "required_fields": [
+    "title",
+    "type",
+    "created",
+    "updated",
+    "sources",
+    "tags",
+    {
+     "field": "status",
+     "since_version": 2
+    }
+   ]
+  },
+  "synthesis": {
+   "required_fields": [
+    "title",
+    "type",
+    "created",
+    "updated",
+    "sources",
+    "tags",
+    {
+     "field": "status",
+     "since_version": 2
+    }
+   ]
+  }
+ },
+ "schema_version": 2,
+ "status_transitions": {
+  "archived": [],
+  "draft": [
+   "verified",
+   "published"
+  ],
+  "published": [
+   "archived"
+  ],
+  "verified": [
+   "published",
+   "draft"
+  ]
+ }
+}

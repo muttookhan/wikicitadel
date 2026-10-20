@@ -1,0 +1,34 @@
+{
+  "manifest": "WikiCitadel raw/ provenance manifest (all of raw/)",
+  "schema_version": 1,
+  "generated_at": "2026-10-20T14:45:27-04:00",
+  "root": "raw",
+  "excludes": [
+    "raw/sources/provenance-manifest.json (the manifest never lists itself)"
+  ],
+  "file_count": 1,
+  "total_bytes": 796,
+  "sub_manifests": [
+    {
+      "path": "raw/sources/mirror-a-manifest.json",
+      "kind": "mirror sub-manifest",
+      "covers": "raw/sources/mirror-a",
+      "entries": 0,
+      "note": "not present on disk"
+    },
+    {
+      "path": "raw/sources/mirror-b-manifest.json",
+      "kind": "mirror sub-manifest",
+      "covers": "raw/sources/mirror-b",
+      "entries": 0,
+      "note": "not present on disk"
+    }
+  ],
+  "sub_manifest_drift": [],
+  "files": {
+    "raw/sources/founding-note.md": {
+      "bytes": 796,
+      "sha256": "2a2f7adf1c92693ea6374dfc11261a8287078eac4f297644f4f1bd5b16948962"
+    }
+  }
+}

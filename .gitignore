@@ -1,0 +1,21 @@
+# Secrets — never commit credentials, keys or tokens (WikiCitadel rule:
+# a stray secret file must never ride into git history).
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+.env
+.env.*
+*.env
+credentials*
+*secret*
+.netrc
+.aws/
+.gnupg/
+
+# Local state and caches
+__pycache__/
+*.pyc
+.local/
+staging/
+.DS_Store

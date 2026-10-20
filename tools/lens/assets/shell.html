@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WikiCitadel Lens</title>
+<link rel="stylesheet" href="lens.css">
+</head>
+<body>
+<a class="skip" href="#canvas">Skip to content</a>
+<a class="skip" href="#inspector">Skip to inspector</a>
+<div id="app">
+  <header id="topbar">
+    <div class="brand-block">
+      <span class="brand">Lens</span>
+      <span class="brand-sub">WikiCitadel</span>
+    </div>
+    <p class="stamp-line" id="stamp-line">Built {{GENERATED_AT}} · from <code>{{HEAD_SHORT}}</code></p>
+    <button id="pages-toggle" class="btn btn-ghost" aria-expanded="false">Pages</button>
+    <button id="palette-open" class="btn btn-ghost" aria-keyshortcuts="Meta+K Control+K" title="Command palette — search pages, jump to a view, run an action">⌘K Search</button>
+    <button id="inspector-toggle" class="btn btn-ghost" aria-expanded="false" aria-controls="inspector">Inspector</button>
+  </header>
+
+  <aside id="rail" aria-label="Modes">
+    <nav id="mode-nav">
+      <a class="rail-item" data-route="briefing" href="#/"><span class="rail-label">Briefing</span></a>
+      <a class="rail-item" data-route="read" href="#/read/overview"><span class="rail-label">Wiki</span></a>
+      <a class="rail-item" data-route="ask" href="#/ask"><span class="rail-label">Ask</span></a>
+      <button class="rail-item rail-more-toggle" id="more-toggle" aria-expanded="false" aria-controls="more-modes"><span class="rail-label">More</span></button>
+      <div id="more-modes" class="more-modes" hidden>
+        <a class="rail-item" data-route="graph" href="#/graph"><span class="rail-label">Graph</span></a>
+        <a class="rail-item" data-route="timeline" href="#/timeline"><span class="rail-label">Timeline</span></a>
+        <a class="rail-item" data-route="decisions" href="#/decisions"><span class="rail-label">Decisions</span></a>
+        <a class="rail-item" data-route="proposals" href="#/proposals"><span class="rail-label">Proposals</span></a>
+        <a class="rail-item" data-route="trails" href="#/trails"><span class="rail-label">Trails</span></a>
+        <a class="rail-item" data-route="cards" href="#/cards"><span class="rail-label">Cards</span></a>
+        <a class="rail-item" data-route="blackbox" href="#/blackbox"><span class="rail-label">Black Box</span></a>
+        <a class="rail-item" data-route="state" href="#/state"><span class="rail-label">State</span></a>
+        <a class="rail-item" data-route="reading" href="#/reading"><span class="rail-label">Reading</span></a>
+      </div>
+    </nav>
+    <div class="rail-foot">
+      <p class="caption">Read-only. Questions and proposals go through the gateway (Ask, above).</p>
+    </div>
+  </aside>
+
+  <aside id="navcol" aria-label="Pages">
+    <form id="search-form" role="search">
+      <label class="visually-hidden" for="global-search">Search the wiki</label>
+      <input id="global-search" type="search" placeholder="Search or ask the wiki…" autocomplete="off">
+    </form>
+    <div id="recent-strip" aria-label="Recent and frequent"></div>
+    <div id="tree"></div>
+  </aside>
+
+  <main id="canvas" tabindex="-1"></main>
+
+  <aside id="inspector" aria-label="Inspector">
+    <div class="inspector-head"><button id="inspector-close" class="btn btn-ghost">Close</button></div>
+    <div id="inspector-context"></div>
+    <section id="blackbox-rail" aria-label="Black Box status"></section>
+  </aside>
+</div>
+
+<div id="palette" class="palette" hidden role="dialog" aria-modal="true" aria-label="Command palette">
+  <div class="palette-panel">
+    <input id="palette-input" type="search" placeholder="Search pages, jump to a view, or run an action…" autocomplete="off" aria-label="Command palette">
+    <div id="palette-results"></div>
+    <p class="palette-hint">↑ ↓ to move · Enter to open · Esc to close · Results are the merged search's own; recents are kept in this browser only.</p>
+  </div>
+</div>
+
+<div id="tab-more" class="tab-more-panel" hidden>
+  <a href="#/graph">Graph</a>
+  <a href="#/timeline">Timeline</a>
+  <a href="#/decisions">Decisions</a>
+  <a href="#/proposals">Proposals</a>
+  <a href="#/trails">Trails</a>
+  <a href="#/cards">Cards</a>
+  <a href="#/blackbox">Black Box</a>
+  <a href="#/state">State</a>
+  <a href="#/reading">Reading</a>
+</div>
+<nav id="tabbar" aria-label="Primary modes">
+  <a class="tab-item" data-route="briefing" href="#/">Today</a>
+  <a class="tab-item" data-route="read" href="#/read/overview">Wiki</a>
+  <a class="tab-item" data-route="ask" href="#/ask">Ask</a>
+  <button class="tab-item" id="tab-more-toggle" aria-expanded="false" aria-controls="tab-more">More</button>
+</nav>
+
+<script src="data/pages.js"></script>
+<script src="data/routes.js"></script>
+<script src="data/graph.js"></script>
+<script src="data/graph-report.js"></script>
+<script src="data/modes.js"></script>
+<script src="data/search.js"></script>
+<script src="data/knowledge.js"></script>
+<script src="data/qa.js"></script>
+<script src="data/proposals.js"></script>
+<script src="data/trails.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

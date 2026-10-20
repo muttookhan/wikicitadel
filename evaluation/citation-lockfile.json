@@ -1,0 +1,123 @@
+{
+  "tool": "wiki_cite_lock citation lockfile",
+  "lockfile_version": 2,
+  "generated": "2026-10-20",
+  "note": "Per-citation lock: claim hash + cited-line hashes as of the generated date, plus a TextQuoteSelector second anchor per citation (dual anchoring). CHANGED means the cited content differs — re-verify the claim by hand; MOVED means the same passage lives at a new range (re-run build to re-lock); AMBIGUOUS means the quoted passage occurs more than once and its context cannot disambiguate it. The manifest records each source's converter identity where the record supports one (unknown-legacy where it does not). Patterns: tng-wiki lockfile (MIT), okf-harness manifest (Apache-2.0), zissa-wiki quote check (MIT), wiki-skills audit (MIT), KNOX converter identity (MIT), W3C Web Annotation selectors — all re-implemented.",
+  "converter": {
+    "tool": "wiki_convert.py",
+    "script_sha256": "b728a79687feb0a10f18dc1dd5698b0c279ef02e74c23cbdc93aacdef30954a7",
+    "sanitizer_sha256": "a9a1770506b265b6e7f51bc2b86b503c3ee31e5183cf89d709959563dc3a212d"
+  },
+  "coverage": {
+    "pages_scanned": 9,
+    "pages_with_markers": 3,
+    "citations": 4,
+    "sources_registered": 1,
+    "selectors": 4,
+    "converter_recorded": 0,
+    "converter_unknown_legacy": 1
+  },
+  "citations": [
+    {
+      "id": "c0001",
+      "page": "wiki/entities/owner.md",
+      "page_line": 21,
+      "claim": "The owner is the human who owns this installation: the corpus, the decisions, and the final word on both.",
+      "claim_hash": "4059f6476331ee1b7edc5c1011e26ade8bf34842ffb73542cb220ebc318ae56b",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        13,
+        16
+      ],
+      "line_hashes": [
+        "6f964512d0630a3aa74ba646b1ffa40e4ab0fd5ca9b843b7a06aec5984b9b405",
+        "4a7ec0cee94ff0735e0a2aaa0417f4dc4a20dfc79e0411b96ac899722430aae3",
+        "e5fa6dd1d3bdf563accec9f92bfe3d6b9195bce95cce9e107869e1078502d25d",
+        "d54015565d0d61cf1a5412496ea344f92792a29f7c66e31d53037bd251480ece"
+      ],
+      "content_hash": "cb6d807b466ee6c5c44db08f52d9c997a943c15b48b0859fd510980b1c46be23",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "One correction, the same day, and it overrides the sentence above wherever\nthe two conflict: that direction covers work, never decisions. Every\ndecision — what to adopt, what to publish, what to spend, what to delete —\nneeds my own approval, asked for one at a time.",
+        "prefix": "— without asking me\neach time.\n\n",
+        "suffix": ""
+      }
+    },
+    {
+      "id": "c0002",
+      "page": "wiki/overview.md",
+      "page_line": 19,
+      "claim": "This wiki exists because the owner chose to hold the agent's context visibly, in versioned files anyone can inspect, rather than in the agent's own memory.",
+      "claim_hash": "a10b6bb2290ec68bc9fc8521cf40ca1b1e64f058c4133d1d3b93aa4ca1588dcd",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        3,
+        7
+      ],
+      "line_hashes": [
+        "4408bc4b4a3c151e005b92f005ff0343a3e6885298540109cd22ccba0229ce83",
+        "cdbb7ddad51f1e9c365765ca78e0437a992f9786aa8b9dddcf2d03c7cf44f533",
+        "82e0002876a0a8459cd229282a9542c48cc9fe292981d2d00cb3cd3be33a5a3a",
+        "852ad901f1b4ef04472da04b7842a9f2b653f3cf4eade833251ee896a9797464",
+        "dd8e8f0ee2d21bb5533bd056df130116428d29ea2738abea97f8aabe6169f065"
+      ],
+      "content_hash": "3f0de5c9edd17ccc4b61d1dbc9d0c500d6dfc4a96e071d6817ba0526e262d513",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "I am setting up this wiki because I do not want the agent's working memory\nto live inside the agent, where I cannot see it, check it, or hand it to\nanother agent. Everything the agent knows about my work should live here,\nin plain files under version control, with the source of every claim\nattached to the claim.",
+        "prefix": "tated by the owner, 2026-01-15\n\n",
+        "suffix": "\n\nTo keep things moving I am giv"
+      }
+    },
+    {
+      "id": "c0003",
+      "page": "wiki/syntheses/decision-register.md",
+      "page_line": 23,
+      "claim": "This form of the decision was superseded the same day by D2; it is retained here, and in the treatment register with a negative treatment, because a register that quietly rewrote it would teach every later reader a false history.",
+      "claim_hash": "0b7902f902a0116d717d9a6d60dd0b8409f54e7f56064e870c335d41b80121c7",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        9,
+        12
+      ],
+      "line_hashes": [
+        "aa7f6cce2dd058b0fdd7ad652264333171f83172c6e67137b429ca2be921e854",
+        "041b1274423a01ef0d92d47c00478c7365237a767b711a0e6ae1e786c97a55cb",
+        "69d9298917ab0b8e536e8054620d0536cacb792042a6690ed963d4053a4e2a23",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ],
+      "content_hash": "ca62113a89653cdde347adfdbf166c6d7382827644e83ebb01112cb55ae2a99b",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "To keep things moving I am giving a blanket direction: the agent may\nproceed with the work — reading, filing, building — without asking me\neach time.\n",
+        "prefix": "y claim\nattached to the claim.\n\n",
+        "suffix": "\nOne correction, the same day, a"
+      }
+    },
+    {
+      "id": "c0004",
+      "page": "wiki/syntheses/decision-register.md",
+      "page_line": 28,
+      "claim": "**D2 — Decisions are never covered (current).** The owner reversed the blanket direction the same day: decisions are NOT covered by it — every decision needs the owner's own approval.",
+      "claim_hash": "bc57ef12a42b35d2d45f2825f3cdf28a8be3215fcbcda6a6ba3836a6fc7cd6e9",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        13,
+        16
+      ],
+      "line_hashes": [
+        "6f964512d0630a3aa74ba646b1ffa40e4ab0fd5ca9b843b7a06aec5984b9b405",
+        "4a7ec0cee94ff0735e0a2aaa0417f4dc4a20dfc79e0411b96ac899722430aae3",
+        "e5fa6dd1d3bdf563accec9f92bfe3d6b9195bce95cce9e107869e1078502d25d",
+        "d54015565d0d61cf1a5412496ea344f92792a29f7c66e31d53037bd251480ece"
+      ],
+      "content_hash": "cb6d807b466ee6c5c44db08f52d9c997a943c15b48b0859fd510980b1c46be23",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "One correction, the same day, and it overrides the sentence above wherever\nthe two conflict: that direction covers work, never decisions. Every\ndecision — what to adopt, what to publish, what to spend, what to delete —\nneeds my own approval, asked for one at a time.",
+        "prefix": "— without asking me\neach time.\n\n",
+        "suffix": ""
+      }
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+# Lens compiler dependencies (everything else is Python 3.12 stdlib).
+PyYAML>=6.0

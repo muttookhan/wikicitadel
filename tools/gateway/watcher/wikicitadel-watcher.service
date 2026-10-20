@@ -1,0 +1,16 @@
+# Template systemd user unit for the Black Box watcher (Door C).
+# Fill in the two paths for your installation, then:
+#   cp wikicitadel-watcher.service ~/.config/systemd/user/
+#   systemctl --user enable --now wikicitadel-watcher
+[Unit]
+Description=WikiCitadel Black Box watcher (Door C — filesystem supplement, honestly labelled unattributed-local)
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /path/to/wikicitadel/tools/gateway/watcher/watcher.py --root /path/to/wikicitadel --state-dir /path/to/wikicitadel/wiki/access --interval 30
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
