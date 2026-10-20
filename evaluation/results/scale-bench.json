@@ -1,0 +1,48 @@
+{
+  "kind": "scale-bench",
+  "engine": "bm25 (scripts/wiki_search.py)",
+  "generated_at": "2026-10-20T19:58:14+00:00",
+  "platform": "Linux-7.0.0-39-generic-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "threshold_ms": 250.0,
+  "rows": [
+    {
+      "docs": 100,
+      "median_ms": 4.76,
+      "p95_ms": 5.39,
+      "queries": 20
+    },
+    {
+      "docs": 500,
+      "median_ms": 25.66,
+      "p95_ms": 30.33,
+      "queries": 20
+    },
+    {
+      "docs": 1000,
+      "median_ms": 53.26,
+      "p95_ms": 68.21,
+      "queries": 20
+    },
+    {
+      "docs": 2500,
+      "median_ms": 146.14,
+      "p95_ms": 171.86,
+      "queries": 20
+    },
+    {
+      "docs": 5000,
+      "median_ms": 304.6,
+      "p95_ms": 351.8,
+      "queries": 20
+    },
+    {
+      "docs": 10000,
+      "median_ms": 641.06,
+      "p95_ms": 727.4,
+      "queries": 20
+    }
+  ],
+  "measured_ceiling_docs": 2500,
+  "ceiling_statement": "On this machine, median BM25 probe latency stays under 250 ms up to 2500 synthetic pages (~120 words each). Beyond the measured sizes no claim is made; the corpus this ships with is two orders of magnitude smaller."
+}
