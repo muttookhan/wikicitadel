@@ -154,6 +154,67 @@ rules themselves are the system.
   in the inspector. (Digital-garden convention.)
 - Type of work — a fourth axis, about WHAT KIND OF WORK the page is, never conflated with `status` (lifecycle), `confidence` (evidence) or `stage` (maturity): frontmatter `work_type: record | synthesis | advice | speculation`. A record states what happened or what a source says; a synthesis compiles several sources into one reasoned account; advice tells agents (or the owner) what to do; speculation proposes something not yet built or decided. Compiled pages of the auditable kinds — synthesis and advice — also carry `methods:`: a one-line note saying how the page was made, so its reasoning can be checked without asking its author. `scripts/wiki_worktypes.py` proposes a label for every page from observable signals and files the proposals under `wiki/filings/` for review; applying a backfill is a separate recorded act that adds only these frontmatter lines, and an existing `work_type` is never overwritten. (Trust Project type-of-work labels.)
 - File names: lowercase, hyphens, no spaces (`llm-wiki.md`).
+- Three collections (EU-N2): every page belongs to exactly one
+  collection — `sources` (raw/ and wiki/sources/), `compiled`
+  (the compiled wiki layer), or `governance` (AGENTS.md,
+  wiki/rules/, wiki/access/, structural index/log).
+  `scripts/wiki_collections.py` censuses the corpus against
+  this vocabulary; an unclassified page is a finding.
+- Diagrams: a diagram's editable source (`<stem>.excalidraw`)
+  lives beside its rendered export (`<stem>.svg` or `.png`)
+  under `diagrams/`, stems lowercase-hyphens;
+  `scripts/wiki_diagrams.py` enforces the convention.
+- Generation templates live as files under
+  `templates/generation/` with frontmatter (name, inputs,
+  description), model-agnostic; `scripts/wiki_gen_templates.py`
+  lists and validates them.
+- Terms of deposit: every deposited source carries a completed
+  `templates/terms-of-deposit.md` record; the ingest ledger
+  copies its fields verbatim and an empty field blocks ingest.
+- Naming lock: stems in `wiki/rules/naming-lock.json` cannot be
+  renamed or removed without a rename entry in
+  `wiki/rules/naming-lock-ledger.jsonl`;
+  `scripts/wiki_naming_lock.py` checks the corpus against the
+  register. (The Cablate atom layer itself remains Tier C.)
+- AI disclosure (JP-R2): a page written autonomously
+  (frontmatter `autonomous: true` or `author_type: agent`)
+  carries `ai_disclosure: true` and a rendered line beginning
+  `> AI disclosure:`; `scripts/wiki_disclosure.py` reports
+  unlabelled machine-written pages.
+- Identifier info: appending `?info` to a page id names its
+  inflection record (id, title, created, successor);
+  `scripts/wiki_ark_info.py` resolves it as JSON.
+- GRADE moved_by discipline (adopted 2026-10-21): wherever a
+  certainty grade is recorded — a `grade`, `confidence`, or
+  `certainty` field on a register line in the claims/outcomes
+  format family — a CHANGE of grade must carry `moved_by` on
+  the same line: a non-empty string naming who or what evidence
+  moved it. A first assignment is not a move and owes no
+  moved_by; restating the same grade is not a move. A move is
+  judged within one axis where the register grades on axes
+  (source-grades: integrity / precision are separate subjects
+  of movement). `scripts/wiki_grade_moves.py check` lints the
+  grade-bearing registers (default: evaluation/outcomes.jsonl
+  and evaluation/source-grades.jsonl) and reports undisciplined
+  moves by line, subject, and from -> to values; it never
+  rewrites a register — a missing moved_by is cured by a new
+  appended line recording it, never by editing history.
+  (Pattern: the GRADE certainty framework's discipline that a
+  grade is moved by named evidence, via the Marathon R3 Tier B
+  governance bundle.)
+- Evidence TTL (EU-N5, est. 2026-10-21): a page may carry
+  `evidence_as_of: YYYY-MM-DD` with `evidence_ttl_days: <n>`;
+  on or after as_of + TTL its evidence is due for refresh —
+  a re-check owed, reported by `scripts/wiki_evidence_ttl.py`,
+  never a deletion or a severance. Evidence dates are
+  agent-writable (they record when evidence was gathered);
+  they are NOT owner attestations — `verified_until` stays
+  owner-only. The convention lives on [[evidence-ttl]].
+- Pending Review sections (adopted 2026-10-21): a page built from lower-confidence sources may carry a `## Pending Review` section naming the specific claims still to corroborate. Entries are bullets; an entry is resolved when it carries `(status: resolved)`, expired when it carries `(expires: YYYY-MM-DD)` with a date in the past, and open otherwise. `scripts/wiki_pending_review.py` reports a section whose entries are all resolved or expired as clearable (exit 1 when any exist) — the checker is report-only; clearing the section is a separate human edit, never the tool's. (Pattern: Vanillaflava/llm-wiki-skills' self-clearing Pending Review sections, via the wave-4 survey.)
+- Source-hash staleness (est. 2026-10-21, R3 TB1): scripts/wiki_source_hash.py snapshot keeps SHA-256 hashes of cited raw sources in evaluation/source-hashes.json; check recomputes them and propagates staleness transitively through the citation graph — a CHANGED or MISSING source blocks publish (exit 1). PROPOSED sweep wiring: run check in the nightly sweep and surface BLOCKED in the sweep report (not yet wired).
+- Two-phase answering (est. 2026-10-21, R3 TB1): tools/ask/two_phase.py adds an opt-in two-phase mode to the Ask door (flag default OFF; standing contract unchanged). A preliminary is marked UNVERIFIED and is never a final; the final re-opens sources claim by claim and must pass the unchanged abstention/conflict gate, else it abstains; a user correction forces re-verification.
+- Expiring intentions (est. 2026-10-21, R3 TB1): intention claims (claim_type: intention + expires:) demote when the expiry passes — scripts/wiki_expiring_intentions.py list / demote (dry-run default; --apply files evaluation/intention-demotions.jsonl events and updates the page).
+- Version stacks (est. 2026-10-21, R3 TB1): scripts/wiki_version_stack.py reports near-duplicate raw files stacked as Latest/Similar/Identical/Superseded with proposed stack tags. PROPOSED: wire resolve_latest() into scripts/wiki_search.py through the Lens parity gate (not yet wired).
 
 ## Operation: Ingest
 
@@ -353,6 +414,21 @@ written capture triggers and do-not-record list.)
 ## Checkpoints and decision-basis (WikiCitadel v1)
 
 `evaluation/checkpoints.jsonl` is the wiki's signed checkpoint register (rules in [[signing-and-anchoring]]): each checkpoint binds the HEAD tree, the Black Box chain head and the provenance root, is signed with a dedicated SSH signing key (public half kept in `wiki/access/allowed_signers`), and is witnessed by a copy kept outside the repo. A checkpoint is created at each major integration. Timestamp anchors follow the dual-anchor rule: two independent authorities (OpenTimestamps + an RFC 3161 TSA) when obtainable; the register labels each checkpoint `dual-anchor` / `single-anchor` / `unanchored` from RECORDED RECEIPTS ONLY — a failed anchor attempt is recorded as a failure, and a label is never upgraded without the receipt. No public transparency log is ever used (the signer identity would be permanently public). `evaluation/decision-basis.json` hash-binds every current decision form to the files its statement rests on; `scripts/wiki_decision_basis.py check` runs at each integration — a moved basis is surfaced (BASIS CHANGED), never silently absorbed: the decision stands, its basis moving is a fact on the record.
+- Completion predicates (adopted 2026-10-21): a checkpoint may
+  carry a completion predicate in
+  evaluation/checkpoint-predicates.jsonl (maintained with
+  scripts/wiki_checkpoint_predicates.py) — a stated boolean over
+  artefacts, each condition carrying evidence on the ladder
+  agent-assertion < generated-summary < command-output <
+  repeatable-test < independent-ci < independent-review <
+  artifact-digest. A condition counts only when its evidence
+  rung meets the predicate's stated minimum: agent self-report
+  alone never satisfies an important completion condition.
+  Deterministic hooks around staged pipeline steps are declared
+  as data in evaluation/hooks.jsonl and run by
+  scripts/wiki_hooks.py — pre hooks gate the step, post hooks
+  gate its result, and a failure halts the pipeline on the
+  record.
 
 ## Abstention and conflict regression gate (WikiCitadel v1)
 
@@ -378,6 +454,23 @@ A page can carry a **Notice** — a fixed, non-customisable marker stating a sta
 
 A deliberate capture is made from a named template at a named destination, rendered by `scripts/wiki_capture.py` from `templates/capture/` (kinds: source-note, filing, decision, idea, note — the corpus's real intake doors). The grammar is the org-capture specification re-implemented in our own code: the harness fills timestamp + provenance + source fields at invocation; the prompts ask only for what the harness cannot know, and the one designed prompt is *why* (the filing kind carries the filing order's own field grammar instead). Drafts land in `staging/captures/` only — never straight into `wiki/`; a filing draft points at the filings flow and bypasses none of it. Every draft carries the sensitivity question as a frontmatter TODO — unanswered, the draft is unclassified and un-ingestable — and the compile-stamp keys present and empty until a real compile stamps them. A template is a starting shape, not a fill-in-the-blanks obligation: sections that do not apply are deleted, not padded. Capture remains a deliberate act: the tool renders a draft when invoked and does nothing else — no ambient or automatic capture exists, and none may be added under this section.
 
+
+Capture/triage machinery (Marathon R3, lane TB5): incoming filings
+are routed by `scripts/wiki_filing_router.py` (proposals only);
+recurring filing failures are drafted into rule-amendment
+proposals by `scripts/wiki_rule_amendments.py` (never adopted
+automatically); open items get report-only triage verdicts from
+`scripts/wiki_triage.py`; companion sources are grouped via
+`scripts/wiki_companions.py` and the `wiki/companion-groups.json`
+register; the conversation log is queried with cited excerpts by
+`scripts/wiki_convo_query.py`; web sources may carry snapshot
+bundles (`scripts/wiki_snapshot.py`); scanned sources pass the
+pre-ingest OCR seam (`scripts/wiki_preocr.py`) and recordings the
+offline transcription seam (`scripts/wiki_transcribe.py`) before
+conversion; captures stage in `staging/inbox/` under
+`scripts/wiki_staging_inbox.py`; literature notes carry citekeys
+checked by `scripts/wiki_citekeys.py` against
+`wiki/citekeys.json`.
 
 ## Email-in capture (WikiCitadel v1)
 
@@ -430,6 +523,8 @@ The owner's standing rule: **nothing sits waiting on him that a tier below his c
 
 A tier is a property of the act, not of the agent's confidence: when an item straddles tiers, it takes the higher one. Spending, publishing, deleting and emailing out are never argued down into a lower tier.
 
+- Automation-readiness (est. 2026-10-21): no automation (cron, watcher, or other unattended runner) runs unattended unless its manifest passes `scripts/wiki_automation_gate.py check` — identity, a stated schedule, idempotence with its mechanism named, a kill switch, a log path, owner notice beyond the log, stated bounds, and a stated write surface. The gate judges the declaration; the automation's tests and log judge the automation. The gap-9 standing auto-watch (`scripts/wiki_auto_watch.py`) enforces this on itself: it refuses to run unless its watch manifest's automation block passes the gate.
+
 ## Standing ingest rule
 
 Continuous ingest: everything the owner directs the agent to read
@@ -472,6 +567,12 @@ any other source. Owner and agent messages are recorded verbatim
 from the chat record; system/developer injections are not
 conversation and are excluded; tool actions live in `wiki/log.md`
 and the ingest ledger.
+
+**The base purpose:** this record is the wiki's BASE — the durable
+verbatim account of the conversation and its decisions, kept so
+context compaction never erases what was said and the agent does
+not drift. Every feature in this schema is an addition on top of
+that base, never a substitute for it.
 
 ## Repo access: READ-ONLY
 
@@ -516,3 +617,23 @@ under the read-only rule; that is their home, not the wiki's.)
 - Privacy: this wiki is personal. Do not publish it or push it to any
   remote unless the owner explicitly approves that remote and its privacy
   setting first.
+
+## Progressive retrieval (est. 2026-10-21, Marathon Round 3 lane TA1)
+
+Three retrieval shapes stand beside plain search. (1) Dual-level routing (`scripts/wiki_dualroute.py`): a query is classified by deterministic rules (R1 explicit `page:`/`passage:` prefix · R2 quoted phrase · R3 dated/numbered term · R4 overview cue · R5 definition shape or short query · R6 pinpoint cue · R7 long qualified question · R8 default both) to page level, passage level, or both; "both" returns both lists LABELLED, never silently merged, and every decision names its rule. (2) Progressive disclosure (`scripts/wiki_progressive.py`): retrieval proceeds L1 index (one line per candidate) → L2 timeline (chronological context) → L3 full text, and a caller may STOP between layers — stopping is a normal, fully-recorded outcome, the per-layer token estimate is printed before the next layer is spent, and full text is never returned for a page the caller did not select at L2. (3) Proposed lenses (`scripts/wiki_lens_propose.py`): sources that entered `raw/` without entering any `wiki/sources/` page are grouped by shared terms and each cluster is offered as a PROPOSED lens (JSON on stdout or a filing under `wiki/filings/`); the tool never compiles, files, or indexes anything itself — a lens stands only on the owner's approval of the proposal. Nothing here replaces `wiki_search.py` or the Ask contract; the golden set's measured ranking is untouched. Fixtures: `scripts/tests/test_wiki_dualroute.py`, `test_wiki_progressive.py`, `test_wiki_lens_propose.py`.
+
+## Capture pipeline extensions (Marathon Round 3, lane TA4; est. 2026-10-21)
+
+Seven extensions to the capture/convert/clip path, all measured machinery, none of them a new door:
+
+- **Parse-quality gating (KR-R2).** `scripts/wiki_convert.py` scores every conversion (marker density, null-byte and replacement-char ratios, heading signal, reading-order proxy over the text it actually extracted) and records `quality` in the `.ingest.json` sidecar — including conversions that later fail; with `--quality-threshold T`, a parse scoring below T is refused (exit 3), its quarantined markdown goes to `staging/quarantine/` with the low score and the failing metrics in its sidecar, and nothing is filed anywhere else. Default: record-only, no refusal.
+- **Ingest buffer / flush (Memobase pattern).** `scripts/wiki_ingest_buffer.py` decouples capture from processing: `add` spools a source note into `staging/ingest-buffer/` (idempotent on the content hash; nothing is filed), `flush` reads every pending note back oldest-first, runs the extraction stub (the pluggable step a real processor replaces; by default it copies the note to the processed spool with an honest verification note), and marks each note processed — claim-by-rename with per-note error files, so a crash mid-batch never loses or double-files a note. `status` reports counts and oldest age.
+- **Clip templates by URL pattern.** `scripts/wiki_clip.py --template auto` (and `scripts/wiki_clip_templates.py select <url>`) chooses the capture template whose `url_patterns` frontmatter matches the clipped URL; no match falls back to the generic `source-note` template and the fallback is STATED in the clip result and recorded in the sidecar — never a silent default. The clip command's own pre-existing `--template` behaviour (explicit name, error on an unknown name) is unchanged.
+- **Preview-and-edit checkpoint (MarkDownload pattern).** `wiki_clip.py --preview` converts and writes the rendered markdown to `staging/clip-previews/` with `filed: false` in its sidecar, and files nothing; `scripts/wiki_preview.py confirm <preview.md>` — an explicit command, the designed human checkpoint — is the only step that moves a preview into `raw/captures/clips/` (frontmatter updated, `filed: true`, `filed_via: preview-confirm`), and `discard` removes a preview and its sidecar. Identical bytes to the direct clip path; the checkpoint adds a look, not a transform.
+- **Per-site extraction rules (wallabag site-config pattern).** `scripts/wiki_site_rules.py` keeps `templates/site-rules.json` — one rule per domain with strip selectors, an optional keep selector and an optional title selector — and `apply <page.html>` cleans saved HTML by the matching rule (no rule: the input is returned unchanged and the fact is stated). A rule that matches nothing on the pages it is applied to is reported ROTTED, by domain; rules are site facts in a data file, never code branches in the converter.
+- **The jot capture kind (Memos).** `templates/capture/jot.md` — a one-line quick-capture: a single required field (the text itself), kind `jot`; it carries the same sensitivity TODO and empty compile-stamp keys as every kind, and a jot is staged, never filed — it reaches the wiki only through the normal ingest act, which classifies it.
+- **Suggested filing (DEVONthink Classify, local form).** `scripts/wiki_suggest_filing.py suggest <file>` trains naive Bayes over this wiki's OWN pages (folder = class) and returns the top-k suggested folders with scores — a SUGGESTION with no write path anywhere in the tool; the existing `wiki_clip.py` sidecar records it as `suggested_filing` for the filer's eye. A suggestion is never a filing: capture remains a deliberate act, and nothing is auto-filed, auto-moved, or auto-classified under this section.
+
+## Retrieval and ranking machinery (est. 2026-10-21, Marathon Round 3 lane TB7)
+
+The hybrid ranker carries a third stated input beside score and severance: the **exact-title/stem-match boost** — a query whose terms exactly match a page's title or file stem ranks that page decisively higher (exact +10, stemmed +5), applied identically in `scripts/wiki_search.py`, `tools/lens/lenslib.py` and the Lens client's hybrid lane, so the three rankers cannot drift apart on it. The ranking is restated as the named expression **hybrid-current** and evaluated by `scripts/wiki_rank_expr.py` (declarative rank expressions over recorded features; shadow mode scores without reordering). Around it stand read/report-shaped tools over the corpus: bounded graph expansion + GraphRAG community summaries (`scripts/wiki_graphrag.py`), the citation-scope checker (`scripts/wiki_citation_scope.py` — per-file permission-scoped citations, fail-closed), the structured-ingest register (`scripts/wiki_structured_ingest.py`), the KAG relation index with logical-form queries (`scripts/wiki_kag.py`), the MemoRAG clue pass (`scripts/wiki_memorag.py`), script normalization with the dormant Japanese dual-track profile (`scripts/wiki_script_norm.py`, `evaluation/retrieval-profiles/`), RAPTOR summary trees (`scripts/wiki_raptor.py`), validated agent objects (`scripts/wiki_agent_object.py`), and the graph export's CSR form (`wiki_graph_export.py --csr-out`). None of this touches the golden set or the answer contract. The abstention gate is preserved by keeping the ranker's absolute scale: `hybrid-current`'s blend term is the renormalised blend (`blend_norm`, `scripts/wiki_search.py` stage 4), the scale tau was calibrated on — the round-3 record page tells how dropping the renormalisation dropped the battery to 9/12 and how it was restored. The boost reaches the shipped Lens through the TITLE-BOOST mirror block in `tools/lens/assets/app.js` together with the Python ranker in `tools/lens/lenslib.py`; Lens data files regenerate at Lens build time (`tools/lens/build_lens.py`).

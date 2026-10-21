@@ -82,6 +82,56 @@ def make_snippet(text: str, query_terms, width: int = 170) -> str:
     return out
 
 
+# Title/stem boost — mirror of scripts/wiki_search.py (Marathon
+# R3 TB7): exact title/stem match +10, stemmed match +5, added in
+# hybrid_rank after the rerank stage, before severance.
+TITLE_EXACT_BOOST = 10.0
+TITLE_STEM_BOOST = 5.0
+
+
+def stem_token(tok: str) -> str:
+    """Mirror of wiki_search.py stem_token (suffix rules only)."""
+    t = tok.lower()
+    if len(t) > 4 and t.endswith("ies"):
+        t = t[:-3] + "y"
+    elif len(t) > 5 and t.endswith("ing"):
+        t = t[:-3]
+    elif len(t) > 4 and t.endswith("ed"):
+        t = t[:-2]
+    elif len(t) > 3 and t.endswith("es") and not t.endswith("ss"):
+        t = t[:-2]
+    elif len(t) > 3 and t.endswith("s") and not t.endswith("ss"):
+        t = t[:-1]
+    if len(t) > 3 and t[-1] == t[-2] and t[-1] not in "aeiou":
+        t = t[:-1]
+    return t
+
+
+def title_match_kind(query_terms, title, stem):
+    """Mirror of wiki_search.py title_match_kind."""
+    q = [str(t).lower() for t in query_terms]
+    if not q:
+        return None
+    title_toks = tokenize(title or "")
+    stem_toks = tokenize((stem or "").replace("-", " "))
+    if q == title_toks or q == stem_toks:
+        return "exact"
+    q_stems = {stem_token(t) for t in q}
+    for toks in (title_toks, stem_toks):
+        if toks and q_stems == {stem_token(t) for t in toks}:
+            return "stem"
+    return None
+
+
+def title_boost_value(query_terms, title, stem):
+    kind = title_match_kind(query_terms, title, stem)
+    if kind == "exact":
+        return TITLE_EXACT_BOOST, kind
+    if kind == "stem":
+        return TITLE_STEM_BOOST, kind
+    return 0.0, None
+
+
 class PostingsIndex:
     """Precomputed BM25 index over a fixed document list.
 
@@ -205,6 +255,9 @@ class PostingsIndex:
         max_s = out[0][0]
         final = []
         for pos, (score, i, detail) in enumerate(out):
+            # Final blend renormalisation (mirror of
+            # wiki_search.py stage 4): the abstention tau is
+            # calibrated to this absolute scale.
             ns = score / max_s if max_s else 0.0
             t = temp_by_idx.get(i, 0.0)
             ns += TEMPORAL_W * t
@@ -217,7 +270,16 @@ class PostingsIndex:
                 t_frac = len(qset & title_toks) / len(qset)
                 mult = 1.0 + RERANK_COVERAGE_W * cov + RERANK_TITLE_W * t_frac
                 ns *= mult
-            detail = dict(detail, temporal=round(t, 4), rerank=round(mult, 4))
+            # Stage 4b: the title/stem boost (mirror of
+            # wiki_search.py: the boost is the final term of
+            # the "hybrid-current" rank expression).
+            boost, match_kind = title_boost_value(
+                query_terms, doc_title(self.docs[i]["text"]),
+                Path(self.docs[i]["key"]).stem)
+            ns += boost
+            detail = dict(detail, temporal=round(t, 4), rerank=round(mult, 4),
+                          title_boost=boost, title_match=match_kind,
+                          rank_expression="hybrid-current")
             final.append((ns, i, detail))
         final.sort(key=lambda r: (-r[0], self.docs[r[1]]["key"]))
 

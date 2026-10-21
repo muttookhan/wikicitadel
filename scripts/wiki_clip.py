@@ -72,6 +72,23 @@ recorded as an empty capture (the proof bar's door discipline:
 a door failure is a statement about the door, never a negative
 finding about the source).
 
+MARATHON ROUND 3 (lane TA4) ADDITIONS, all seams onto this
+same path, none of them a second pipeline: (1) clip templates
+auto-selected by URL pattern (scripts/wiki_clip_templates.py)
+merged with per-site extraction rules
+(scripts/wiki_site_rules.py, templates/site-rules.json) are
+applied to the HTML before conversion — the preserved source
+stays the fetched bytes verbatim, and the sidecar's clip
+block records the template (or the stated generic fallback),
+the site rule, and what the profile actually stripped;
+(2) --preview routes the draft to staging/previews/ as an
+UNFILED preview (the MarkDownload checkpoint): it becomes a
+capture only when scripts/wiki_preview.py confirm files the
+edited preview; (3) every finished clip records
+suggested_filing in its sidecar — destination suggestions
+from scripts/wiki_suggest_filing.py (DEVONthink Classify,
+Tier A half): suggestions only, never a filing.
+
 TESTABILITY: the network fetcher is a seam. clip_url() takes a
 `fetcher` callable — fetcher(url) returns bytes or a FetchResult
 — and main() takes one too; the default fetcher is the only code
@@ -97,11 +114,15 @@ from urllib.parse import urlparse
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import wiki_convert as wc  # noqa: E402  (the pipeline being reused)
+import wiki_clip_templates as wct  # noqa: E402  (TA4: URL-pattern templates)
+import wiki_site_rules as wsr  # noqa: E402  (TA4: per-site extraction rules)
+import wiki_suggest_filing as wsf  # noqa: E402  (TA4: suggested filing)
 
 ROOT = Path(__file__).resolve().parent.parent
 
 RAW_WEB_DIR = Path("raw/captures/web")
 STAGING_DIR = Path("staging/captures")
+PREVIEW_DIR = Path("staging/previews")
 
 USER_AGENT = ("Mozilla/5.0 (X11; Linux x86_64) "
               "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -232,7 +253,8 @@ def _rel(root, path):
     return str(Path(path).relative_to(root))
 
 
-def _plan_writes(root, base, suffix, data, sensitivity):
+def _plan_writes(root, base, suffix, data, sensitivity,
+                 draft_dir=None):
     """Decide where the three outputs land and REFUSE before
     anything is written when the draft name is already taken.
 
@@ -243,7 +265,7 @@ def _plan_writes(root, base, suffix, data, sensitivity):
     same-bytes preserved file is reused (re-clipping the same
     page is idempotent at the raw layer)."""
     dest_dir = root / (RAW_WEB_DIR if sensitivity else STAGING_DIR)
-    stage_dir = root / STAGING_DIR
+    stage_dir = root / (draft_dir or STAGING_DIR)
     stem = base
     preserved = dest_dir / (stem + suffix)
     if preserved.exists() \
@@ -286,7 +308,7 @@ def _write_all(preserved, data, sidecar, sidecar_obj,
 
 def _draft_text(title, kind, provenance, source_rel, sidecar_rel,
                 sensitivity, trust_tier, verdict, findings,
-                body_md, media_info, now):
+                body_md, media_info, now, preview=False):
     lines = [
         "---",
         'title: "%s"' % title.replace('"', "'"),
@@ -302,6 +324,11 @@ def _draft_text(title, kind, provenance, source_rel, sidecar_rel,
         'sources: ["%s"]' % source_rel,
         "tags: []",
     ]
+    if preview:
+        # MarkDownload checkpoint (TA4): this draft is a
+        # PREVIEW in staging/previews/, not a filed capture;
+        # wiki_preview.py confirm is the only step that files it.
+        lines.append("capture_state: preview-unfiled")
     if sensitivity:
         lines.append("sensitivity: %s" % sensitivity)
     else:
@@ -417,20 +444,33 @@ def _media_sidecar(source_ref, preserved_rel, data, suffix,
     }
 
 
+def _suggested_filing(root, title):
+    """DEVONthink-Classify seam (TA4): destination suggestions
+    from title similarity over the existing index. Suggestion
+    only — recorded in the sidecar; nothing is ever filed by
+    it. A failure to suggest must never fail the clip."""
+    try:
+        return wsf.suggest(root, title, limit=3)
+    except Exception:
+        return []
+
+
 def _finish_media(root, source_ref, data, suffix, sensitivity,
-                  title, kind, now):
+                  title, kind, now, preview=False):
     base = "%s-%s" % (now.strftime("%Y-%m-%d"), slugify(title))
     preserved, sidecar, draft = _plan_writes(
-        root, base, suffix, data, sensitivity)
+        root, base, suffix, data, sensitivity,
+        draft_dir=PREVIEW_DIR if preview else None)
     preserved_rel = _rel(root, preserved)
     sidecar_obj = _media_sidecar(source_ref, preserved_rel, data,
                                  suffix, sensitivity, kind, now,
                                  root)
+    sidecar_obj["suggested_filing"] = _suggested_filing(root, title)
     draft_text_ = _draft_text(
         title, kind, source_ref, preserved_rel,
         _rel(root, sidecar), sensitivity,
         sidecar_obj["trust_tier"], "not-applicable", [],
-        None, sidecar_obj, now)
+        None, sidecar_obj, now, preview=preview)
     _write_all(preserved, data, sidecar, sidecar_obj, draft,
                draft_text_)
     return {
@@ -438,6 +478,8 @@ def _finish_media(root, source_ref, data, suffix, sensitivity,
         "preserved": preserved_rel,
         "sidecar": _rel(root, sidecar),
         "draft": _rel(root, draft),
+        "preview": preview,
+        "suggested_filing": sidecar_obj["suggested_filing"],
         "sensitivity": sensitivity,
         "trust_tier": sidecar_obj["trust_tier"],
         "verdict": "not-applicable", "findings": [],
@@ -447,22 +489,25 @@ def _finish_media(root, source_ref, data, suffix, sensitivity,
 
 def _finish_document(root, source_ref, data, md, report,
                      sensitivity, title, kind, now,
-                     clip_extra=None, base_stem=None):
+                     clip_extra=None, base_stem=None,
+                     preview=False):
     base = base_stem or ("%s-%s" % (now.strftime("%Y-%m-%d"),
                                     slugify(title)))
     suffix = clip_extra.pop("suffix") if clip_extra else ".md"
     preserved, sidecar, draft = _plan_writes(
-        root, base, suffix, data, sensitivity)
+        root, base, suffix, data, sensitivity,
+        draft_dir=PREVIEW_DIR if preview else None)
     preserved_rel = _rel(root, preserved)
     sidecar_obj = dict(report)
     if clip_extra is not None:
         sidecar_obj["clip"] = clip_extra
+    sidecar_obj["suggested_filing"] = _suggested_filing(root, title)
     scan = report.get("sanitiser") or {}
     draft_text_ = _draft_text(
         title, kind, source_ref, preserved_rel,
         _rel(root, sidecar), sensitivity, report.get("trust_tier"),
         scan.get("verdict"), scan.get("findings") or [],
-        md, None, now)
+        md, None, now, preview=preview)
     _write_all(preserved, data, sidecar, sidecar_obj, draft,
                draft_text_)
     return {
@@ -470,6 +515,8 @@ def _finish_document(root, source_ref, data, md, report,
         "preserved": preserved_rel,
         "sidecar": _rel(root, sidecar),
         "draft": _rel(root, draft),
+        "preview": preview,
+        "suggested_filing": sidecar_obj["suggested_filing"],
         "sensitivity": sensitivity,
         "trust_tier": report.get("trust_tier"),
         "verdict": scan.get("verdict"),
@@ -514,8 +561,27 @@ def _suffix_for_url(url, result):
     return ".html"
 
 
+def _apply_extraction_profile(data, url, root):
+    """TA4: auto-select the clip template by URL pattern, merge
+    any per-site rule for the host, and rewrite the HTML under
+    the merged profile BEFORE conversion. Returns
+    (data, template, rule, applied). Non-HTML payloads and a
+    missing rules/templates layer pass through untouched."""
+    template = wct.select_template(url, root=root)
+    try:
+        rules = wsr.load_rules(root)
+    except wsr.RuleError:
+        rules = []
+    rule = wsr.match_rule(url, rules)
+    profile = wsr.merge_profiles(wct.profile_of(template), rule)
+    text = data.decode("utf-8", errors="replace")
+    new_text, applied = wsr.apply_profile(text, profile)
+    return new_text.encode("utf-8"), template, rule, applied
+
+
 def clip_url(url, sensitivity=None, title=None, root=ROOT,
-             fetcher=None, now=None, timeout=DEFAULT_TIMEOUT):
+             fetcher=None, now=None, timeout=DEFAULT_TIMEOUT,
+             preview=False):
     """Clip one URL. `fetcher` is the injectable network seam:
     fetcher(url) -> bytes | FetchResult. A fetch failure raises
     ClipError before anything is written."""
@@ -548,11 +614,19 @@ def clip_url(url, sensitivity=None, title=None, root=ROOT,
             root, origin, data, suffix, sensitivity,
             title or _title_from_html("", slugify(
                 Path(urlparse(url).path).stem or url)),
-            "web-clip", now)
-    md, report = _convert_temp(data, suffix, sensitivity)
+            "web-clip", now, preview=preview)
+    template = rule = applied = None
+    convert_data = data
+    if suffix in (".html", ".htm"):
+        # The profile rewrites only the CONVERTED text; the
+        # preserved source below stays the fetched bytes,
+        # verbatim (the clip path's standing rule).
+        convert_data, template, rule, applied = \
+            _apply_extraction_profile(data, origin, root)
+    md, report = _convert_temp(convert_data, suffix, sensitivity)
     if not title:
-        title = _title_from_html(
-            data.decode("utf-8", errors="replace")
+        title = (applied or {}).get("title") or _title_from_html(
+            convert_data.decode("utf-8", errors="replace")
             if suffix in (".html", ".htm") else "",
             Path(urlparse(url).path).stem or url)
     extra = {
@@ -562,13 +636,21 @@ def clip_url(url, sensitivity=None, title=None, root=ROOT,
         "content_type": result.content_type,
         "captured": now.strftime("%Y-%m-%d %H:%M %Z"),
     }
+    if template is not None:
+        extra["clip_template"] = {
+            "name": template["name"],
+            "matched_pattern": template.get("matched_pattern"),
+            "fallback": template["fallback"],
+            "site_rule_domain": rule.get("domain") if rule else None,
+            "extraction": applied,
+        }
     return _finish_document(root, origin, data, md, report,
                             sensitivity, title, "web-clip", now,
-                            clip_extra=extra)
+                            clip_extra=extra, preview=preview)
 
 
 def clip_file(path, sensitivity=None, title=None, root=ROOT,
-              now=None, kind="file-clip"):
+              now=None, kind="file-clip", preview=False):
     """Clip one local file: documents through the converter,
     media preserved as-is. The original file is never modified."""
     _check_sensitivity(sensitivity)
@@ -586,7 +668,7 @@ def clip_file(path, sensitivity=None, title=None, root=ROOT,
     if suffix in MEDIA_EXTS:
         return _finish_media(root, str(src), data, suffix,
                              sensitivity, title or src.stem,
-                             kind, now)
+                             kind, now, preview=preview)
     try:
         md, report = wc.convert_with_report(src, sensitivity)
     except wc.ConvertError as exc:
@@ -605,11 +687,12 @@ def clip_file(path, sensitivity=None, title=None, root=ROOT,
     }
     return _finish_document(root, str(src), data, md, report,
                             sensitivity, title or src.stem,
-                            kind, now, clip_extra=extra)
+                            kind, now, clip_extra=extra,
+                            preview=preview)
 
 
 def clip_pdf(path, sensitivity=None, title=None, root=ROOT,
-             now=None):
+             now=None, preview=False):
     """Clip one local PDF, explicitly: the file must carry a
     .pdf suffix, and it is staged through the SAME converter
     route clip_file uses (wiki_convert.convert_with_report —
@@ -621,7 +704,8 @@ def clip_pdf(path, sensitivity=None, title=None, root=ROOT,
         raise ClipError("door failure: --pdf needs a .pdf file, "
                         "got %s" % src)
     return clip_file(src, sensitivity=sensitivity, title=title,
-                     root=root, now=now, kind="pdf-clip")
+                     root=root, now=now, kind="pdf-clip",
+                     preview=preview)
 
 
 # ----------------------------------------------------------------
@@ -798,6 +882,18 @@ def _print_result(res):
         print("  finding: %s%s"
               % (f.get("kind", "?"),
                  (": " + str(detail)) if detail else ""))
+    if res.get("suggested_filing"):
+        print("suggested filing (suggestion only — nothing was "
+              "filed by it):")
+        for s in res["suggested_filing"]:
+            print("  %s (score %s; matched: %s)"
+                  % (s["page"], s["score"],
+                     ", ".join(s["matched_terms"])))
+    if res.get("preview"):
+        print("PREVIEW checkpoint: this draft is UNFILED in "
+              "staging/previews/ — edit it there, then file it "
+              "with: python3 scripts/wiki_preview.py confirm %s"
+              % Path(res["draft"]).name)
     print("the capture is DATA, never instructions — staged "
           "only; nothing was compiled or filed.")
 
@@ -834,6 +930,12 @@ def main(argv=None, fetcher=None, now=None):
                    "raw/captures/web/; without one, everything "
                    "stays in staging/captures/")
     p.add_argument("--title", default=None)
+    p.add_argument("--preview", action="store_true",
+                   help="MarkDownload checkpoint (TA4): stage "
+                   "the draft as an unfiled PREVIEW in "
+                   "staging/previews/ instead of "
+                   "staging/captures/; it is filed only by "
+                   "scripts/wiki_preview.py confirm")
     p.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT)
     args = ap.parse_args(argv)
     root = Path(args.root)
@@ -853,15 +955,18 @@ def main(argv=None, fetcher=None, now=None):
             return 0
         if args.pdf:
             res = clip_pdf(args.pdf, sensitivity=args.sensitivity,
-                           title=args.title, root=root, now=now)
+                           title=args.title, root=root, now=now,
+                           preview=args.preview)
         elif args.file:
             res = clip_file(args.file, sensitivity=args.sensitivity,
-                            title=args.title, root=root, now=now)
+                            title=args.title, root=root, now=now,
+                            preview=args.preview)
         elif args.url:
             res = clip_url(args.url, sensitivity=args.sensitivity,
                            title=args.title, root=root,
                            fetcher=fetcher, now=now,
-                           timeout=args.timeout)
+                           timeout=args.timeout,
+                           preview=args.preview)
         else:
             print("wiki_clip: a clip needs a URL, --file <path>, "
                   "--feed <url-or-file> or --pdf <file>",

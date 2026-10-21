@@ -46,6 +46,10 @@ The kinds are the corpus's real intake doors, no more:
                  writes nothing to raw/filings/ or the ledgers
     decision     an owner ruling made or reversed
     idea         an undirected idea for [[ideas]] Waiting
+    jot          a one-line quick capture (the Memos pattern,
+                 Marathon Round 3): the title is the line, the
+                 only provenance is the invocation's, and the
+                 draft waits in staging like every other kind
     note         a session observation ([[capture-rules]])
 
 Every draft renders to staging/captures/ — NEVER into wiki/.
@@ -118,6 +122,19 @@ KINDS = {
                        "one line, appended at integration",
         "when": "an undirected idea that must wait for the "
                 "owner's call (the ask-first rule)",
+    },
+    "jot": {
+        "template": "jot.md",
+        "destination": "staging/captures/ only — a jot is a "
+                       "one-line quick capture; it is promoted "
+                       "to a fuller kind (or discarded) at "
+                       "integration, never filed as-is",
+        "when": "a single line that must not be lost — a name, "
+                "a number, a passing fact (Memos pattern, "
+                "Marathon Round 3 / TA4): the title IS the "
+                "line; provenance is the one minimal field "
+                "(given at invocation, or a TODO prompt — "
+                "never faked)",
     },
     "note": {
         "template": "note.md",

@@ -48,6 +48,23 @@ focuses a node by title, colour by page type (the Lens's
 functional palette), and a details pane with the node's
 title, type, tags, out/in degree and neighbour list.
 
+Edge provenance (Marathon Round 3, Lane TA5 — Graphify
+pattern, idea only, re-implemented): every edge in the export
+carries a `provenance` class. EXTRACTED = the edge is
+physically present in a page — a wikilink in the body, a
+frontmatter `links:` / relation-vocabulary declaration, or a
+`sources:` citation. INFERRED = the edge was derived by a
+tool from other facts, not written anywhere: this export
+derives exactly one inferred kind, `co-cited` — two pages
+whose frontmatter `sources:` cite the same raw source.
+Inferred edges travel in their own `inferred_edges` list
+(with the shared sources as `evidence`), never in the main
+`edges` census: degrees, orphans and communities are
+computed over EXTRACTED edges only, so no derived edge can
+silently inflate the page graph's own counts. The HTML
+renders the distinction: extracted edges are solid grey,
+inferred edges are dashed teal and named in the legend.
+
 Graph analytics (Marathon Round 2, Lane G): the export graph
 also carries, computed in pure stdlib Python at build time —
 
@@ -71,6 +88,10 @@ underlying data is untouched).
 Usage:
     python3 scripts/wiki_graph_export.py [--root DIR]
                                          [--out FILE]
+                                         [--csr-out FILE]
+
+--csr-out additionally writes the graph's CSR sparse-matrix
+form (row 10c; see build_csr).
 
 Stdlib only (this module); graph extraction is delegated to
 wiki_traverse as described above.
@@ -264,6 +285,74 @@ def compute_communities(nodes, edges):
     return assignment, communities
 
 
+EXTRACTED_KINDS = ("wikilink", "typed", "citation")
+
+
+def edge_provenance(edge: dict) -> str:
+    """The provenance class of one door edge: EXTRACTED when
+    the edge is physically in a page (its kind is one the
+    traversal door reads out of page text or frontmatter),
+    INFERRED for anything a tool derived."""
+    return "EXTRACTED" if edge.get("kind") in EXTRACTED_KINDS \
+        else "INFERRED"
+
+
+def compute_inferred_edges(pages: dict) -> list[dict]:
+    """INFERRED co-citation edges: unordered page pairs whose
+    frontmatter `sources:` cite the same raw source. Each edge
+    carries the shared source paths as `evidence`, sorted, so
+    a reader can check the derivation. Deterministic: pairs
+    and evidence sorted; self-pairs never emitted."""
+    by_source: dict[str, list[str]] = {}
+    for rel in sorted(pages):
+        fields = pages[rel][0] or {}
+        for src in _tags(fields.get("sources")):
+            by_source.setdefault(src, []).append(rel)
+    shared: dict[tuple, list[str]] = {}
+    for src, rels in sorted(by_source.items()):
+        for i, a in enumerate(rels):
+            for b in rels[i + 1:]:
+                shared.setdefault((a, b), []).append(src)
+    out = []
+    for (a, b), srcs in sorted(shared.items()):
+        out.append({"source": a, "target": b,
+                    "relation": "co-cited", "kind": "inferred",
+                    "provenance": "INFERRED",
+                    "evidence": sorted(srcs)})
+    return out
+
+
+def build_csr(graph: dict) -> dict:
+    """The graph as a sparse adjacency matrix in CSR form
+    (Marathon Round 3, lane TB7, row 10c — the FalkorDB
+    sparse-matrix graph representation, re-implemented from
+    the idea): rows are the graph's nodes in their emitted
+    (sorted) order, each row's entries are the node's
+    out-neighbours' column indices in ascending order, values
+    are all 1 (an unweighted adjacency; parallel edges emit
+    parallel entries, so the matrix still counts edges
+    exactly). At scale this is the representation a reader can
+    stream and multiply without materialising the edge list
+    per node. Returns {"format": "csr", "shape": [n, n],
+    "node_ids": [...], "indptr": [...], "indices": [...],
+    "values": [...]} — fully determined by the graph dict, so
+    the export is byte-identical across runs like the HTML.
+    """
+    ids = [n["id"] for n in graph["nodes"]]
+    col = {nid: i for i, nid in enumerate(ids)}
+    rows = {nid: [] for nid in ids}
+    for e in graph["edges"]:
+        rows[e["source"]].append(col[e["target"]])
+    indptr = [0]
+    indices = []
+    for nid in ids:
+        indices.extend(sorted(rows[nid]))
+        indptr.append(len(indices))
+    return {"format": "csr", "shape": [len(ids), len(ids)],
+            "node_ids": ids, "indptr": indptr, "indices": indices,
+            "values": [1] * len(indices)}
+
+
 def build_graph(root: Path) -> dict:
     """The export graph: {"nodes": [...], "edges": [...],
     "counts": {...}} — fully sorted, so the artefact derived
@@ -287,7 +376,8 @@ def build_graph(root: Path) -> dict:
         if e["src"] not in page_set or e["dst"] not in page_set:
             continue
         edges.append({"source": e["src"], "target": e["dst"],
-                      "relation": e["relation"], "kind": e["kind"]})
+                      "relation": e["relation"], "kind": e["kind"],
+                      "provenance": edge_provenance(e)})
     edges.sort(key=lambda e: (e["source"], e["target"],
                               e["relation"], e["kind"]))
 
@@ -321,9 +411,12 @@ def build_graph(root: Path) -> dict:
     for n in nodes:
         n["community"] = assignment[n["id"]]
     god_nodes = compute_god_nodes(nodes)
+    inferred_edges = compute_inferred_edges(pages)
     counts = {
         "pages": len(nodes),
         "edges": len(edges),
+        "extracted_edges": len(edges),
+        "inferred_edges": len(inferred_edges),
         "tombstoned": sum(1 for n in nodes if n["tombstoned"]),
         "severed": sum(1 for n in nodes if n["severed"]),
         "orphans": sum(1 for n in nodes
@@ -331,7 +424,8 @@ def build_graph(root: Path) -> dict:
                        and n["in_degree"] == 0),
         "communities": len(communities),
     }
-    return {"nodes": nodes, "edges": edges, "counts": counts,
+    return {"nodes": nodes, "edges": edges,
+            "inferred_edges": inferred_edges, "counts": counts,
             "communities": communities, "god_nodes": god_nodes}
 
 
@@ -504,6 +598,7 @@ function mulberry32(a) {
 }
 var nodes = DATA.nodes;
 var edges = DATA.edges;
+var inferredEdges = DATA.inferred_edges || [];
 var communities = DATA.communities || [];
 var godNodes = DATA.god_nodes || [];
 var byId = {};
@@ -651,6 +746,17 @@ function draw() {
     ctx.strokeStyle = hot ? "#33302a" : "#b9b2a4";
     ctx.lineWidth = hot ? 1.6 : 1;
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+  inferredEdges.forEach(function (e) {
+    if (isFilteredOut(e.source) || isFilteredOut(e.target)) { return; }
+    var a = toScreen(byId[e.source]), b = toScreen(byId[e.target]);
+    ctx.globalAlpha = 0.75;
+    ctx.strokeStyle = "#2a7f7f";
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.setLineDash([]);
   });
   ctx.globalAlpha = 1;
   nodes.forEach(function (node) {
@@ -854,7 +960,8 @@ function buildFilters() {
 function buildChrome() {
   var c = DATA.counts;
   document.getElementById("stats").textContent =
-    c.pages + " pages · " + c.edges + " edges · " +
+    c.pages + " pages · " + c.edges + " extracted edges · " +
+    (c.inferred_edges || 0) + " inferred edges · " +
     c.tombstoned + " tombstoned · " + c.severed + " severed · " +
     c.orphans + " orphans — standalone export, works offline.";
   var dl = document.getElementById("title-list");
@@ -872,6 +979,8 @@ function buildChrome() {
     span.appendChild(document.createTextNode(t));
     legend.appendChild(span);
   });
+  var t0 = el("span", "┄ teal dashed — INFERRED edge (co-cited, derived by the export; solid grey edges are EXTRACTED from a page)");
+  legend.appendChild(t0);
   var t1 = el("span", "○ dashed ring + cross — tombstoned");
   var t2 = el("span", "◎ red ring — severed");
   legend.appendChild(t1); legend.appendChild(t2);
@@ -981,15 +1090,27 @@ def main(argv=None) -> int:
     parser.add_argument("--out", default=None,
                         help="output file (default: "
                              "<root>/evaluation/graph.html)")
+    parser.add_argument("--csr-out", default=None,
+                        help="also write the CSR sparse-matrix "
+                             "export (row 10c) as JSON here")
     args = parser.parse_args(argv)
     root = Path(args.root).resolve() if args.root else ROOT
     out = Path(args.out) if args.out else root / DEFAULT_OUT_REL
     graph = build_graph(root)
+    if args.csr_out:
+        csr_path = Path(args.csr_out)
+        csr_path.parent.mkdir(parents=True, exist_ok=True)
+        csr_path.write_text(json.dumps(build_csr(graph), indent=2,
+                                       sort_keys=True) + "\n",
+                            encoding="utf-8")
+        print(f"graph CSR: {len(graph['nodes'])} nodes, "
+              f"{len(graph['edges'])} nonzeros -> {csr_path}")
     text = render_html(graph)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(text, encoding="utf-8")
     c = graph["counts"]
-    print(f"graph export: {c['pages']} pages · {c['edges']} edges "
+    print(f"graph export: {c['pages']} pages · {c['edges']} extracted "
+          f"edges · {c['inferred_edges']} inferred edges "
           f"({c['tombstoned']} tombstoned, {c['severed']} severed, "
           f"{c['orphans']} orphans, {c['communities']} communities) "
           f"-> {out}")

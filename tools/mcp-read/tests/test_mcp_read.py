@@ -31,9 +31,11 @@ on purpose:
     is not the owner).
 
 It also pins the protocol handshake, the tools/list shape
-(exactly the eight read tools — the read/write split is the
-point), and the no-write proof: sha256 of every fixture
-content file identical before and after a call battery.
+(exactly the nine read tools — the eight reads plus
+wiki_workflow, which composes reads only; the read/write
+split is the point), and the no-write proof: sha256 of every
+fixture content file identical before and after a call
+battery.
 
 Run:  python3 -m unittest discover -s tests   (from tools/mcp-read/)
 """
@@ -250,7 +252,7 @@ class TestProtocol(McpReadFixture):
             {t["name"] for t in tools},
             {"wiki_search", "wiki_read_page", "wiki_read_source",
              "wiki_neighbors", "wiki_path", "wiki_census",
-             "wiki_claim", "wiki_cite"})
+             "wiki_claim", "wiki_cite", "wiki_workflow"})
         for t in tools:
             self.assertEqual(t["inputSchema"]["type"], "object")
             self.assertIn("description", t)
@@ -529,6 +531,58 @@ class TestRelativeRoot(McpReadFixture):
         claim = json.loads(out[2]["result"]["content"][0]["text"])
         self.assertTrue(claim["claims"])
         self.assertFalse(out[3]["result"].get("isError", False))
+
+
+class TestWorkflow(McpReadFixture):
+    """wiki_workflow (Langflow pattern, TB8 row 2): a workflow
+    definition exposed as one MCP tool, composing reads only."""
+
+    def test_lists_workflows(self):
+        is_err, payload = self.call("wiki_workflow", {})
+        self.assertFalse(is_err, payload)
+        names = {w["name"] for w in payload["workflows"]}
+        self.assertIn("census_and_cite", names)
+        self.assertIn("page_context", names)
+        for w in payload["workflows"]:
+            for tool in w["steps"]:
+                self.assertIn(tool, {
+                    "wiki_search", "wiki_read_page",
+                    "wiki_read_source", "wiki_neighbors",
+                    "wiki_path", "wiki_census", "wiki_claim",
+                    "wiki_cite"})
+
+    def test_census_and_cite_composed(self):
+        is_err, payload = self.call(
+            "wiki_workflow",
+            {"workflow": "census_and_cite",
+             "arguments": {"page": "alpha"}})
+        self.assertFalse(is_err, payload)
+        self.assertIn("census", payload["steps"])
+        self.assertIn("citations", payload["steps"])
+        self.assertIn("pages", payload["steps"]["census"])
+
+    def test_page_context_composed(self):
+        is_err, payload = self.call(
+            "wiki_workflow",
+            {"workflow": "page_context",
+             "arguments": {"page": "alpha"}})
+        self.assertFalse(is_err, payload)
+        self.assertEqual(payload["steps"]["page"]["page"],
+                         "wiki/entities/alpha.md")
+        self.assertIn("neighbours", payload["steps"])
+
+    def test_unknown_workflow_is_error(self):
+        is_err, payload = self.call(
+            "wiki_workflow", {"workflow": "nope", "arguments": {}})
+        self.assertTrue(is_err)
+        self.assertIn("unknown workflow", payload["error"])
+
+    def test_missing_required_input_is_error(self):
+        is_err, payload = self.call(
+            "wiki_workflow",
+            {"workflow": "census_and_cite", "arguments": {}})
+        self.assertTrue(is_err)
+        self.assertIn("required input", payload["error"])
 
 
 if __name__ == "__main__":

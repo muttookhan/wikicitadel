@@ -45,6 +45,15 @@ fixity (every checksum verifies, payload and tag files alike) —
 plus a cross-check of bag-info.txt's Payload-Oxum against the
 manifest. It reports VALID, or INVALID with every reason named.
 
+Pack-time secret-pattern scan (added 2026-10-21, Marathon
+Round 3): `pack` first runs scripts/wiki_pack_scan.py over
+the payload, reusing the leak lint's pattern classes. A hit
+REFUSES the pack before anything is copied, unless the
+caller passes --allow-pack-findings (pack proceeds, hits
+reported as warnings, scan result in the stats). The scan
+can be skipped only explicitly, with --no-pack-scan, and
+the stats record that it was skipped.
+
 Usage:
   python3 scripts/wiki_bag.py pack <dest-dir> [--full]
       Assemble a bag at <dest-dir> (must not exist, or be
@@ -108,12 +117,27 @@ def _sha256_file(path: Path):
     return n, h.hexdigest()
 
 
+def _pack_scan(payload):
+    """Run the pack-time secret-pattern scan (scripts/
+    wiki_pack_scan.py, imported in-process) over a payload
+    list of (rel, abspath) pairs."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "wiki_pack_scan",
+        Path(__file__).resolve().parent / "wiki_pack_scan.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.scan_payload_files(payload)
+
+
 def pack(root: Path, dest: Path, set_name: str,
          source_org: str = DEFAULT_SOURCE_ORG,
-         bagging_date: str = None):
+         bagging_date: str = None,
+         scan: bool = True, allow_pack_findings: bool = False):
     """Assemble a bag. Returns a stats dict. Raises ValueError
     on a bad destination (exists and non-empty, or inside the
-    payload it would copy)."""
+    payload it would copy), and — unless allow_pack_findings
+    — when the pack-time secret-pattern scan finds a hit."""
     root = root.resolve()
     dest = dest.resolve() if dest.exists() else dest.absolute()
     if dest.exists() and any(dest.iterdir()):
@@ -129,6 +153,19 @@ def pack(root: Path, dest: Path, set_name: str,
                          "outside the tree it copies")
 
     payload = collect_payload(root, set_name)
+    pack_scan = None
+    if scan:
+        pack_scan = _pack_scan(payload)
+        if pack_scan["findings"] and not allow_pack_findings:
+            hits = "; ".join(
+                f"{f['file']}: {f['pattern']} x{f['count']}"
+                for f in pack_scan["findings"][:10])
+            raise ValueError(
+                "pack refused: the pack-time secret-pattern scan "
+                f"found {pack_scan['findings_total']} hit(s) — "
+                f"{hits}. Nothing was copied. Rule on the hits, "
+                "or re-run with --allow-pack-findings to pack "
+                "anyway (the hits are then reported as warnings).")
     data_dir = dest / "data"
     manifest_lines = []
     total_bytes = 0
@@ -163,7 +200,11 @@ def pack(root: Path, dest: Path, set_name: str,
     (dest / "tagmanifest-sha256.txt").write_text(
         "\n".join(tag_lines) + "\n", encoding="utf-8")
     return {"set": set_name, "files": len(payload),
-            "bytes": total_bytes, "dest": str(dest)}
+            "bytes": total_bytes, "dest": str(dest),
+            "pack_scan": (pack_scan if pack_scan is not None
+                          else {"verdict": "skipped",
+                                "findings_total": None,
+                                "findings": []})}
 
 
 def _parse_manifest(path: Path):
@@ -277,6 +318,12 @@ def main(argv):
     p_pack.add_argument("--full", action="store_true",
                         help="snapshot set 'full' (adds raw/); "
                              "default set is 'compiled'")
+    p_pack.add_argument("--no-pack-scan", action="store_true",
+                        help="skip the pack-time secret-pattern "
+                             "scan (recorded in the pack stats)")
+    p_pack.add_argument("--allow-pack-findings", action="store_true",
+                        help="pack even when the pack-time scan "
+                             "finds hits (reported as warnings)")
     p_pack.add_argument("--source-org", default=DEFAULT_SOURCE_ORG)
     p_val = sub.add_parser("validate", help="verify a bag")
     p_val.add_argument("bag", help="the bag directory")
@@ -287,7 +334,9 @@ def main(argv):
         set_name = "full" if args.full else "compiled"
         try:
             stats = pack(root, Path(args.dest), set_name,
-                         source_org=args.source_org)
+                         source_org=args.source_org,
+                         scan=not args.no_pack_scan,
+                         allow_pack_findings=args.allow_pack_findings)
         except ValueError as exc:
             print(f"wiki_bag: {exc}", file=sys.stderr)
             return 2
@@ -295,6 +344,17 @@ def main(argv):
         print(f"  payload: {stats['files']} files,"
               f" {stats['bytes']} bytes"
               f" (Payload-Oxum {stats['bytes']}.{stats['files']})")
+        scan_stats = stats.get("pack_scan") or {}
+        if scan_stats.get("verdict") == "skipped":
+            print("  pack scan: SKIPPED (--no-pack-scan)")
+        elif scan_stats.get("findings"):
+            print(f"  pack scan: {scan_stats['findings_total']} "
+                  f"hit(s) — packed under --allow-pack-findings:")
+            for f in scan_stats["findings"]:
+                print(f"    warning: {f['file']}: {f['pattern']}"
+                      f" x{f['count']}")
+        else:
+            print("  pack scan: clean")
         return 0
     ok, problems, stats = validate(Path(args.bag))
     if not (Path(args.bag) / "bagit.txt").is_file():

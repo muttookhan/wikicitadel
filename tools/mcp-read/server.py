@@ -25,11 +25,14 @@ applies its read rule verbatim:
     the engine's own, never a re-implementation; results the
     sensitivity gate bars are then withheld (see _search).
 
-Tools (eight, all reads): wiki_search, wiki_read_page,
+Tools (nine, all reads): wiki_search, wiki_read_page,
 wiki_read_source, wiki_neighbors, wiki_path, wiki_census,
-wiki_claim, wiki_cite. The last three are thin wrappers over
-the traversal door's path / claim / cite commands, imported
-the same way — never re-implemented here.
+wiki_claim, wiki_cite, wiki_workflow. The middle three are thin
+wrappers over the traversal door's path / claim / cite commands,
+imported the same way — never re-implemented here. The ninth,
+wiki_workflow (Langflow pattern, workflows.py), exposes a
+stated workflow — steps over the eight read tools only — as a
+single tool; it composes reads and gains the door no write verb.
 
 The door's identity stance (a design decision, stated here
 because it decides what the gate does): the door runs as the
@@ -50,6 +53,25 @@ results as a single JSON text content block.
 
 Wiki root: --root <path>, else $LLM_WIKI_ROOT, else the repo
 this file lives in (tools/mcp-read/ -> repo root).
+
+Frozen reads (Marathon Round 3, the traverse --pin follow-up):
+the traversal CLI's --pin comes to this door in the same two
+shapes the CLI offers it — as a session default and per call:
+
+  * `--pin <commit>` at startup pins EVERY read of the
+    session to that commit's tree;
+  * an optional `pin` argument on any tool pins THAT call.
+
+Semantics are the traversal door's own, imported not
+re-implemented: traverse.resolve_pinned_root resolves the
+commit (git rev-parse), extracts its tree read-only (git
+archive into a temporary directory), and the working tree is
+never written, checked out, or moved. An unresolvable pin is
+refused with the reason stated (at startup: the door exits 2
+before serving; per call: that call returns an error result).
+A pinned result carries `pin: <resolved commit>` — the same
+stamp the CLI puts on --json output — and an unpinned result
+carries no pin field, exactly as before this change.
 """
 from __future__ import annotations
 
@@ -107,7 +129,22 @@ TOOLS = [
      "inputSchema": {"type": "object", "properties": {
          "page": {"type": "string"},
          "cite_id": {"type": "string"}}}},
+    {"name": "wiki_workflow",
+     "description": "Run a named workflow — stated steps over this door's read tools only, exposed as a single tool (Langflow pattern). Call with no 'workflow' name to list the registered workflows. Read-only: a workflow composes reads and gains the door no write verb.",
+     "inputSchema": {"type": "object", "properties": {
+         "workflow": {"type": "string"},
+         "arguments": {"type": "object"}}}},
 ]
+
+
+_PIN_PROPERTY = {
+    "type": "string",
+    "description": "Optional commit: freeze this call's read "
+                   "at that commit's tree (the traversal "
+                   "door's --pin semantics; the result is "
+                   "stamped with the resolved commit)."}
+for _tool in TOOLS:
+    _tool["inputSchema"]["properties"]["pin"] = _PIN_PROPERTY
 
 
 class DoorError(Exception):
@@ -121,24 +158,71 @@ def _load_module(name, path):
     return mod
 
 
+# The workflow registry (Langflow pattern), loaded from beside
+# this file — definitions are data, validated read-only at load.
+workflows = _load_module("mcp_read_workflows",
+                         Path(__file__).resolve().parent
+                         / "workflows.py")
+
+
 class ReadDoor:
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, pin: str = None):
         # Resolved once, here: the traversal door computes page
         # paths relative to the root, and a relative root (a plain
         # `--root .` start) crashes its claim/cite verbs against
         # the absolute paths its page walk yields.
-        self.root = Path(root).resolve()
-        traverse_path = self.root / "scripts" / "wiki_traverse.py"
+        self.source_root = Path(root).resolve()
+        traverse_path = self.source_root / "scripts" / "wiki_traverse.py"
         if not traverse_path.is_file():
             raise DoorError(
                 f"no traversal door at {traverse_path} — the read "
                 f"door serves a wiki repo root (got {root})")
         # The read rule itself, imported — never re-implemented.
         self.traverse = _load_module("wiki_traverse", traverse_path)
+        self.workflow_registry = workflows.WorkflowRegistry()
+        # Session pin (--pin at startup): every read resolves
+        # against the pinned commit's extracted tree. The
+        # extraction is traverse.resolve_pinned_root's own —
+        # read-only git archive; the working tree is untouched.
+        self.root = self.source_root
+        self.pin = None
+        self._pin_cache = {}
+        if pin:
+            try:
+                self.root, self.pin = self._resolve_pin(pin)
+            except self.traverse.Refusal as exc:
+                raise DoorError(str(exc)) from exc
+
+    # -- frozen reads --------------------------------------------------
+    def _resolve_pin(self, pin: str):
+        """(pinned_root, resolved_commit) for `pin`, cached per
+        pin string — traverse.resolve_pinned_root's semantics
+        verbatim (rev-parse verify, then a read-only archive
+        extraction; Refusal on an unresolvable pin)."""
+        if pin not in self._pin_cache:
+            self._pin_cache[pin] = self.traverse.resolve_pinned_root(
+                self.source_root, pin)
+        return self._pin_cache[pin]
+
+    def _root_for(self, pin=None):
+        """The root a call reads from + the commit to stamp
+        (None when the call is unpinned and the session is
+        unpinned). A per-call pin overrides the session pin."""
+        if pin:
+            dest, commit = self._resolve_pin(str(pin))
+            return dest, commit
+        return self.root, self.pin
+
+    @staticmethod
+    def _stamp(result, commit):
+        if commit:
+            return {"pin": commit, **result}
+        return result
+
 
     # -- tools ---------------------------------------------------------
     def _search(self, query: str, limit: int = 10,
-                scope: str = "wiki") -> dict:
+                scope: str = "wiki", pin=None) -> dict:
         """Delegate to scripts/wiki_search.py --pack (the same
         delegation the traversal door's search command uses), so
         the ranking — and its retrieval-severance stage — is the
@@ -149,12 +233,13 @@ class ReadDoor:
         which knows nothing of identities."""
         if scope not in ("wiki", "raw", "all"):
             raise DoorError(f"unknown scope: {scope!r}")
+        root, commit = self._root_for(pin)
         limit = max(1, min(int(limit), 100))
         cmd = [sys.executable,
-               str(self.root / "scripts" / "wiki_search.py"),
+               str(root / "scripts" / "wiki_search.py"),
                query, "--top", str(limit), "--scope", scope,
                "--pack"]
-        proc = subprocess.run(cmd, cwd=self.root,
+        proc = subprocess.run(cmd, cwd=root,
                               capture_output=True, text=True)
         if proc.returncode != 0:
             tail = (proc.stdout.strip().splitlines()
@@ -172,7 +257,7 @@ class ReadDoor:
             for e in entries:
                 rel = e.get("path", "")
                 if rel.startswith("raw/"):
-                    cls = self.traverse.classify_raw(self.root, rel)
+                    cls = self.traverse.classify_raw(root, rel)
                     if not self.traverse.raw_read_permitted(
                             DOOR_IDENTITY, cls):
                         withheld += 1
@@ -188,54 +273,88 @@ class ReadDoor:
                 entry["freshness"] = e["freshness"]
             results.append(entry)
         gate(pack.get("omitted", []))  # counted, never surfaced
-        return {"query": pack.get("query", query), "scope": scope,
-                "results": results,
-                "total_ranked": pack.get("total_ranked", len(results)),
-                "corpus_docs": pack.get("corpus_docs"),
-                "severance": pack.get("severance"),
-                "withheld_count": withheld}
+        return self._stamp(
+            {"query": pack.get("query", query), "scope": scope,
+             "results": results,
+             "total_ranked": pack.get("total_ranked", len(results)),
+             "corpus_docs": pack.get("corpus_docs"),
+             "severance": pack.get("severance"),
+             "withheld_count": withheld}, commit)
 
-    def _read_page(self, name: str) -> dict:
-        pages, keys = self.traverse.page_index(self.root)
+    def _read_page(self, name: str, pin=None) -> dict:
+        root, commit = self._root_for(pin)
+        pages, keys = self.traverse.page_index(root)
         rel = self.traverse.resolve_page(keys, name)
         fields, _body, text = pages[rel]
-        return {"page": rel, "frontmatter": fields, "text": text}
+        return self._stamp({"page": rel, "frontmatter": fields,
+                            "text": text}, commit)
 
-    def _read_source(self, raw_path: str) -> dict:
+    def _read_source(self, raw_path: str, pin=None) -> dict:
         # traverse.cmd_source IS the gate: classify + permit +
         # refuse-with-reason (its Refusal propagates to dispatch).
+        root, commit = self._root_for(pin)
         out = self.traverse.cmd_source(
-            self.root, DOOR_IDENTITY, raw_path, True)
+            root, DOOR_IDENTITY, raw_path, True)
         result = {"path": out["source"],
                   "sensitivity": out["sensitivity"],
                   "text": out["text"]}
         if out["sensitivity"] == "unclassified":
             result["stamp"] = ("UNCLASSIFIED — no class on the "
                                "register; not thereby public")
-        return result
+        return self._stamp(result, commit)
 
-    def _neighbors(self, name: str, etype, direction: str) -> dict:
-        return self.traverse.cmd_neighbours(
-            self.root, DOOR_IDENTITY, name, etype, direction, True)
+    def _neighbors(self, name: str, etype, direction: str,
+                   pin=None) -> dict:
+        root, commit = self._root_for(pin)
+        return self._stamp(self.traverse.cmd_neighbours(
+            root, DOOR_IDENTITY, name, etype, direction, True),
+            commit)
 
-    def _path(self, a: str, b: str, max_depth: int = 6) -> dict:
-        return self.traverse.cmd_path(
-            self.root, DOOR_IDENTITY, a, b, int(max_depth), True)
+    def _path(self, a: str, b: str, max_depth: int = 6,
+              pin=None) -> dict:
+        root, commit = self._root_for(pin)
+        return self._stamp(self.traverse.cmd_path(
+            root, DOOR_IDENTITY, a, b, int(max_depth), True),
+            commit)
 
-    def _census(self) -> dict:
-        out = self.traverse.cmd_census(self.root, DOOR_IDENTITY,
+    def _census(self, pin=None) -> dict:
+        root, commit = self._root_for(pin)
+        out = self.traverse.cmd_census(root, DOOR_IDENTITY,
                                        True)
         out["orphan_count"] = len(out.get("orphans", []))
-        return out
+        return self._stamp(out, commit)
 
-    def _claim(self, query: str = "") -> dict:
-        return self.traverse.cmd_claim(
-            self.root, DOOR_IDENTITY, query, True)
+    def _claim(self, query: str = "", pin=None) -> dict:
+        root, commit = self._root_for(pin)
+        return self._stamp(self.traverse.cmd_claim(
+            root, DOOR_IDENTITY, query, True), commit)
 
-    def _cite(self, page=None, cite_id=None) -> dict:
-        return self.traverse.cmd_cite(
-            self.root, DOOR_IDENTITY, page or None,
-            cite_id or None, True)
+    def _cite(self, page=None, cite_id=None, pin=None) -> dict:
+        root, commit = self._root_for(pin)
+        return self._stamp(self.traverse.cmd_cite(
+            root, DOOR_IDENTITY, page or None,
+            cite_id or None, True), commit)
+
+    # -- workflows (Langflow pattern: a workflow is one tool) -------
+    def _workflow_call(self, tool, args):
+        """One workflow step, run through this door's own dispatch
+        so the step passes exactly the gates a direct call would."""
+        result = self._call_tool({"name": tool, "arguments": args})
+        payload = json.loads(result["content"][0]["text"])
+        if result.get("isError"):
+            return {"error": payload.get("error", "tool failed")}
+        return payload
+
+    def _run_workflow(self, name=None, arguments=None) -> dict:
+        if not name:
+            return {"workflows":
+                    self.workflow_registry.describe()}
+        try:
+            return workflows.run_workflow(
+                self.workflow_registry, str(name),
+                arguments or {}, self._workflow_call)
+        except workflows.WorkflowError as exc:
+            raise DoorError(str(exc)) from exc
 
     # -- JSON-RPC handling (gateway server.py's shape) -----------------
     @staticmethod
@@ -284,17 +403,19 @@ class ReadDoor:
         args = params.get("arguments") or {}
         Refusal = self.traverse.Refusal
         try:
+            pin = args.get("pin")
             if name == "wiki_search":
                 return self._result(self._search(
                     str(args.get("query", "")),
                     args.get("limit", 10),
-                    str(args.get("scope", "wiki"))))
+                    str(args.get("scope", "wiki")), pin=pin))
             if name == "wiki_read_page":
                 return self._result(self._read_page(
-                    str(args.get("page") or args.get("path") or "")))
+                    str(args.get("page") or args.get("path") or ""),
+                    pin=pin))
             if name == "wiki_read_source":
                 return self._result(self._read_source(
-                    str(args.get("path", ""))))
+                    str(args.get("path", "")), pin=pin))
             if name == "wiki_neighbors":
                 direction = str(args.get("direction", "both"))
                 if direction not in ("out", "in", "both"):
@@ -302,20 +423,24 @@ class ReadDoor:
                         f"unknown direction: {direction!r}")
                 return self._result(self._neighbors(
                     str(args.get("page") or args.get("path") or ""),
-                    args.get("type"), direction))
+                    args.get("type"), direction, pin=pin))
             if name == "wiki_path":
                 return self._result(self._path(
                     str(args.get("from_page") or ""),
                     str(args.get("to_page") or ""),
-                    args.get("max_depth", 6)))
+                    args.get("max_depth", 6), pin=pin))
             if name == "wiki_census":
-                return self._result(self._census())
+                return self._result(self._census(pin=pin))
             if name == "wiki_claim":
                 return self._result(self._claim(
-                    str(args.get("query") or "")))
+                    str(args.get("query") or ""), pin=pin))
             if name == "wiki_cite":
                 return self._result(self._cite(
-                    args.get("page"), args.get("cite_id")))
+                    args.get("page"), args.get("cite_id"),
+                    pin=pin))
+            if name == "wiki_workflow":
+                return self._result(self._run_workflow(
+                    args.get("workflow"), args.get("arguments")))
             return self._result(
                 {"error": f"unknown tool: {name}"}, is_error=True)
         except Refusal as exc:
@@ -336,13 +461,19 @@ def serve(argv=None) -> int:
     ap.add_argument("--root", type=Path, default=None,
                     help="wiki repo root (default: $LLM_WIKI_ROOT "
                          "or the repo this file lives in)")
+    ap.add_argument("--pin", default=None,
+                    help="freeze every read of this session at "
+                         "this commit (the traversal door's "
+                         "--pin: a read-only git archive "
+                         "extraction; the working tree is "
+                         "never written)")
     args = ap.parse_args(argv)
     root = args.root or (
         Path(os.environ["LLM_WIKI_ROOT"])
         if os.environ.get("LLM_WIKI_ROOT")
         else Path(__file__).resolve().parents[2])
     try:
-        door = ReadDoor(root)
+        door = ReadDoor(root, pin=args.pin)
     except DoorError as exc:
         print(f"mcp-read: {exc}", file=sys.stderr)
         return 2

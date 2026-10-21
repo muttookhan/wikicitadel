@@ -66,7 +66,15 @@ document is `tools/ask/pickup.md`; the helper is `tools/ask/pickup.py`.
 3. For each pending question, open a session on the wiki gateway
    (`tools/gateway/`, stdio MCP transport) as the identity `agent`
    (scopes are recorded in `wiki/access/identity-scopes.md`). Search
-   and read the wiki **through the gateway tools only**.
+   and read the wiki **through the gateway tools only**. The hybrid
+   ranking behind the search carries three stated inputs: the
+   hybrid score, the severance stage, and the exact-title/stem-match
+   boost (Marathon Round 3, lane TB7 — a query that exactly matches
+   a page's title or file stem ranks that page decisively higher;
+   the ranking is restated as the named expression "hybrid-current"
+   in `scripts/wiki_rank_expr.py`). Result order is evidence, not
+   noise: a top hit may be there because its title is the question's
+   own term.
 
 3b. **The clarification gate (item 61) — after searching, before
    composing.** Run the mechanical split test and read the

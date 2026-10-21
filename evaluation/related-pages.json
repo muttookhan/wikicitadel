@@ -1,0 +1,777 @@
+{
+  "kind": "related-pages",
+  "related": {
+    "wiki/concepts/citation-chain.md": [
+      {
+        "page": "wiki/overview.md",
+        "score": 4.9,
+        "why": [
+          "tags:founding",
+          "terms:19"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 4.0,
+        "why": [
+          "tags:founding",
+          "terms:10"
+        ]
+      },
+      {
+        "page": "wiki/sources/founding-note.md",
+        "score": 3.6,
+        "why": [
+          "tags:founding",
+          "terms:6"
+        ]
+      },
+      {
+        "page": "wiki/concepts/standing-approval.md",
+        "score": 3.5,
+        "why": [
+          "tags:founding",
+          "terms:5"
+        ]
+      },
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 3.2,
+        "why": [
+          "tags:founding",
+          "terms:2"
+        ]
+      }
+    ],
+    "wiki/concepts/demo-guide-ja.md": [
+      {
+        "page": "wiki/concepts/demo-guide-ko.md",
+        "score": 6.3,
+        "why": [
+          "tags:demo,i18n",
+          "terms:3"
+        ]
+      },
+      {
+        "page": "wiki/index.md",
+        "score": 2.2,
+        "why": [
+          "linked",
+          "terms:2"
+        ]
+      },
+      {
+        "page": "wiki/log.md",
+        "score": 2.2,
+        "why": [
+          "linked",
+          "terms:2"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 2.1,
+        "why": [
+          "linked",
+          "terms:1"
+        ]
+      },
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 2.0,
+        "why": [
+          "linked"
+        ]
+      }
+    ],
+    "wiki/concepts/demo-guide-ko.md": [
+      {
+        "page": "wiki/concepts/demo-guide-ja.md",
+        "score": 6.3,
+        "why": [
+          "tags:demo,i18n",
+          "terms:3"
+        ]
+      },
+      {
+        "page": "wiki/index.md",
+        "score": 2.2,
+        "why": [
+          "linked",
+          "terms:2"
+        ]
+      },
+      {
+        "page": "wiki/log.md",
+        "score": 2.2,
+        "why": [
+          "linked",
+          "terms:2"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 2.1,
+        "why": [
+          "linked",
+          "terms:1"
+        ]
+      },
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 2.0,
+        "why": [
+          "linked"
+        ]
+      }
+    ],
+    "wiki/concepts/standing-approval.md": [
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 5.9,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:9"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ja/decision-register.md",
+        "score": 5.0,
+        "why": [
+          "tags:founding",
+          "linked"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ko/decision-register.md",
+        "score": 5.0,
+        "why": [
+          "tags:founding",
+          "linked"
+        ]
+      },
+      {
+        "page": "wiki/concepts/citation-chain.md",
+        "score": 3.5,
+        "why": [
+          "tags:founding",
+          "terms:5"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 3.5,
+        "why": [
+          "tags:founding",
+          "terms:5"
+        ]
+      }
+    ],
+    "wiki/entities/owner.md": [
+      {
+        "page": "wiki/overview.md",
+        "score": 3.6,
+        "why": [
+          "linked",
+          "terms:16"
+        ]
+      },
+      {
+        "page": "wiki/index.md",
+        "score": 3.4,
+        "why": [
+          "linked",
+          "terms:14"
+        ]
+      },
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 2.7,
+        "why": [
+          "linked",
+          "terms:7"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ja/overview.md",
+        "score": 2.5,
+        "why": [
+          "linked",
+          "terms:5"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ko/overview.md",
+        "score": 2.5,
+        "why": [
+          "linked",
+          "terms:5"
+        ]
+      }
+    ],
+    "wiki/i18n/de/overview.md": [
+      {
+        "page": "wiki/overview.md",
+        "score": 7.7,
+        "why": [
+          "tags:founding,purpose",
+          "terms:17"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ja/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ko/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/i18n/zh/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 5.9,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:9"
+        ]
+      }
+    ],
+    "wiki/i18n/ja/decision-register.md": [
+      {
+        "page": "wiki/i18n/ko/decision-register.md",
+        "score": 7.1,
+        "why": [
+          "tags:decisions,founding",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 7.1,
+        "why": [
+          "tags:decisions,founding",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 5.7,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:7"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ja/overview.md",
+        "score": 5.6,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:6"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ko/overview.md",
+        "score": 5.6,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:6"
+        ]
+      }
+    ],
+    "wiki/i18n/ja/overview.md": [
+      {
+        "page": "wiki/i18n/ko/overview.md",
+        "score": 7.2,
+        "why": [
+          "tags:founding,purpose",
+          "terms:12"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 7.2,
+        "why": [
+          "tags:founding,purpose",
+          "terms:12"
+        ]
+      },
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/i18n/zh/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 5.7,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:7"
+        ]
+      }
+    ],
+    "wiki/i18n/ko/decision-register.md": [
+      {
+        "page": "wiki/i18n/ja/decision-register.md",
+        "score": 7.1,
+        "why": [
+          "tags:decisions,founding",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 7.1,
+        "why": [
+          "tags:decisions,founding",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 5.7,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:7"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ja/overview.md",
+        "score": 5.6,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:6"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ko/overview.md",
+        "score": 5.6,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:6"
+        ]
+      }
+    ],
+    "wiki/i18n/ko/overview.md": [
+      {
+        "page": "wiki/i18n/ja/overview.md",
+        "score": 7.2,
+        "why": [
+          "tags:founding,purpose",
+          "terms:12"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 7.2,
+        "why": [
+          "tags:founding,purpose",
+          "terms:12"
+        ]
+      },
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/i18n/zh/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 5.7,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:7"
+        ]
+      }
+    ],
+    "wiki/i18n/zh/overview.md": [
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ja/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ko/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/sources/founding-note.md",
+        "score": 5.6,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:6"
+        ]
+      }
+    ],
+    "wiki/ideas.md": [
+      {
+        "page": "wiki/rules/notices.md",
+        "score": 4.8,
+        "why": [
+          "tags:governance",
+          "terms:18"
+        ]
+      },
+      {
+        "page": "wiki/index.md",
+        "score": 3.8,
+        "why": [
+          "linked",
+          "terms:18"
+        ]
+      },
+      {
+        "page": "wiki/log.md",
+        "score": 3.2,
+        "why": [
+          "linked",
+          "terms:12"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 1.9,
+        "why": [
+          "terms:19"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 1.7,
+        "why": [
+          "terms:17"
+        ]
+      }
+    ],
+    "wiki/index.md": [
+      {
+        "page": "wiki/overview.md",
+        "score": 4.0,
+        "why": [
+          "linked",
+          "terms:29"
+        ]
+      },
+      {
+        "page": "wiki/rules/notices.md",
+        "score": 4.0,
+        "why": [
+          "linked",
+          "terms:34"
+        ]
+      },
+      {
+        "page": "wiki/sources/founding-note.md",
+        "score": 4.0,
+        "why": [
+          "linked",
+          "terms:21"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 4.0,
+        "why": [
+          "linked",
+          "terms:30"
+        ]
+      },
+      {
+        "page": "wiki/ideas.md",
+        "score": 3.8,
+        "why": [
+          "linked",
+          "terms:18"
+        ]
+      }
+    ],
+    "wiki/log.md": [
+      {
+        "page": "wiki/overview.md",
+        "score": 4.0,
+        "why": [
+          "linked",
+          "terms:24"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 4.0,
+        "why": [
+          "linked",
+          "terms:24"
+        ]
+      },
+      {
+        "page": "wiki/sources/founding-note.md",
+        "score": 3.9,
+        "why": [
+          "linked",
+          "terms:19"
+        ]
+      },
+      {
+        "page": "wiki/ideas.md",
+        "score": 3.2,
+        "why": [
+          "linked",
+          "terms:12"
+        ]
+      },
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 3.0,
+        "why": [
+          "linked",
+          "terms:10"
+        ]
+      }
+    ],
+    "wiki/overview.md": [
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 7.7,
+        "why": [
+          "tags:founding,purpose",
+          "terms:17"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ja/overview.md",
+        "score": 7.2,
+        "why": [
+          "tags:founding,purpose",
+          "terms:12"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ko/overview.md",
+        "score": 7.2,
+        "why": [
+          "tags:founding,purpose",
+          "terms:12"
+        ]
+      },
+      {
+        "page": "wiki/i18n/zh/overview.md",
+        "score": 7.1,
+        "why": [
+          "tags:founding,purpose",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 7.0,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:28"
+        ]
+      }
+    ],
+    "wiki/rules/notices.md": [
+      {
+        "page": "wiki/ideas.md",
+        "score": 4.8,
+        "why": [
+          "tags:governance",
+          "terms:18"
+        ]
+      },
+      {
+        "page": "wiki/index.md",
+        "score": 4.0,
+        "why": [
+          "linked",
+          "terms:34"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 4.0,
+        "why": [
+          "linked",
+          "terms:41"
+        ]
+      },
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 2.8,
+        "why": [
+          "linked",
+          "terms:8"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ja/overview.md",
+        "score": 2.4,
+        "why": [
+          "linked",
+          "terms:4"
+        ]
+      }
+    ],
+    "wiki/sources/founding-note.md": [
+      {
+        "page": "wiki/overview.md",
+        "score": 6.9,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:19"
+        ]
+      },
+      {
+        "page": "wiki/syntheses/decision-register.md",
+        "score": 6.8,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:18"
+        ]
+      },
+      {
+        "page": "wiki/i18n/de/overview.md",
+        "score": 5.7,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:7"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ja/overview.md",
+        "score": 5.6,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:6"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ko/overview.md",
+        "score": 5.6,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:6"
+        ]
+      }
+    ],
+    "wiki/syntheses/decision-register.md": [
+      {
+        "page": "wiki/i18n/ja/decision-register.md",
+        "score": 7.1,
+        "why": [
+          "tags:decisions,founding",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/i18n/ko/decision-register.md",
+        "score": 7.1,
+        "why": [
+          "tags:decisions,founding",
+          "terms:11"
+        ]
+      },
+      {
+        "page": "wiki/overview.md",
+        "score": 7.0,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:28"
+        ]
+      },
+      {
+        "page": "wiki/sources/founding-note.md",
+        "score": 6.8,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:18"
+        ]
+      },
+      {
+        "page": "wiki/concepts/standing-approval.md",
+        "score": 5.9,
+        "why": [
+          "tags:founding",
+          "linked",
+          "terms:9"
+        ]
+      }
+    ]
+  }
+}

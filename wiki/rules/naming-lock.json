@@ -1,0 +1,14 @@
+{
+ "format": "naming-lock-register v1",
+ "note": "Stems listed here cannot be renamed without a naming-lock-ledger.jsonl entry. Seeded 2026-10-21 (TA6).",
+ "locked": [
+  {
+   "stem": "ideas",
+   "locked_on": "2026-10-21"
+  },
+  {
+   "stem": "citation-chain",
+   "locked_on": "2026-10-21"
+  }
+ ]
+}

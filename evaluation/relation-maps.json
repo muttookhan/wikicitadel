@@ -1,0 +1,549 @@
+{
+  "edge_types": [
+    "wikilink"
+  ],
+  "edges": [
+    {
+      "source": "wiki/concepts/demo-guide-ja.md",
+      "target": "overview",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/concepts/demo-guide-ko.md",
+      "target": "overview",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/de/overview.md",
+      "target": "decision-register",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/de/overview.md",
+      "target": "founding-note",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/de/overview.md",
+      "target": "notices",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/de/overview.md",
+      "target": "owner",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/ja/decision-register.md",
+      "target": "standing-approval",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/ja/overview.md",
+      "target": "decision-register",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/ja/overview.md",
+      "target": "founding-note",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/ja/overview.md",
+      "target": "notices",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/ja/overview.md",
+      "target": "owner",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/ko/decision-register.md",
+      "target": "standing-approval",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/ko/overview.md",
+      "target": "decision-register",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/ko/overview.md",
+      "target": "founding-note",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/ko/overview.md",
+      "target": "notices",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/ko/overview.md",
+      "target": "owner",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/zh/overview.md",
+      "target": "decision-register",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/zh/overview.md",
+      "target": "founding-note",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/zh/overview.md",
+      "target": "notices",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/i18n/zh/overview.md",
+      "target": "owner",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/index.md",
+      "target": "decision-register",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/index.md",
+      "target": "demo-guide-ja",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/index.md",
+      "target": "demo-guide-ko",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/index.md",
+      "target": "founding-note",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/index.md",
+      "target": "ideas",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/index.md",
+      "target": "notices",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/index.md",
+      "target": "overview",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/index.md",
+      "target": "owner",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/index.md",
+      "target": "standing-approval",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/log.md",
+      "target": "decision-register",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/log.md",
+      "target": "demo-guide-ja",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/log.md",
+      "target": "demo-guide-ko",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/log.md",
+      "target": "founding-note",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/log.md",
+      "target": "ideas",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/log.md",
+      "target": "overview",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/log.md",
+      "target": "standing-approval",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/overview.md",
+      "target": "decision-register",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/overview.md",
+      "target": "founding-note",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/overview.md",
+      "target": "notices",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/overview.md",
+      "target": "owner",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/sources/founding-note.md",
+      "target": "decision-register",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/sources/founding-note.md",
+      "target": "overview",
+      "type": "wikilink"
+    },
+    {
+      "source": "wiki/syntheses/decision-register.md",
+      "target": "standing-approval",
+      "type": "wikilink"
+    }
+  ],
+  "hoisting": [
+    {
+      "child_count": 4,
+      "children": [
+        "wiki/entities/owner.md",
+        "wiki/rules/notices.md",
+        "wiki/sources/founding-note.md",
+        "wiki/syntheses/decision-register.md"
+      ],
+      "page": "wiki/i18n/de/overview.md",
+      "suggestion": "hoist subtree into a section view headed by this page"
+    },
+    {
+      "child_count": 4,
+      "children": [
+        "wiki/entities/owner.md",
+        "wiki/rules/notices.md",
+        "wiki/sources/founding-note.md",
+        "wiki/syntheses/decision-register.md"
+      ],
+      "page": "wiki/i18n/ja/overview.md",
+      "suggestion": "hoist subtree into a section view headed by this page"
+    },
+    {
+      "child_count": 4,
+      "children": [
+        "wiki/entities/owner.md",
+        "wiki/rules/notices.md",
+        "wiki/sources/founding-note.md",
+        "wiki/syntheses/decision-register.md"
+      ],
+      "page": "wiki/i18n/ko/overview.md",
+      "suggestion": "hoist subtree into a section view headed by this page"
+    },
+    {
+      "child_count": 4,
+      "children": [
+        "wiki/entities/owner.md",
+        "wiki/rules/notices.md",
+        "wiki/sources/founding-note.md",
+        "wiki/syntheses/decision-register.md"
+      ],
+      "page": "wiki/i18n/zh/overview.md",
+      "suggestion": "hoist subtree into a section view headed by this page"
+    },
+    {
+      "child_count": 9,
+      "children": [
+        "wiki/concepts/demo-guide-ja.md",
+        "wiki/concepts/demo-guide-ko.md",
+        "wiki/concepts/standing-approval.md",
+        "wiki/entities/owner.md",
+        "wiki/ideas.md",
+        "wiki/overview.md",
+        "wiki/rules/notices.md",
+        "wiki/sources/founding-note.md",
+        "wiki/syntheses/decision-register.md"
+      ],
+      "page": "wiki/index.md",
+      "suggestion": "hoist subtree into a section view headed by this page"
+    },
+    {
+      "child_count": 7,
+      "children": [
+        "wiki/concepts/demo-guide-ja.md",
+        "wiki/concepts/demo-guide-ko.md",
+        "wiki/concepts/standing-approval.md",
+        "wiki/ideas.md",
+        "wiki/overview.md",
+        "wiki/sources/founding-note.md",
+        "wiki/syntheses/decision-register.md"
+      ],
+      "page": "wiki/log.md",
+      "suggestion": "hoist subtree into a section view headed by this page"
+    },
+    {
+      "child_count": 4,
+      "children": [
+        "wiki/entities/owner.md",
+        "wiki/rules/notices.md",
+        "wiki/sources/founding-note.md",
+        "wiki/syntheses/decision-register.md"
+      ],
+      "page": "wiki/overview.md",
+      "suggestion": "hoist subtree into a section view headed by this page"
+    }
+  ],
+  "kind": "relation-maps",
+  "nodes": [
+    "wiki/concepts/citation-chain.md",
+    "wiki/concepts/demo-guide-ja.md",
+    "wiki/concepts/demo-guide-ko.md",
+    "wiki/concepts/standing-approval.md",
+    "wiki/entities/owner.md",
+    "wiki/i18n/de/overview.md",
+    "wiki/i18n/ja/decision-register.md",
+    "wiki/i18n/ja/overview.md",
+    "wiki/i18n/ko/decision-register.md",
+    "wiki/i18n/ko/overview.md",
+    "wiki/i18n/zh/overview.md",
+    "wiki/ideas.md",
+    "wiki/index.md",
+    "wiki/log.md",
+    "wiki/overview.md",
+    "wiki/rules/notices.md",
+    "wiki/sources/founding-note.md",
+    "wiki/syntheses/decision-register.md"
+  ],
+  "relation_maps": {
+    "wikilink": [
+      {
+        "source": "wiki/concepts/demo-guide-ja.md",
+        "target": "overview",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/concepts/demo-guide-ko.md",
+        "target": "overview",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/de/overview.md",
+        "target": "decision-register",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/de/overview.md",
+        "target": "founding-note",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/de/overview.md",
+        "target": "notices",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/de/overview.md",
+        "target": "owner",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/ja/decision-register.md",
+        "target": "standing-approval",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/ja/overview.md",
+        "target": "decision-register",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/ja/overview.md",
+        "target": "founding-note",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/ja/overview.md",
+        "target": "notices",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/ja/overview.md",
+        "target": "owner",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/ko/decision-register.md",
+        "target": "standing-approval",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/ko/overview.md",
+        "target": "decision-register",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/ko/overview.md",
+        "target": "founding-note",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/ko/overview.md",
+        "target": "notices",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/ko/overview.md",
+        "target": "owner",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/zh/overview.md",
+        "target": "decision-register",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/zh/overview.md",
+        "target": "founding-note",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/zh/overview.md",
+        "target": "notices",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/i18n/zh/overview.md",
+        "target": "owner",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/index.md",
+        "target": "decision-register",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/index.md",
+        "target": "demo-guide-ja",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/index.md",
+        "target": "demo-guide-ko",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/index.md",
+        "target": "founding-note",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/index.md",
+        "target": "ideas",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/index.md",
+        "target": "notices",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/index.md",
+        "target": "overview",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/index.md",
+        "target": "owner",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/index.md",
+        "target": "standing-approval",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/log.md",
+        "target": "decision-register",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/log.md",
+        "target": "demo-guide-ja",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/log.md",
+        "target": "demo-guide-ko",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/log.md",
+        "target": "founding-note",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/log.md",
+        "target": "ideas",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/log.md",
+        "target": "overview",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/log.md",
+        "target": "standing-approval",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/overview.md",
+        "target": "decision-register",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/overview.md",
+        "target": "founding-note",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/overview.md",
+        "target": "notices",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/overview.md",
+        "target": "owner",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/sources/founding-note.md",
+        "target": "decision-register",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/sources/founding-note.md",
+        "target": "overview",
+        "type": "wikilink"
+      },
+      {
+        "source": "wiki/syntheses/decision-register.md",
+        "target": "standing-approval",
+        "type": "wikilink"
+      }
+    ]
+  }
+}

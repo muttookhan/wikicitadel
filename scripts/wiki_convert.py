@@ -35,6 +35,18 @@ class ConvertError(Exception):
     pass
 
 
+class ParseQualityError(ConvertError):
+    """A conversion whose parse-quality score fell below the
+    caller's gate threshold (KR-R2). Carries the converted
+    markdown and the ingest report so the caller can quarantine
+    them with a record instead of filing them."""
+
+    def __init__(self, message, md, report):
+        super().__init__(message)
+        self.md = md
+        self.report = report
+
+
 # ------------------------------------------------------------------ html
 
 class _HTML2MD(HTMLParser):
@@ -581,9 +593,101 @@ def _ingest_defence(path, md, sensitivity=None, extraction=None):
     return cleaned, _report_for(path, scan, sensitivity, extraction)
 
 
+# ------------------------------------------ parse-quality gating
+# KR-R2 (Marathon Round 3, lane TA4; pattern: parse-quality
+# gating with a structural metric, Upstage Document Parse /
+# DP-Bench via the Korea harvest — proprietary source, IDEA
+# ONLY, re-implemented here from the idea): a conversion is
+# scored for parse quality BEFORE it can be filed, and a caller
+# that sets a threshold gets a gate: below-threshold parses
+# raise ParseQualityError carrying the markdown + report, so
+# the caller quarantines them with a record instead of filing
+# a parse nobody should cite. The score is a deterministic
+# stdlib heuristic bundle (no model, no network):
+#   readable ratio  alphanumerics + ordinary punctuation as a
+#                   share of non-space characters (garble —
+#                   symbol soup, replacement chars, control
+#                   chars — drags this down)
+#   diversity       distinct word tokens / word tokens (a
+#                   parse that repeats one token is a failed
+#                   extraction, however clean its characters)
+#   structure       headings / lists / tables / code fences /
+#                   multiple paragraphs present at all
+#   substance       word count up to a small floor (an empty
+#                   or near-empty parse scores ~0)
+# The components are recorded in the ingest report's
+# "parse_quality" block beside the score, so a quarantined
+# parse says WHY it scored low.
+
+def parse_quality(md):
+    """Score converted markdown 0.0–1.0. Returns
+    {"score", "verdict" ("good" at >= 0.5), "components"}."""
+    text = md or ""
+    stripped = text.strip()
+    if not stripped:
+        return {"score": 0.0, "verdict": "poor",
+                "components": {"words": 0, "readable_ratio": 0.0,
+                               "diversity": 0.0, "structure": 0.0,
+                               "substance": 0.0}}
+    words = re.findall(r"[A-Za-z0-9']+", text)
+    n_words = len(words)
+    nonspace = [c for c in text if not c.isspace()]
+    readable = sum(1 for c in nonspace
+                   if c.isalnum() or c in ".,;:!?()'\"-—–#>|*_`~/\\[]{}=+")
+    readable_ratio = readable / max(1, len(nonspace))
+    garble = sum(1 for c in text if c == "�" or
+                 (ord(c) < 32 and c not in "\n\t"))
+    garble_ratio = garble / max(1, len(text))
+    diversity = (len({w.lower() for w in words}) / n_words
+                 if n_words else 0.0)
+    structure_hits = 0
+    if re.search(r"^#{1,6} ", text, re.M):
+        structure_hits += 1
+    if re.search(r"^\s*[-*] ", text, re.M):
+        structure_hits += 1
+    if re.search(r"^\|.*\|", text, re.M):
+        structure_hits += 1
+    if "```" in text:
+        structure_hits += 1
+    if len([p for p in text.split("\n\n") if p.strip()]) >= 2:
+        structure_hits += 1
+    structure = structure_hits / 5.0
+    substance = min(1.0, n_words / 25.0)
+    score = (0.45 * readable_ratio + 0.25 * diversity
+             + 0.15 * structure + 0.15 * substance
+             - 2.0 * garble_ratio)
+    if n_words > 10 and diversity < 0.2:
+        score -= 0.3  # one token repeated: a failed extraction
+    score = max(0.0, min(1.0, round(score, 3)))
+    return {"score": score,
+            "verdict": "good" if score >= 0.5 else "poor",
+            "components": {
+                "words": n_words,
+                "readable_ratio": round(readable_ratio, 3),
+                "diversity": round(diversity, 3),
+                "structure": round(structure, 3),
+                "substance": round(substance, 3),
+                "garble_ratio": round(garble_ratio, 4)}}
+
+
 # -------------------------------------------------------------- dispatch
 
-def convert_with_report(path, sensitivity=None):
+def convert_with_report(path, sensitivity=None, quality_threshold=None):
+    md, report = _convert_with_report_impl(path, sensitivity)
+    quality = parse_quality(md)
+    report["parse_quality"] = quality
+    if quality_threshold is not None \
+            and quality["score"] < quality_threshold:
+        raise ParseQualityError(
+            "parse-quality gate: score %.3f is below the "
+            "threshold %.3f (components: %s) — quarantine this "
+            "parse instead of filing it"
+            % (quality["score"], quality_threshold,
+               quality["components"]), md, report)
+    return md, report
+
+
+def _convert_with_report_impl(path, sensitivity=None):
     _check_sensitivity(sensitivity)
     p = Path(path)
     if not p.is_file():
@@ -629,6 +733,17 @@ def main(argv):
     ap.add_argument("file")
     ap.add_argument("-o", "--out", default=None,
                     help="write here instead of stdout")
+    ap.add_argument("--quality-threshold", type=float, default=None,
+                    metavar="SCORE",
+                    help="parse-quality gate (KR-R2): refuse to "
+                    "file a conversion scoring below SCORE "
+                    "(0.0-1.0); the parse is quarantined under "
+                    "--quarantine-dir with its ingest report "
+                    "instead, and the exit code is 3")
+    ap.add_argument("--quarantine-dir", default="quarantine/parse-quality",
+                    metavar="DIR",
+                    help="where a gated parse is quarantined "
+                    "(default: quarantine/parse-quality)")
     ap.add_argument("--sensitivity", default=None, metavar="CLASS",
                     help="sensitivity class for this ingest, from "
                     "the vocabulary in evaluation/sensitivity.json "
@@ -652,7 +767,24 @@ def main(argv):
               "never reads as public.", file=sys.stderr)
         return 2
     try:
-        md, report = convert_with_report(args.file, args.sensitivity)
+        md, report = convert_with_report(
+            args.file, args.sensitivity,
+            quality_threshold=args.quality_threshold)
+    except ParseQualityError as exc:
+        qdir = Path(args.quarantine_dir)
+        qdir.mkdir(parents=True, exist_ok=True)
+        stem = Path(args.file).stem or "parse"
+        qmd = qdir / (stem + ".quarantined.md")
+        qjson = qdir / (stem + ".quarantined.ingest.json")
+        qmd.write_text(exc.md, encoding="utf-8")
+        qjson.write_text(json.dumps(exc.report, indent=2,
+                                     sort_keys=True) + "\n",
+                         encoding="utf-8")
+        print(f"wiki_convert: {exc}", file=sys.stderr)
+        print(f"wiki_convert: quarantined (NOT filed): {qmd} + "
+              f"{qjson.name} — the report's parse_quality block "
+              f"says why it scored low", file=sys.stderr)
+        return 3
     except (ConvertError, zipfile.BadZipFile, ET.ParseError,
             json.JSONDecodeError) as exc:
         print(f"wiki_convert: {exc}", file=sys.stderr)
@@ -660,7 +792,9 @@ def main(argv):
     scan = report["sanitiser"] or {}
     print(f"wiki_convert: trust-tier {report['trust_tier']}; sanitiser "
           f"verdict {scan.get('verdict')} "
-          f"({len(scan.get('findings') or [])} finding(s))",
+          f"({len(scan.get('findings') or [])} finding(s)); "
+          f"parse-quality {report['parse_quality']['score']} "
+          f"({report['parse_quality']['verdict']})",
           file=sys.stderr)
     if args.out:
         Path(args.out).write_text(md, encoding="utf-8")

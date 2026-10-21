@@ -39,6 +39,21 @@ earned its place.
 byte-for-byte the original algorithm; the Lens build parity-checks
 it, and now the hybrid ranking too, at build time).
 
+Exact-title / stem-match boost + rank expressions (Marathon
+Round 3, lane TB7; rows 1-2 of the round-3 board): the hybrid (and
+hindsight) rankers add a DECISIVE boost when the query exactly
+matches a page's title or file stem, or matches it after stemming
+(TITLE_EXACT_BOOST / TITLE_STEM_BOOST below) — round 2's Lens
+smoke found the owner-attested page titled by a query term
+falling out of the hybrid top-10 as the corpus grew; a boost far
+above the maximum attainable normalised score makes that
+impossible for a page that is a candidate at all. The hybrid's
+final score is computed by evaluating ONE named rank expression
+(RANK_EXPRESSIONS["hybrid-current"], Vespa-style single-pass
+rank expressions, re-implemented from the idea) over per-candidate
+features in a single pass; scripts/wiki_rank_expr.py is the
+tooling surface for the expression language.
+
 --pack emits an EVIDENCE PACK (JSON): the included hits with their
 score components and snippets, plus an explicit OMISSIONS list —
 the highest-ranked results left out by the --top cut, with the
@@ -886,38 +901,80 @@ def hybrid_rank(query_terms, docs, adj=None, severance=None):
         return out
 
     # --- Stage 3: temporal component (intent-gated) ---
+    # The date-rank share itself is computed unconditionally as
+    # the `recency` feature (other rank expressions use it); it
+    # only ENTERS the score, as `temporal`, under temporal intent.
     temp_by_idx = {}
+    cand = [index_of[p] for _s, p, _t, _d in out]
+
+    def _date_key(i):
+        d = doc_date(docs[i][1])
+        return (d is not None, d or "", bm25_by_idx.get(i, 0.0))
+
+    t_order = sorted(sorted(cand, key=lambda i: str(docs[i][0])),
+                     key=_date_key, reverse=True)
+    n_cand = len(cand) or 1
+    recency_by_idx = {}
+    for r, i in enumerate(t_order):
+        recency_by_idx[i] = 1.0 - r / n_cand
     if temporal_intent(query_terms):
-        cand = [index_of[p] for _s, p, _t, _d in out]
+        temp_by_idx = dict(recency_by_idx)
 
-        def _date_key(i):
-            d = doc_date(docs[i][1])
-            return (d is not None, d or "", bm25_by_idx.get(i, 0.0))
-
-        t_order = sorted(sorted(cand, key=lambda i: str(docs[i][0])),
-                         key=_date_key, reverse=True)
-        n_cand = len(cand)
-        for r, i in enumerate(t_order):
-            temp_by_idx[i] = 1.0 - r / n_cand
-
-    # --- Stage 4: coverage rerank over the stage-2 order ---
+    # --- Stage 4: coverage rerank + the rank expression ---
+    # Features are computed per candidate, then the final score
+    # is ONE evaluation of the named expression
+    # RANK_EXPRESSIONS["hybrid-current"] per candidate (the
+    # Vespa-style single pass): (blend_norm + 0.3*temporal) *
+    # rerank + title_boost, where blend_norm is the stage-2
+    # blend (bm25_norm + 0.6*ppr_norm) divided by the candidate
+    # set's maximum blend (max_s). That renormalisation is the
+    # pre-TB7 arithmetic exactly — one division of the blend
+    # itself — and it is load-bearing, not cosmetic: the
+    # abstention gate's tau is calibrated to that ABSOLUTE
+    # scale. Dropping it (as first shipped) left ordering
+    # unchanged but inflated weak-match top scores past tau and
+    # the abstention battery fell to 9/12; a per-term rescale
+    # still flipped the knife-edge case AB-008 (calibrated to
+    # sit exactly at tau), so the division is applied to the
+    # blend as a whole. The title boost (row 1) is the intended
+    # behaviour change and enters unscaled.
     qset = set(query_terms)
-    max_s = out[0][0]
+    max_deg = max((len(adj.get(i, ())) for i in cand), default=0) or 1
+    ast = rank_expression_ast("hybrid-current")
+    max_s = max((s for s, _p, _t, _d in out), default=0.0)
     final = []
     for pos, (score, p, text, detail) in enumerate(out):
-        ns = score / max_s if max_s else 0.0
         i = index_of[p]
         t = temp_by_idx.get(i, 0.0)
-        ns += TEMPORAL_W * t
         mult = 1.0
+        cov = t_frac = 0.0
         if pos < RERANK_POOL and qset:
             lead = set(tokenize(text)[:RERANK_LEAD_TOKENS])
             cov = len(qset & lead) / len(qset)
             title_toks = set(tokenize(doc_title(text)))
             t_frac = len(qset & title_toks) / len(qset)
             mult = 1.0 + RERANK_COVERAGE_W * cov + RERANK_TITLE_W * t_frac
-            ns *= mult
-        detail = dict(detail, temporal=round(t, 4), rerank=round(mult, 4))
+        boost, match_kind = title_boost_value(
+            query_terms, doc_title(text), p.stem)
+        rel_i = str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p)
+        pr_i = 0.0 if rel_i in STRUCTURAL_PATHS else ppr.get(i, 0.0)
+        features = {
+            "bm25": bm25_by_idx.get(i, 0.0),
+            "bm25_norm": (bm25_by_idx.get(i, 0.0) / max_b) if max_b else 0.0,
+            "ppr": pr_i,
+            "ppr_norm": (pr_i / max_p) if max_p else 0.0,
+            "blend_norm": (score / max_s) if max_s else 0.0,
+            "temporal": t, "recency": recency_by_idx.get(i, 0.0),
+            "rerank": mult, "coverage": cov, "title_frac": t_frac,
+            "title_boost": boost,
+            "exact_title": 1.0 if match_kind == "exact" else 0.0,
+            "stem_title": 1.0 if match_kind == "stem" else 0.0,
+            "importance": len(adj.get(i, ())) / max_deg,
+        }
+        ns = eval_rank_expression(ast, features)
+        detail = dict(detail, temporal=round(t, 4), rerank=round(mult, 4),
+                      title_boost=boost, title_match=match_kind,
+                      rank_expression="hybrid-current")
         final.append((ns, p, text, detail))
     final.sort(key=lambda r: (-r[0], str(r[1])))
 
@@ -933,6 +990,250 @@ def hybrid_rank(query_terms, docs, adj=None, severance=None):
         final, excluded = apply_severance(final, query_terms, sev)
         LAST_SEVERANCE["excluded"] = excluded
     return final
+
+
+# ---------------------------------------------------------------------------
+# Exact-title / stem-match boost + rank expressions (Marathon R3 TB7)
+#
+# title_match_kind(query_terms, title, stem): "exact" when the
+# query token sequence equals the title token sequence or the
+# file-stem token sequence; "stem" when the STEMMED token sets are
+# equal (but not exact); else None. The boosts are sized to be
+# decisive: the largest attainable pre-boost hybrid score is under
+# 2.0 (normalised BM25 + alpha*PPR + temporal, times the rerank
+# multiplier), so +10 (exact) / +5 (stem) cannot be outscored by
+# corpus growth — an attested page titled by the query term stays
+# at rank 1 while it is a candidate at all.
+# tools/lens/lenslib.py and the Lens client (app.js) mirror these
+# constants and rules exactly, and the regression tests pin the
+# agreement.
+# ---------------------------------------------------------------------------
+
+TITLE_EXACT_BOOST = 10.0
+TITLE_STEM_BOOST = 5.0
+
+
+def stem_token(tok: str) -> str:
+    """A small deterministic stemmer (suffix rules only): running
+    -> run, reflections -> reflection, studies -> study. Used ONLY
+    for the title/stem match; the corpus tokenizer is untouched."""
+    t = tok.lower()
+    if len(t) > 4 and t.endswith("ies"):
+        t = t[:-3] + "y"
+    elif len(t) > 5 and t.endswith("ing"):
+        t = t[:-3]
+    elif len(t) > 4 and t.endswith("ed"):
+        t = t[:-2]
+    elif len(t) > 3 and t.endswith("es") and not t.endswith("ss"):
+        t = t[:-2]
+    elif len(t) > 3 and t.endswith("s") and not t.endswith("ss"):
+        t = t[:-1]
+    if len(t) > 3 and t[-1] == t[-2] and t[-1] not in "aeiou":
+        t = t[:-1]
+    return t
+
+
+def title_match_kind(query_terms, title, stem):
+    """("exact" | "stem" | None) for a query against a page's
+    title text and file stem (see the section header)."""
+    q = [str(t).lower() for t in query_terms]
+    if not q:
+        return None
+    title_toks = tokenize(title or "")
+    stem_toks = tokenize((stem or "").replace("-", " "))
+    if q == title_toks or q == stem_toks:
+        return "exact"
+    q_stems = {stem_token(t) for t in q}
+    for toks in (title_toks, stem_toks):
+        if toks and q_stems == {stem_token(t) for t in toks}:
+            return "stem"
+    return None
+
+
+def title_boost_value(query_terms, title, stem):
+    """(boost, kind) — the additive boost for this match kind."""
+    kind = title_match_kind(query_terms, title, stem)
+    if kind == "exact":
+        return TITLE_EXACT_BOOST, kind
+    if kind == "stem":
+        return TITLE_STEM_BOOST, kind
+    return 0.0, None
+
+
+# ---------------------------------------------------------------------------
+# Rank expressions (Vespa-style single-pass rank expressions,
+# re-implemented from the idea — Vespa is Apache-2.0; this is an
+# independent implementation of the stated-expression concept).
+#
+# A rank expression is a small declarative arithmetic expression
+# over named per-candidate FEATURES, evaluated in ONE pass over
+# the candidate list: no expression may call another ranker or
+# re-scan the corpus. Grammar:
+#   expr   := term (('+' | '-') term)*
+#   term   := factor (('*' | '/') factor)*
+#   factor := NUMBER | FEATURE | FUNC '(' expr (',' expr)* ')'
+#             | '(' expr ')' | '-' factor
+# Functions: min, max, clamp(x, lo, hi), log1p, abs. Division by
+# zero yields 0.0 (a feature ratio with no denominator carries no
+# signal, it is not an error). Unknown features/functions and
+# malformed expressions raise ValueError at parse time.
+# ---------------------------------------------------------------------------
+
+RANK_FEATURES = {
+    "bm25", "bm25_norm", "ppr", "ppr_norm", "blend_norm",
+    "temporal", "recency", "rerank", "coverage", "title_frac",
+    "title_boost", "exact_title", "stem_title", "importance",
+}
+
+RANK_EXPRESSIONS = {
+    # The current hybrid ranking, stated as one named expression:
+    # the stage-2 blend renormalised by the candidate set's max
+    # blend (blend_norm — the scale the abstention tau was
+    # calibrated on) + the temporal component, scaled by the
+    # coverage rerank multiplier, plus the decisive title boost.
+    # hybrid_rank() evaluates THIS string, so the shipped ranking
+    # and the stated expression cannot drift.
+    "hybrid-current":
+        "(blend_norm + 0.3 * temporal) * rerank"
+        " + title_boost",
+    "bm25-only": "bm25_norm + title_boost",
+    "graph-lean": "bm25_norm + 1.2 * ppr_norm + title_boost",
+    "fresh-lean": "(bm25_norm + 0.6 * ppr_norm) * rerank"
+                  " + 0.5 * recency + title_boost",
+    "importance-lean": "bm25_norm + 0.6 * ppr_norm"
+                       " + 0.4 * importance + title_boost",
+}
+
+_RANK_TOKEN_RE = re.compile(
+    r"\s*(?:(?P<num>\d+(?:\.\d+)?)|(?P<name>[a-z_][a-z0-9_]*)"
+    r"|(?P<op>[+\-*/(),]))")
+_RANK_FUNCS = {"min": (2, min), "max": (2, max),
+               "log1p": (1, math.log1p), "abs": (1, abs),
+               "clamp": (3, lambda x, lo, hi: max(lo, min(hi, x)))}
+
+
+def parse_rank_expression(text):
+    """Parse a rank expression into an AST of tuples:
+    ("num", v) | ("feat", name) | ("bin", op, l, r) |
+    ("neg", x) | ("call", name, [args]). Raises ValueError."""
+    tokens = []
+    pos = 0
+    while pos < len(text):
+        m = _RANK_TOKEN_RE.match(text, pos)
+        if not m or m.end() == pos:
+            raise ValueError(f"rank expression: bad token at {pos}")
+        pos = m.end()
+        if m.group("num") is not None:
+            tokens.append(("num", float(m.group("num"))))
+        elif m.group("name") is not None:
+            tokens.append(("name", m.group("name")))
+        else:
+            tokens.append(("op", m.group("op")))
+    tokens.append(("op", "$"))
+    state = {"i": 0}
+
+    def peek():
+        return tokens[state["i"]]
+
+    def take():
+        tok = tokens[state["i"]]
+        state["i"] += 1
+        return tok
+
+    def parse_expr():
+        node = parse_term()
+        while peek() in (("op", "+"), ("op", "-")):
+            op = take()[1]
+            node = ("bin", op, node, parse_term())
+        return node
+
+    def parse_term():
+        node = parse_factor()
+        while peek() in (("op", "*"), ("op", "/")):
+            op = take()[1]
+            node = ("bin", op, node, parse_factor())
+        return node
+
+    def parse_factor():
+        kind, val = take()
+        if kind == "num":
+            return ("num", val)
+        if kind == "op" and val == "-":
+            return ("neg", parse_factor())
+        if kind == "op" and val == "(":
+            node = parse_expr()
+            if take() != ("op", ")"):
+                raise ValueError("rank expression: missing )")
+            return node
+        if kind == "name":
+            if peek() == ("op", "("):
+                if val not in _RANK_FUNCS:
+                    raise ValueError(
+                        f"rank expression: unknown function {val}")
+                take()
+                args = [parse_expr()]
+                while peek() == ("op", ","):
+                    take()
+                    args.append(parse_expr())
+                if take() != ("op", ")"):
+                    raise ValueError("rank expression: missing )")
+                if len(args) != _RANK_FUNCS[val][0]:
+                    raise ValueError(
+                        f"rank expression: {val} takes "
+                        f"{_RANK_FUNCS[val][0]} argument(s)")
+                return ("call", val, args)
+            if val not in RANK_FEATURES:
+                raise ValueError(
+                    f"rank expression: unknown feature {val}")
+            return ("feat", val)
+        raise ValueError("rank expression: unexpected token")
+
+    ast = parse_expr()
+    if peek() != ("op", "$"):
+        raise ValueError("rank expression: trailing input")
+    return ast
+
+
+def eval_rank_expression(ast, features):
+    """Evaluate a parsed rank expression against a feature dict.
+    Missing features read as 0.0. One call per candidate — the
+    single pass of the Vespa pattern."""
+    kind = ast[0]
+    if kind == "num":
+        return ast[1]
+    if kind == "feat":
+        return float(features.get(ast[1], 0.0))
+    if kind == "neg":
+        return -eval_rank_expression(ast[1], features)
+    if kind == "call":
+        fn = _RANK_FUNCS[ast[1]][1]
+        return float(fn(*[eval_rank_expression(a, features)
+                          for a in ast[2]]))
+    _k, op, left, right = ast
+    lv = eval_rank_expression(left, features)
+    rv = eval_rank_expression(right, features)
+    if op == "+":
+        return lv + rv
+    if op == "-":
+        return lv - rv
+    if op == "*":
+        return lv * rv
+    return lv / rv if rv else 0.0
+
+
+_RANK_AST_CACHE = {}
+
+
+def rank_expression_ast(name_or_text):
+    """The parsed AST for a named expression (cached) or a raw
+    expression string."""
+    if name_or_text in RANK_EXPRESSIONS:
+        text = RANK_EXPRESSIONS[name_or_text]
+    else:
+        text = name_or_text
+    if text not in _RANK_AST_CACHE:
+        _RANK_AST_CACHE[text] = parse_rank_expression(text)
+    return _RANK_AST_CACHE[text]
 
 
 def doc_date(text: str):
@@ -1062,12 +1363,15 @@ def hindsight_rank(query_terms, docs, adj=None):
             title_frac = len(qset & title_toks) / len(qset) if qset else 0.0
             score = rrf * (1.0 + RERANK_COVERAGE_W * coverage
                            + RERANK_TITLE_W * title_frac)
-        out.append((score, p, text, {
+        boost, match_kind = title_boost_value(
+            query_terms, doc_title(text), p.stem)
+        out.append((score + boost, p, text, {
             "bm25": round(bm25_by_idx.get(i, 0.0), 4),
             "ppr": round(graph_value(i, p), 6),
             "via": "+".join(strategies) if strategies else "bm25",
             "rrf": round(rrf, 6),
             "temporal": use_temporal,
+            "title_boost": boost, "title_match": match_kind,
         }))
     out.sort(key=lambda r: (-r[0], str(r[1])))
     return out

@@ -110,7 +110,9 @@ def build_qa_record(question_entry: dict, answer_text: str,
                     citation_details: list = None,
                     trust_verdict: str = None,
                     clarification: dict = None,
-                    coverage: dict = None) -> dict:
+                    coverage: dict = None,
+                    two_phase: dict = None,
+                    trace: dict = None) -> dict:
     """Build one Q&A record for ``wiki/access/qa-2026.jsonl``.
 
     The abstention contract (``answer_contract.py``) fields are added
@@ -143,6 +145,16 @@ def build_qa_record(question_entry: dict, answer_text: str,
     only when supplied. It lives on the RECORD and in the staged
     proposal (the pickup report), never appended to the answer
     text; see coverage.py for the placement decision.
+
+    Marathon R3 lane TB1 rides the same rule twice more:
+    ``two_phase`` — the two-phase verification block built by
+    ``tools/ask/two_phase.py`` (present only when the two-phase
+    flag was ON for this answer; the flag defaults OFF and the
+    standing contract is unchanged without it) — and ``trace``
+    — the per-answer structured trace built by
+    ``tools/ask/trace.py`` (EU6a), which is ALSO appended as a
+    JSONL record beside the Q&A file by the record-answer flow.
+    Both are stamped only when supplied.
     """
     record = {
         "id": question_entry["id"],
@@ -176,6 +188,10 @@ def build_qa_record(question_entry: dict, answer_text: str,
         record["clarification"] = clarification
     if coverage is not None:
         record["coverage"] = coverage
+    if two_phase is not None:
+        record["two_phase"] = two_phase
+    if trace is not None:
+        record["trace"] = trace
     return record
 
 
@@ -287,6 +303,25 @@ def stage_proposal_markdown(record: dict) -> str:
             lines.append(str(coverage.get("line", "")))
         else:
             lines.append(str(coverage))
+        lines.append("")
+    if record.get("two_phase"):
+        lines.append("## Two-phase verification")
+        lines.append("")
+        lines.append(
+            "This answer ran in two-phase mode (tools/ask/"
+            "two_phase.py): a marked preliminary, then a final "
+            "verified claim by claim against the re-opened "
+            "sources."
+        )
+        lines.append("")
+    if record.get("trace"):
+        lines.append("## Trace")
+        lines.append("")
+        lines.append(
+            "A structured trace of this answer's retrieval, "
+            "packing and gate decisions was filed beside the "
+            "Q&A record (tools/ask/trace.py, EU6a)."
+        )
         lines.append("")
     clarification = record.get("clarification")
     if clarification:
@@ -504,6 +539,43 @@ def _payload_coverage(payload: dict):
     return None
 
 
+_TRACE_MODULE = None
+
+
+def _trace_module():
+    """Load tools/ask/trace.py by path (the lazy pattern used
+    for coverage), so the trace seam stays opt-in and additive."""
+    global _TRACE_MODULE
+    if _TRACE_MODULE is None:
+        import importlib.util
+
+        path = Path(__file__).resolve().parent / "trace.py"
+        spec = importlib.util.spec_from_file_location("ask_trace", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _TRACE_MODULE = module
+    return _TRACE_MODULE
+
+
+def _payload_trace(payload: dict, record: dict, qa_file):
+    """Append the payload's trace beside the Q&A file, if any.
+
+    An explicit ``trace`` dict in the payload is filed as-is;
+    the caller may instead set ``emit_trace: true`` to have the
+    trace built from the finished record. Anything else files
+    no trace — the seam is additive and its absence changes
+    nothing.
+    """
+    trace_mod = _trace_module()
+    trace = payload.get("trace")
+    if not isinstance(trace, dict) and payload.get("emit_trace"):
+        trace = trace_mod.build_trace(record)
+    if isinstance(trace, dict):
+        trace_mod.append_trace(trace_mod.trace_path_beside(qa_file), trace)
+        return trace
+    return None
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -640,6 +712,17 @@ def main(argv=None) -> int:
             citation_details=payload.get("citation_details"),
             clarification=payload.get("clarification"),
             coverage=_payload_coverage(payload),
+            two_phase=(
+                payload.get("two_phase")
+                if isinstance(payload.get("two_phase"), dict)
+                else ({"phase": payload.get("phase"),
+                       "verification": payload.get("verification")}
+                      if payload.get("two_phase") is True
+                      and isinstance(payload.get("verification"), dict)
+                      else None)
+            ),
+            trace=payload.get("trace")
+            if isinstance(payload.get("trace"), dict) else None,
         )
         # Every newly recorded answer carries its trust verdict,
         # computed deterministically from the finished record
@@ -648,6 +731,7 @@ def main(argv=None) -> int:
             record, repo_root() / "wiki"
         )
         append_record(qa_file, record)
+        _payload_trace(payload, record, qa_file)
         staging_dir.mkdir(parents=True, exist_ok=True)
         proposal_path = staging_dir / ("qa-%s.md" % record["id"])
         proposal_path.write_text(

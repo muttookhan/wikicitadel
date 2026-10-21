@@ -76,6 +76,19 @@ results are read against a prior belief, not hindsight.
 Either way the report records the open prediction ids it
 found ("prediction_ids"), the ids a later scoring names.
 
+--no_context (Marathon Round 3, lane TA2; LongBench pattern,
+MIT) adds the CONTROL ARM: the same questions answered with no
+retrieved context at all, separating genuine context use from
+parametric memory. Answers come from --no-context-answers
+(a JSONL of answer records) or, without one, from the null
+answerer that abstains on everything — the honest floor for a
+corpus no model memorised. The report gains "no_context_arm"
+(per-question rows + accuracy, abstention accuracy, and
+protocol violations — a no-context answer that cites pages it
+never saw) and "context_lift" (with-context hit rate minus
+no-context accuracy, with the proxy caveat stated in the
+report itself).
+
 The gate baseline (evaluation/extended-baseline.json) is what the
 gateway's eval gate compares future runs against; --emit-baseline
 is the deliberate act that moves it. Nightly wiring (not installed;
@@ -124,6 +137,99 @@ def invalid_axes(questions):
         if bad:
             out[q["id"]] = bad
     return out
+
+def load_no_context_answers(path):
+    """{id: record} from a no-context answers JSONL file.
+
+    A record is {"id": ..., "answer": "...", "citations": [...],
+    "abstained": bool} — an answer produced WITHOUT retrieved
+    context (the LongBench --no_context control arm; Marathon
+    Round 3, lane TA2). Records are answers a model (or the null
+    answerer) gave from parametric memory alone."""
+    out = {}
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        obj = json.loads(line)
+        if obj.get("kind") != "header":
+            out[obj["id"]] = obj
+    return out
+
+
+def score_no_context_answer(q, record):
+    """Deterministic score for one no-context answer record.
+
+    Abstention = the record declares it, or the answer text is
+    empty. An answerable question is correct when every key_fact
+    appears and no forbidden_claim appears; a no_answer question
+    is correct exactly when the arm abstains. A no-context answer
+    carrying citations is a protocol violation (there was no
+    context to cite) — reported, and the answer cannot score
+    correct."""
+    if record is None:
+        # No record: the null answerer abstains — correct exactly
+        # on the questions whose expected behaviour is abstention.
+        return {"id": q["id"],
+                "correct": bool(q.get("expected_abstain")),
+                "abstained": True,
+                "detail": "no record — the null answerer abstains"}
+    answer = record.get("answer") or ""
+    abstained = bool(record.get("abstained")) or not answer.strip()
+    cited = bool(record.get("citations"))
+    norm = " ".join(answer.split()).lower()
+    if q.get("expected_abstain"):
+        ok = abstained
+        return {"id": q["id"], "correct": ok, "abstained": abstained,
+                "cited_with_no_context": cited,
+                "detail": "abstained as expected" if ok
+                          else "answered a no_answer question "
+                               "from parametric memory"}
+    if abstained:
+        return {"id": q["id"], "correct": False, "abstained": True,
+                "cited_with_no_context": cited,
+                "detail": "abstained on an answerable question"}
+    facts_ok = all(" ".join(f.split()).lower() in norm
+                   for f in q.get("key_facts") or [])
+    forbidden_hit = any(" ".join(f.split()).lower() in norm
+                        for f in q.get("forbidden_claims") or [])
+    ok = facts_ok and not forbidden_hit and not cited
+    detail = (f"key_facts_ok={facts_ok} "
+              f"forbidden_hit={forbidden_hit} "
+              f"cited_with_no_context={cited}")
+    return {"id": q["id"], "correct": ok, "abstained": False,
+            "cited_with_no_context": cited, "detail": detail}
+
+
+def no_context_arm(questions, answers):
+    """The control arm's aggregates over the question set.
+
+    answers=None is the NULL answerer: it abstains on every
+    question — the honest floor for a corpus whose facts are
+    not in any model's parametric memory (and, for the public
+    tree, are fictional by construction)."""
+    rows = [score_no_context_answer(q, (answers or {}).get(q["id"]))
+            for q in questions]
+    ans = [r for r, q in zip(rows, questions)
+           if not q.get("expected_abstain")]
+    noans = [r for r, q in zip(rows, questions)
+             if q.get("expected_abstain")]
+    return {
+        "answerer": ("supplied answers file" if answers is not None
+                     else "null answerer (abstains on everything)"),
+        "questions": len(rows),
+        "accuracy": round(sum(1 for r in rows if r["correct"])
+                          / (len(rows) or 1), 4),
+        "answerable_accuracy": (round(
+            sum(1 for r in ans if r["correct"]) / len(ans), 4)
+            if ans else None),
+        "no_answer_accuracy": (round(
+            sum(1 for r in noans if r["correct"]) / len(noans), 4)
+            if noans else None),
+        "protocol_violations": sum(
+            1 for r in rows if r.get("cited_with_no_context")),
+        "rows": rows,
+    }
+
 
 spec = importlib.util.spec_from_file_location(
     "wiki_search", ROOT / "scripts" / "wiki_search.py")
@@ -255,6 +361,18 @@ def main(argv):
                     help="preregistration pre-flight : warn "
                          "when no open prediction is registered for "
                          "this run; never blocks")
+    ap.add_argument("--no_context", action="store_true",
+                    help="also run the --no_context control arm "
+                         "(LongBench pattern): the same questions "
+                         "answered with NO retrieved context, so "
+                         "context lift = with-context hit rate "
+                         "minus no-context accuracy is measured, "
+                         "not assumed")
+    ap.add_argument("--no-context-answers", default=None,
+                    help="JSONL of no-context answer records for "
+                         "the control arm; without it the null "
+                         "answerer (abstains on everything) is "
+                         "the arm's floor")
     args = ap.parse_args(argv[1:])
 
     prediction_ids, prediction_warning = predict_preflight()
@@ -351,6 +469,24 @@ def main(argv):
             sum(1 for r in answerable_rows if r["must_cite_has_inline_cite"])
             / (len(answerable_rows) or 1), 4),
     }
+    nc_arm, context_lift = None, None
+    if args.no_context:
+        nc_answers = load_no_context_answers(args.no_context_answers) \
+            if args.no_context_answers else None
+        nc_arm = no_context_arm(questions, nc_answers)
+        context_lift = {
+            "with_context_hit_rate_topk": agg["hit_rate_topk"],
+            "no_context_accuracy": nc_arm["accuracy"],
+            "lift": round(agg["hit_rate_topk"]
+                          - nc_arm["accuracy"], 4),
+            "note": ("The with-context figure is this harness's "
+                     "retrieval proxy (must/acceptable cite in "
+                     "top-k); the no-context figure is answer "
+                     "accuracy under the deterministic key-fact "
+                     "score. The lift is the gap between them — "
+                     "reported, never collapsed into one number."),
+        }
+
     try:
         head = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"],
                               capture_output=True, text=True).stdout.strip()
@@ -373,6 +509,8 @@ def main(argv):
         "by_slice": by_slice,
         "axes_invalid": invalid_axes(questions),
         "abstention": abstention,
+        "no_context_arm": nc_arm,
+        "context_lift": context_lift,
         "citation_presence": citation,
         "judgement_axes_not_scored": (
             "Answer factuality vs key_facts, forbidden-claim avoidance on "
@@ -431,6 +569,14 @@ def main(argv):
     print(f"  hit rate @{args.top}: {agg['hit_rate_topk']:.2f}   "
           f"MRR: {agg['mrr_must_cite']:.3f}   "
           f"abstention rate: {abstention['abstention_rate']}")
+    if nc_arm is not None:
+        print(f"  no-context arm ({nc_arm['answerer']}): "
+              f"accuracy {nc_arm['accuracy']:.2f} "
+              f"(answerable {nc_arm['answerable_accuracy']}, "
+              f"no_answer {nc_arm['no_answer_accuracy']}, "
+              f"protocol violations "
+              f"{nc_arm['protocol_violations']}) — "
+              f"context lift {context_lift['lift']:+.2f}")
     print(f"  citation presence: sources {citation['source_declaration_rate']:.2f}   "
           f"inline cites {citation['inline_cite_rate']:.2f}")
     for axis, aagg in by_axis.items():

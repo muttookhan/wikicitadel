@@ -1,0 +1,27 @@
+{
+  "command": [
+    "python3",
+    "scripts/wiki_example.py",
+    "--once"
+  ],
+  "dry_run_default": false,
+  "idempotence_key": "content-hash dedupe: an unchanged input produces the same item id and is a no-op",
+  "idempotent": true,
+  "kill_switch": {
+    "kind": "stop-file",
+    "value": "evaluation/example.STOP"
+  },
+  "log_path": "evaluation/example-runs.log",
+  "max_items_per_run": 100,
+  "max_runtime_seconds": 600,
+  "name": "example-nightly-example",
+  "owner": "owner-or-agent-seat",
+  "owner_notice": "log+chat",
+  "schedule": {
+    "expression": "15 3 * * *",
+    "kind": "cron"
+  },
+  "writes": [
+    "evaluation/example-register.jsonl"
+  ]
+}

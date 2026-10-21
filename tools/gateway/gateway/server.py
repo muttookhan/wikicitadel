@@ -27,7 +27,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import scopes
+from . import destructive, scopes
 from .config import Config
 from .ledger import Ledger, read_entries, utcnow
 from .registry import Registry
@@ -161,7 +161,10 @@ class Gateway:
         if method == "notifications/initialized":
             return None
         if method == "tools/list":
-            return self._rpc(rid, {"tools": TOOLS})
+            # Destructive tools are registered ONLY when their env
+            # flag is set (destructive.py, Scrapbox MCP pattern);
+            # by default the list below is the whole surface.
+            return self._rpc(rid, {"tools": TOOLS + destructive.visible_tools()})
         if method == "tools/call":
             return self._rpc(rid, self._call_tool(params, meta))
         return self._rpc(rid, None, error={"code": -32601, "message": "method not found"})
@@ -196,6 +199,23 @@ class Gateway:
             return self._result({"error": "authentication required or token invalid"}, is_error=True)
         actor = entry["identity"]
         self.session_id = session_id
+
+        if name in destructive.DESTRUCTIVE_NAMES:
+            # Env-flagged destructive gate (destructive.py): every
+            # attempt — allowed or refused — is ledgered exactly
+            # once through this recorder.
+            scratch = self.cfg.state_dir / "destructive-scratch"
+            scratch.mkdir(parents=True, exist_ok=True)
+
+            def _record(action, result, detail):
+                self._log(actor=actor, action=action, tool=name,
+                          session_id=session_id, task_ref=task_ref,
+                          direction=direction, result=result,
+                          extra={"destructive_gate": detail})
+
+            payload, is_err = destructive.invoke(
+                name, args, scratch_root=scratch, record=_record)
+            return self._result(payload, is_error=is_err)
 
         def deny(action, files_read=None):
             self._log(actor=actor, action=action, tool=name, session_id=session_id,

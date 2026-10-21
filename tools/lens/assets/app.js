@@ -182,6 +182,40 @@ function personalizedPagerank(adj, seeds) {
   }
   return rank;
 }
+/* TITLE-BOOST-BEGIN — exact-title/stem-match boost (Marathon R3
+ * TB7), a mirror of scripts/wiki_search.py title_boost_value:
+ * a query that exactly matches a page title or file stem gets
+ * +10; a stemmed match gets +5. Decisive by construction (the
+ * pre-boost hybrid score is bounded well under 5). The block
+ * between TITLE-BOOST-BEGIN/END is pure functions only, so the
+ * Lens tests can extract and execute it under node. */
+const TITLE_EXACT_BOOST = 10.0, TITLE_STEM_BOOST = 5.0;
+function stemTokenJs(tok) {
+  let t = String(tok).toLowerCase();
+  if (t.length > 4 && t.endsWith("ies")) t = t.slice(0, -3) + "y";
+  else if (t.length > 5 && t.endsWith("ing")) t = t.slice(0, -3);
+  else if (t.length > 4 && t.endsWith("ed")) t = t.slice(0, -2);
+  else if (t.length > 3 && t.endsWith("es") && !t.endsWith("ss")) t = t.slice(0, -2);
+  else if (t.length > 3 && t.endsWith("s") && !t.endsWith("ss")) t = t.slice(0, -1);
+  if (t.length > 3 && t[t.length - 1] === t[t.length - 2] && !"aeiou".includes(t[t.length - 1])) t = t.slice(0, -1);
+  return t;
+}
+function titleBoostJs(queryTerms, title, stem) {
+  const q = (queryTerms || []).map(t => String(t).toLowerCase());
+  if (!q.length) return { boost: 0, kind: null };
+  const titleToks = tokenize(title || "");
+  const stemToks = tokenize(String(stem || "").replace(/-/g, " "));
+  const seqEq = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
+  if (seqEq(q, titleToks) || seqEq(q, stemToks)) return { boost: TITLE_EXACT_BOOST, kind: "exact" };
+  const qStems = new Set(q.map(stemTokenJs));
+  for (const toks of [titleToks, stemToks]) {
+    if (!toks.length) continue;
+    const stemSet = new Set(toks.map(stemTokenJs));
+    if (stemSet.size === qStems.size && [...stemSet].every(t => qStems.has(t))) return { boost: TITLE_STEM_BOOST, kind: "stem" };
+  }
+  return { boost: 0, kind: null };
+}
+/* TITLE-BOOST-END */
 function hybridRank(queryTerms) {
   // The base is the UNsevered BM25 list (the Python hybrid ranks
   // first and severs last, at its stage 5 — mirrored below).
@@ -202,8 +236,11 @@ function hybridRank(queryTerms) {
     // receive the PPR component — mirror of wiki_search.py.
     if (SEARCH.docs[di].path === "wiki/index.md" || SEARCH.docs[di].path === "wiki/log.md") pr = 0;
     if (b <= 0 && !(maxP > 0 && pr >= PPR_GRAPH_FLOOR * maxP)) continue;
-    out.push({ score: (maxB ? b / maxB : 0) + HYBRID_ALPHA * (maxP ? pr / maxP : 0),
+    const tb = titleBoostJs(queryTerms, SEARCH.docs[di].title,
+      (SEARCH.docs[di].path || "").split("/").pop().replace(/\.md$/, ""));
+    out.push({ score: (maxB ? b / maxB : 0) + HYBRID_ALPHA * (maxP ? pr / maxP : 0) + tb.boost,
                di, path: SEARCH.docs[di].path, bm25: b, ppr: pr,
+               title_boost: tb.boost, title_match: tb.kind,
                via: b > 0 && pr > 0 ? "both" : (b > 0 ? "bm25" : "graph") });
   }
   const ranked = out.sort((a, b2) => (b2.score - a.score) || (a.path < b2.path ? -1 : a.path > b2.path ? 1 : 0));

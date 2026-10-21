@@ -111,6 +111,25 @@ Refusals and failures come back as MCP error results
 (`isError: true`) whose text states the reason; a missing page
 and a barred source are both errors, never empty successes.
 
+## Frozen reads (`--pin`)
+
+The traversal CLI's `--pin <commit>` frozen read is available
+here in both shapes:
+
+```sh
+python3 tools/mcp-read/server.py --pin <commit>   # whole session
+```
+
+or per call: every tool accepts an optional `pin` argument
+pinning that one call. Semantics are the traversal door's
+own (`resolve_pinned_root`, imported): the commit is
+verified, its tree extracted read-only by `git archive`,
+and the working tree is never written, checked out, or
+moved. A pinned result carries `pin: <resolved commit>`;
+an unpinned result has no `pin` field and is unchanged
+from before. An unresolvable pin is refused — per call as
+an error result, at startup as exit 2 before serving.
+
 ## Tests
 
 ```sh

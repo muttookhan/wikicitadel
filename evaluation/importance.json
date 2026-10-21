@@ -1,0 +1,150 @@
+{
+  "kind": "page-importance",
+  "as_of": "2026-10-21",
+  "rows": [
+    {
+      "page": "wiki/i18n/ja/decision-register.md",
+      "inbound": 8,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.286153
+    },
+    {
+      "page": "wiki/i18n/ko/decision-register.md",
+      "inbound": 8,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.286153
+    },
+    {
+      "page": "wiki/syntheses/decision-register.md",
+      "inbound": 8,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.286153
+    },
+    {
+      "page": "wiki/sources/founding-note.md",
+      "inbound": 7,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.251232
+    },
+    {
+      "page": "wiki/entities/owner.md",
+      "inbound": 6,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.21631
+    },
+    {
+      "page": "wiki/rules/notices.md",
+      "inbound": 6,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.21631
+    },
+    {
+      "page": "wiki/concepts/standing-approval.md",
+      "inbound": 5,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.181389
+    },
+    {
+      "page": "wiki/i18n/de/overview.md",
+      "inbound": 5,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.181389
+    },
+    {
+      "page": "wiki/i18n/ja/overview.md",
+      "inbound": 5,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.181389
+    },
+    {
+      "page": "wiki/i18n/ko/overview.md",
+      "inbound": 5,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.181389
+    },
+    {
+      "page": "wiki/i18n/zh/overview.md",
+      "inbound": 5,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.181389
+    },
+    {
+      "page": "wiki/overview.md",
+      "inbound": 5,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.181389
+    },
+    {
+      "page": "wiki/concepts/citation-chain.md",
+      "inbound": 0,
+      "age_days": 1,
+      "attested": false,
+      "decay": 0.997264,
+      "score": 0.144764
+    },
+    {
+      "page": "wiki/concepts/demo-guide-ja.md",
+      "inbound": 2,
+      "age_days": 278,
+      "attested": false,
+      "decay": 0.466898,
+      "score": 0.076856
+    },
+    {
+      "page": "wiki/concepts/demo-guide-ko.md",
+      "inbound": 2,
+      "age_days": 278,
+      "attested": false,
+      "decay": 0.466898,
+      "score": 0.076856
+    },
+    {
+      "page": "wiki/ideas.md",
+      "inbound": 2,
+      "age_days": 279,
+      "attested": false,
+      "decay": 0.465621,
+      "score": 0.076624
+    },
+    {
+      "page": "wiki/index.md",
+      "inbound": 0,
+      "age_days": 365,
+      "attested": false,
+      "decay": 0.367879,
+      "score": 0.004191
+    },
+    {
+      "page": "wiki/log.md",
+      "inbound": 0,
+      "age_days": 365,
+      "attested": false,
+      "decay": 0.367879,
+      "score": 0.004191
+    }
+  ]
+}
