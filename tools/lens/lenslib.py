@@ -34,8 +34,68 @@ B = 0.75
 TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
+# ---------------------------------------------------------------------------
+# CJK search-mode segmentation (Marathon Round 4; pattern from
+# ikawaha/kagome's search mode, MIT -- idea/pattern only, our own
+# implementation, no external dependency): a run of CJK characters
+# is indexed BOTH whole (the compound as one token) and segmented
+# into character bigrams, so a CJK page retrieves on the whole
+# compound and on any partial-compound query of two or more
+# characters. Kagome does this with a morphological dictionary;
+# character bigrams are the honest dictionary-free segmentation
+# in pure Python. A single-character CJK run indexes as itself
+# (one CJK character is a whole morpheme, unlike a lone Latin
+# letter, which the len>=2 filter still drops). Non-CJK behaviour
+# is unchanged: the same [a-z0-9]+ tokens, in the same order.
+# tools/lens/lenslib.py and tools/lens/assets/app.js mirror this
+# exactly; scripts/wiki_traverse.py delegates search to this
+# module, so the traverse door inherits it without a third copy.
+# ---------------------------------------------------------------------------
+
+_CJK_CLASS = ("\u3400-\u4dbf"   # CJK ext A
+              "\u4e00-\u9fff"   # CJK unified ideographs
+              "\u3040-\u309f"   # hiragana
+              "\u30a0-\u30ff"   # katakana
+              "\uac00-\ud7a3")  # hangul syllables
+TOKEN_SCAN_RE = re.compile(r"[a-z0-9]+|[" + _CJK_CLASS + r"]+")
+_CJK_RE = re.compile(r"[" + _CJK_CLASS + r"]")
+
+
+def is_cjk_char(ch: str) -> bool:
+    return bool(_CJK_RE.match(ch))
+
+
+def cjk_segment(run: str):
+    """[whole run, bigram, bigram, ...] for a CJK run; a lone
+    character segments to itself only."""
+    if len(run) <= 1:
+        return [run] if run else []
+    return [run] + [run[i:i + 2] for i in range(len(run) - 1)]
+
+
 def tokenize(text: str):
-    return [t for t in TOKEN_RE.findall(text.lower()) if len(t) >= 2]
+    out = []
+    for m in TOKEN_SCAN_RE.finditer(text.lower()):
+        tok = m.group(0)
+        if is_cjk_char(tok[0]):
+            out.extend(cjk_segment(tok))
+        elif len(tok) >= 2:
+            out.append(tok)
+    return out
+
+
+def first_term_offset(line_lower: str, qset):
+    """Character offset of the first query term in an already-
+    lowercased line, or -1. Latin/digit terms match on token
+    boundaries (the historical rule); a term the token regex
+    cannot see (CJK) falls back to a substring search, so a
+    CJK snippet windows around its hit instead of the line head."""
+    for match in TOKEN_RE.finditer(line_lower):
+        if match.group(0) in qset:
+            return match.start()
+    hits = [line_lower.find(t) for t in qset if t]
+    hits = [h for h in hits if h >= 0]
+    return min(hits) if hits else -1
 
 
 def bm25_idf(n, df):
@@ -65,14 +125,10 @@ def make_snippet(text: str, query_terms, width: int = 170) -> str:
     line = best_line
     if len(line) <= width:
         return line
-    m = None
-    for match in TOKEN_RE.finditer(line.lower()):
-        if match.group(0) in qset:
-            m = match
-            break
-    if m is None:
+    mpos = first_term_offset(line.lower(), qset)
+    if mpos < 0:
         return line[:width] + "…"
-    start = max(0, m.start() - width // 3)
+    start = max(0, mpos - width // 3)
     end = start + width
     out = line[start:end]
     if start > 0:
@@ -2276,11 +2332,7 @@ def pick_passage(sections, query_terms, width=420):
     para, sec = best
     if len(para) > width:
         lower = para.lower()
-        mpos = -1
-        for m in TOKEN_RE.finditer(lower):
-            if m.group(0) in qset:
-                mpos = m.start()
-                break
+        mpos = first_term_offset(lower, qset)
         if mpos >= 0:
             start = max(0, mpos - width // 3)
             para = para[start:start + width]
@@ -2720,3 +2772,194 @@ def load_citation_lockfile(repo):
         pairings.sort(key=lambda pr: (pr["page_line"] is None,
                                       pr["page_line"] or 0))
     return out
+
+
+# ---------------------------------------------------------------------------
+# Memory transparency + TB4 Lens wiring (Marathon R4, lane A).
+# Pattern: Sakana Chat's "My Fish" memory view (proprietary — idea
+# only, re-implemented here) for the Memory view; the TB4 data
+# artefacts (relation maps, page history, related pages, feedback)
+# are this wiki's own R3 outputs, loaded below for the portal.
+# ---------------------------------------------------------------------------
+
+MEMORY_TRANSPARENCY_REL = "evaluation/memory-transparency.json"
+RELATION_MAPS_REL = "evaluation/relation-maps.json"
+PAGE_HISTORY_REL = "evaluation/page-history.json"
+RELATED_PAGES_REL = "evaluation/related-pages.json"
+FEEDBACK_REL = "evaluation/feedback.jsonl"
+FEEDBACK_KINDS = ("thumbs_up", "thumbs_down", "correction")
+FEEDBACK_SOURCES = ("ask", "portal")
+
+
+def _load_json_artefact(repo, rel):
+    """A JSON artefact under evaluation/ as a dict; {} when the
+    file is absent or unreadable (the view degrades to its empty
+    note, never an error)."""
+    path = Path(repo) / rel
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def load_memory_transparency(repo):
+    """The memory-transparency artefact built by
+    scripts/wiki_memory_transparency.py. Absent -> the empty
+    skeleton, so the Memory view still renders its notes."""
+    data = _load_json_artefact(repo, MEMORY_TRANSPARENCY_REL)
+    if data.get("kind") != "memory-transparency":
+        return {"kind": "memory-transparency", "version": 1,
+                "sources": {}, "claims": [], "claim_history": {},
+                "connections": [], "ask_events": []}
+    return data
+
+
+def load_relation_maps(repo):
+    """TB4 wiring point 1 data: evaluation/relation-maps.json
+    ({edge_types, edges, hoisting, relation_maps, ...})."""
+    return _load_json_artefact(repo, RELATION_MAPS_REL)
+
+
+def load_page_history(repo):
+    """TB4 wiring point 2 data: {page_path: {history, latest_diff,
+    commits}} from evaluation/page-history.json."""
+    data = _load_json_artefact(repo, PAGE_HISTORY_REL)
+    pages = data.get("pages")
+    return pages if isinstance(pages, dict) else {}
+
+
+def load_related_pages(repo):
+    """TB4 wiring point 3 data: {page_path: [{page, score, why}]}
+    from evaluation/related-pages.json."""
+    data = _load_json_artefact(repo, RELATED_PAGES_REL)
+    related = data.get("related")
+    return related if isinstance(related, dict) else {}
+
+
+def claim_page_paths(repo):
+    """The claim pages of the claim index (latest record per
+    claim_id wins, as in scripts/wiki_claim_index.py): the set of
+    repo-relative page paths that carry an indexed claim."""
+    path = Path(repo) / "evaluation" / "claim-index.jsonl"
+    latest = {}
+    if path.is_file():
+        for line in path.read_text(encoding="utf-8",
+                                   errors="replace").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(rec, dict) and rec.get("claim_id"):
+                latest[rec["claim_id"]] = rec
+    return sorted(latest)
+
+
+def citation_text(citation):
+    """A QA citation as text: the string itself, or a citation
+    object's id / page_id / page field; '' for anything else."""
+    if isinstance(citation, str):
+        return citation.strip()
+    if isinstance(citation, dict):
+        for field in ("id", "page_id", "page", "path"):
+            value = citation.get(field)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return ""
+
+
+def grounded_claims(citations, claim_paths, resolve, path_by_id=None):
+    """The 'grounded in N claims' computation for one Ask answer.
+
+    `citations` is the answer's citation list (strings or objects);
+    `resolve` maps a citation to a Lens page id or None;
+    `path_by_id` maps a page id to its repo-relative path. A cited
+    page counts only when its path is a claim page in the claim
+    index (`claim_paths`). Returns {"count": N, "claim_ids":
+    [claim page paths, in citation order], "cited_ids": [...]}.
+    Mirrors scripts/wiki_memory_transparency.grounded_claims."""
+    claim_set = set(claim_paths)
+    path_by_id = path_by_id or {}
+    cited_ids, grounded = [], []
+    for cit in citations or []:
+        if isinstance(cit, dict):
+            cit = cit.get("id") or cit.get("page_id") or cit.get("page") or ""
+        pid = resolve(cit) if isinstance(cit, str) and cit else None
+        if pid and pid not in cited_ids:
+            cited_ids.append(pid)
+            path = path_by_id.get(pid)
+            if path in claim_set and path not in grounded:
+                grounded.append(path)
+    return {"count": len(grounded), "claim_ids": grounded,
+            "cited_ids": cited_ids}
+
+
+def grounded_claims_for_pages(cited_paths, claim_paths):
+    """Path-level form of the same computation (used where the
+    cited pages are already resolved to repo-relative paths, as
+    in the transparency artefact's ask_events): grounded = the
+    cited paths that are claim pages."""
+    claim_set = set(claim_paths)
+    grounded = sorted({p for p in cited_paths or [] if p in claim_set})
+    return {"count": len(grounded), "claim_ids": grounded}
+
+
+def make_feedback_record(page, kind, text="", source="portal",
+                         ts="", record_id=""):
+    """TB4 wiring point 5: one feedback record in the format of
+    evaluation/feedback-format.md ({id, ts, source, page, kind,
+    text?}). Raises ValueError on a record the format forbids:
+    an unknown kind or source, a missing page, or a correction
+    with no text. The portal's controls build records through
+    the same rules in assets/app.js (feedbackRecordJs)."""
+    if kind not in FEEDBACK_KINDS:
+        raise ValueError(f"bad feedback kind: {kind!r}")
+    if source not in FEEDBACK_SOURCES:
+        raise ValueError(f"bad feedback source: {source!r}")
+    if not page:
+        raise ValueError("feedback needs a page")
+    if kind == "correction" and not (text or "").strip():
+        raise ValueError("correction needs text")
+    rec = {"id": record_id, "ts": ts, "source": source,
+           "page": page, "kind": kind}
+    if (text or "").strip():
+        rec["text"] = text.strip()
+    return rec
+
+
+def load_feedback_triage(repo):
+    """TB4 wiring point 5, read side: triage the portal/Ask
+    feedback log (evaluation/feedback.jsonl, when it exists)
+    with scripts/wiki_feedback_triage.py's own triage() — the
+    module is loaded, not mirrored. No log -> an empty triage."""
+    path = Path(repo) / FEEDBACK_REL
+    if not path.is_file():
+        return {"kind": "feedback-triage", "total": 0, "pages": [],
+                "corrections": []}
+    import importlib.util
+    script = Path(repo) / "scripts" / "wiki_feedback_triage.py"
+    if not script.is_file():
+        return {"kind": "feedback-triage", "total": 0, "pages": [],
+                "corrections": []}
+    spec = importlib.util.spec_from_file_location(
+        "wiki_feedback_triage", script)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    records = []
+    for line in path.read_text(encoding="utf-8",
+                               errors="replace").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(rec, dict) and not mod.validate(rec):
+            records.append(rec)
+    return mod.triage(records)

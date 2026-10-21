@@ -566,6 +566,39 @@ def cmd_cite(root, identity, page_name, cite_id, as_json):
     return "\n".join(lines) + "\n"
 
 
+def cmd_memos(root, identity, tag, as_json):
+    """The memo timeline inbox (staging/memos.jsonl), newest
+    first — read-only like every verb at this door; an absent
+    store is an empty timeline, not an error. The store shape
+    is scripts/wiki_memo.py's; this door reads it directly and
+    writes nothing."""
+    path = root / "staging" / "memos.jsonl"
+    memos = []
+    if path.is_file():
+        for line in path.read_text(
+                encoding="utf-8", errors="ignore").splitlines():
+            if not line.strip():
+                continue
+            try:
+                rec = json.loads(line)
+            except ValueError:
+                continue
+            if isinstance(rec, dict) and rec.get("kind") == "memo":
+                memos.append(rec)
+    memos.reverse()
+    if tag:
+        memos = [m for m in memos if tag in (m.get("tags") or [])]
+    if as_json:
+        return {"memos": memos, "count": len(memos)}
+    lines = [f"memos (timeline, newest first): {len(memos)}"]
+    for m in memos:
+        tags = " ".join("#" + t for t in (m.get("tags") or []))
+        lines.append(f"- {m.get('captured', '')} · "
+                     f"{m.get('text', '')}"
+                     + (f" · {tags}" if tags else ""))
+    return "\n".join(lines) + "\n"
+
+
 def cmd_search(root, identity, query, top, scope):
     effective = scope
     note = None
@@ -640,6 +673,10 @@ def main(argv):
     cp.add_argument("--id")
     cp.add_argument("--json", action="store_true")
 
+    mp = sub.add_parser("memos", help="the memo timeline inbox")
+    mp.add_argument("--tag")
+    mp.add_argument("--json", action="store_true")
+
     qp = sub.add_parser("search", help="delegate to wiki_search.py")
     qp.add_argument("query")
     qp.add_argument("--top", type=int, default=10)
@@ -674,6 +711,9 @@ def main(argv):
                 ap.error("cite needs a page name or --id")
             out = cmd_cite(root, args.identity, args.page, args.id,
                            args.json)
+        elif args.cmd == "memos":
+            out = cmd_memos(root, args.identity, args.tag,
+                            args.json)
         elif args.cmd == "search":
             out = cmd_search(root, args.identity, args.query,
                              args.top, args.scope)

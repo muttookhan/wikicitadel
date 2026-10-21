@@ -21,6 +21,14 @@ const KNOWLEDGE = window.LENS_KNOWLEDGE || { groups: [], record: { pages: [] }, 
 let QA_HISTORY = (window.LENS_QA && window.LENS_QA.entries) || [];
 const PROPOSALS = window.LENS_PROPOSALS || { proposals: [], skipped: [], excluded: [], note: "" };
 const TRAILS = window.LENS_TRAILS || { trails: [], dropped: [], note: "" };
+const MEMORY = window.LENS_MEMORY || { claims: [], claim_history: {}, connections: [], ask_events: [] };
+const FEEDBACK = window.LENS_FEEDBACK || { total: 0, pages: [], corrections: [] };
+const PAGE_BY_PATH = {};
+for (const _pid of Object.keys(PAGES)) PAGE_BY_PATH[PAGES[_pid].path] = _pid;
+function pageLinkByPath(path, label) {
+  const pid = PAGE_BY_PATH[path];
+  return pid ? pageLink(pid, label) : `<span class="mono">${esc(label || path)}</span>`;
+}
 const STANDING = BRIEFING.standing_queries || [];
 const STATE = MODES.state || { matrix: null, lifecycle: null, argdown: null };
 const HONESTY = BRIEFING.honesty || null;
@@ -63,8 +71,34 @@ function signalWords(e) {
 
 /* ---------------- Search (reference BM25 port) ---------------- */
 const TOKEN_RE = /[a-z0-9]+/g;
+/* CJK search-mode segmentation -- mirror of lenslib.py tokenize
+ * (Marathon Round 4; Kagome search-mode pattern, MIT, our own
+ * code): a CJK run indexes BOTH whole and as character bigrams,
+ * so a page retrieves on the whole compound and on any partial
+ * compound of 2+ characters. A lone CJK character indexes as
+ * itself. Non-CJK behaviour is unchanged. */
+const CJK_CLASS = "\u3400-\u4dbf\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7a3";
+const TOKEN_SCAN_RE = new RegExp("[a-z0-9]+|[" + CJK_CLASS + "]+", "g");
+const CJK_RE = new RegExp("^[" + CJK_CLASS + "]");
+function cjkSegment(run) {
+  if (run.length <= 1) return run ? [run] : [];
+  const out = [run];
+  for (let i = 0; i < run.length - 1; i++) out.push(run.slice(i, i + 2));
+  return out;
+}
 function tokenize(text) {
-  return (String(text).toLowerCase().match(TOKEN_RE) || []).filter(t => t.length >= 2);
+  const out = [];
+  for (const tok of (String(text).toLowerCase().match(TOKEN_SCAN_RE) || [])) {
+    if (CJK_RE.test(tok)) out.push(...cjkSegment(tok));
+    else if (tok.length >= 2) out.push(tok);
+  }
+  return out;
+}
+function firstTermOffset(lineLower, qset) {
+  for (const m of lineLower.matchAll(/[a-z0-9]+/g)) { if (qset.has(m[0])) return m.index; }
+  let best = -1;
+  for (const t of qset) { const h = t ? lineLower.indexOf(t) : -1; if (h >= 0 && (best < 0 || h < best)) best = h; }
+  return best;
 }
 /* ---------------- Retrieval severance (fold-in 1, the surfaces build) -------
  * The browser ranker gains the severance behaviour the Python
@@ -266,7 +300,7 @@ function makeSnippet(text, queryTerms, width) {
   if (best.length <= width) return best;
   const lower = best.toLowerCase();
   let mpos = -1;
-  for (const m of lower.matchAll(/[a-z0-9]+/g)) { if (qset.has(m[0])) { mpos = m.index; break; } }
+  mpos = firstTermOffset(lower, qset);
   if (mpos < 0) return best.slice(0, width) + "…";
   const start = Math.max(0, mpos - Math.floor(width / 3));
   let out = best.slice(start, start + width);
@@ -370,7 +404,7 @@ function pickPassageJs(di, queryTerms) {
     const orig = best.text;
     const lower = orig.toLowerCase();
     let mpos = -1;
-    for (const m of lower.matchAll(/[a-z0-9]+/g)) { if (qset.has(m[0])) { mpos = m.index; break; } }
+    mpos = firstTermOffset(lower, qset);
     if (mpos >= 0) {
       const start = Math.max(0, mpos - Math.floor(width / 3));
       let out = orig.slice(start, start + width);
@@ -643,6 +677,17 @@ function pageInspector(p) {
   const relHtml = rel.length
     ? `<ul>${rel.map(r => `<li>${pageLink(r.other)}<br><span class="caption">${esc(signalWords(r))}</span></li>`).join("")}</ul>`
     : `<p class="caption">No related pages in the graph.</p>`;
+  /* TB4 wiring point 3: the scored related-pages rail, reading
+     the page artefact's related_pages (evaluation/related-pages.json
+     at build) — score and the artefact's own `why`, verbatim. */
+  const scored = p.related_pages || [];
+  const scoredHtml = scored.length
+    ? `<ul>${scored.map(r => `<li>${pageLinkByPath(r.page)}<br><span class="caption">score ${esc(r.score)} · ${esc((r.why || []).join("; "))}</span></li>`).join("")}</ul>`
+    : `<p class="caption">No scored related pages in the artefact for this page.</p>`;
+  const fbRow = (FEEDBACK.pages || []).find(r => r.page === p.path);
+  const fbHtml = fbRow
+    ? `<p class="caption">Feedback so far: ${fbRow.counts.thumbs_up || 0} up · ${fbRow.counts.thumbs_down || 0} down · ${fbRow.counts.correction || 0} correction(s) · net ${esc(fbRow.net)}${fbRow.needs_attention ? " · needs attention" : ""}.</p>`
+    : `<p class="caption">No feedback recorded for this page yet — use the controls at the foot of the page.</p>`;
   const hist = p.history.length
     ? `<ul>${p.history.map(hx => `<li><span class="mono">${esc(hx.sha)}</span> · ${esc(hx.date)}<br>${esc(hx.subject)}</li>`).join("")}</ul>`
     : `<p class="caption">No git history recorded for this file.</p>`;
@@ -658,6 +703,8 @@ function pageInspector(p) {
     <h4>Provenance</h4>${prov}${attest}
     <h4>Backlinks</h4>${backs}
     <h4>Related (graph)</h4>${relHtml}
+    <h4>Related pages (scored)</h4>${scoredHtml}
+    <h4>Feedback</h4>${fbHtml}
     <h4>History</h4>${hist}
     <h4>Activity</h4>
     <p class="caption">No activity recorded for this page yet.</p>
@@ -665,6 +712,86 @@ function pageInspector(p) {
 }
 function defaultInspector(extra) {
   setInspector(`<h3>Inspector</h3>${extra || `<p class="caption">Open a page to see its provenance, backlinks, related pages, and history here.</p>`}`);
+}
+
+/* ---------------- Feedback (TB4 wiring point 5) ----------------
+   Portal thumbs/correction controls. A record follows
+   evaluation/feedback-format.md exactly ({id, ts, source:
+   portal, page, kind, text?}; a correction requires text) —
+   feedbackRecordJs mirrors lenslib.make_feedback_record. The
+   record is POSTed to /api/feedback where a store exists; the
+   static Lens has none, so a failed POST appends the record to
+   this browser's feedback log instead — stated on the face of
+   the control, never silently dropped — and the log downloads
+   as JSONL that scripts/wiki_feedback_triage.py triages
+   directly (`triage <file>`). */
+const FEEDBACK_KINDS_JS = ["thumbs_up", "thumbs_down", "correction"];
+function feedbackRecordJs(page, kind, text, ts, recordId) {
+  if (!FEEDBACK_KINDS_JS.includes(kind)) throw new Error("bad feedback kind: " + kind);
+  if (!page) throw new Error("feedback needs a page");
+  if (kind === "correction" && !(text || "").trim()) throw new Error("correction needs text");
+  const rec = { id: recordId, ts: ts, source: "portal", page: page, kind: kind };
+  if ((text || "").trim()) rec.text = text.trim();
+  return rec;
+}
+function feedbackControlsHtml(p) {
+  return `
+    <section class="feedback-controls" aria-label="Feedback on this page">
+      <h2 style="font-family:var(--font-display)">Feedback</h2>
+      <p class="caption">Thumbs and corrections are recorded in the feedback format (evaluation/feedback-format.md) and triaged with scripts/wiki_feedback_triage.py. On this static build a record is sent to /api/feedback where a store exists, and otherwise kept in this browser's feedback log — downloadable as JSONL below — never silently dropped.</p>
+      <div class="chip-row">
+        <button class="chip" data-fb="thumbs_up" aria-label="Thumbs up for this page">👍 Helpful</button>
+        <button class="chip" data-fb="thumbs_down" aria-label="Thumbs down for this page">👎 Not helpful</button>
+      </div>
+      <form id="fb-correction-form" class="ask-box">
+        <input id="fb-correction-text" type="text" placeholder="Suggest a correction to this page…" aria-label="Suggest a correction">
+        <button class="btn" type="submit">Send correction</button>
+      </form>
+      <p class="caption" id="fb-status"></p>
+      <button class="chip" id="fb-download" type="button">Download this browser's feedback log (JSONL)</button>
+    </section>`;
+}
+function submitFeedback(p, kind, text) {
+  const statusEl = document.getElementById("fb-status");
+  const setStatus = msg => { if (statusEl) statusEl.textContent = msg; };
+  let rec;
+  try {
+    rec = feedbackRecordJs(p.path, kind, text, new Date().toISOString(),
+      "fb-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e6).toString(36));
+  } catch (e) { setStatus(String(e.message || e)); return; }
+  const keepLocal = () => {
+    const rows = readJsonLog("lens-feedback-log");
+    rows.push(rec);
+    writeJsonLog("lens-feedback-log", rows);
+    setStatus("Saved in this browser's feedback log (no live feedback store behind this static build). Download the log and triage it with scripts/wiki_feedback_triage.py.");
+  };
+  if (typeof fetch !== "function") { keepLocal(); return; }
+  let pending;
+  try {
+    pending = fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(rec) });
+  } catch (e) { keepLocal(); return; }
+  if (!pending || typeof pending.then !== "function") { keepLocal(); return; }
+  pending.then(res => { if (res && res.ok) setStatus("Feedback recorded."); else keepLocal(); }).catch(() => keepLocal());
+}
+function wireFeedbackControls(p) {
+  canvas.querySelectorAll("[data-fb]").forEach(b => b.addEventListener("click", () => submitFeedback(p, b.getAttribute("data-fb"), "")));
+  const form = document.getElementById("fb-correction-form");
+  if (form) form.addEventListener("submit", ev => {
+    ev.preventDefault();
+    const input = document.getElementById("fb-correction-text");
+    submitFeedback(p, "correction", input ? input.value : "");
+    if (input) input.value = "";
+  });
+  const dl = document.getElementById("fb-download");
+  if (dl) dl.addEventListener("click", () => {
+    const rows = readJsonLog("lens-feedback-log");
+    const blob = new Blob([rows.map(r => JSON.stringify(r)).join("\n") + (rows.length ? "\n" : "")], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "feedback.jsonl";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
 }
 
 /* ---------------- Items 58 + 60: zero results, standing queries,
@@ -883,6 +1010,7 @@ const PALETTE_VIEWS = [
   { label: "Wiki — read the overview", route: "#/read/overview", sub: "view" },
   { label: "Ask", route: "#/ask", sub: "view" },
   { label: "Graph", route: "#/graph", sub: "view" },
+  { label: "Memory", route: "#/memory", sub: "view" },
   { label: "Timeline", route: "#/timeline", sub: "view" },
   { label: "Decisions", route: "#/decisions", sub: "view" },
   { label: "Proposals", route: "#/proposals", sub: "view" },
@@ -1080,6 +1208,26 @@ function renderRead(id, anchor) {
   renderTree(id);
   logPageView(id);
   let bodyHtml = p.html.replace(/<h1[^>]*>[\s\S]*?<\/h1>/, "");
+  /* TB4 wiring point 2: History/Diff tabs reading the page
+     artefact's page_history (evaluation/page-history.json at
+     build); the git-short history on the artefact is the
+     fallback when the artefact has no row for this page. */
+  const ph = p.page_history || { history: [], latest_diff: "" };
+  const histRows = (ph.history && ph.history.length) ? ph.history
+    : (p.history || []).map(h => ({ commit: h.sha, date: h.date, author: "", subject: h.subject }));
+  const tabsHtml = `<div class="page-tabs" role="tablist" aria-label="Page views">
+        <button class="chip" data-ptab="content" aria-pressed="true">Content</button>
+        <button class="chip" data-ptab="history" aria-pressed="false">History</button>
+        <button class="chip" data-ptab="diff" aria-pressed="false">Diff</button>
+      </div>`;
+  const historyPanel = `<div id="page-history-panel" hidden>
+      <h2 style="font-family:var(--font-display)">History</h2>
+      ${histRows.length ? `<ul>${histRows.map(hx => `<li><span class="mono">${esc(String(hx.commit || "").slice(0, 7))}</span> · ${esc(hx.date || "")}${hx.author ? ` · ${esc(hx.author)}` : ""}<br>${esc(hx.subject || "")}</li>`).join("")}</ul>` : `<p class="caption">No history recorded for this page in evaluation/page-history.json.</p>`}
+    </div>`;
+  const diffPanel = `<div id="page-diff-panel" hidden>
+      <h2 style="font-family:var(--font-display)">Latest diff</h2>
+      ${ph.latest_diff ? `<pre class="diff-view">${esc(ph.latest_diff)}</pre>` : `<p class="caption">No diff recorded for this page in evaluation/page-history.json.</p>`}
+    </div>`;
   const tocItems = p.headings.filter(h => h.level >= 2 && h.level <= 3);
   const toc = tocItems.length ? `<nav class="toc" aria-label="On this page"><h4>On this page</h4><ul>${tocItems.map(h => `<li style="margin-left:${(h.level - 2) * 14}px"><a href="#${esc(h.anchor)}" data-anchor="${esc(h.anchor)}">${esc(h.text)}</a></li>`).join("")}</ul></nav>` : "";
   canvas.innerHTML = `
@@ -1095,6 +1243,8 @@ function renderRead(id, anchor) {
       </div>
       ${p.stale ? `<div class="stale-banner">A source for this page changed. Treat claims as unverified until re-checked.</div>` : ""}
       ${p.attested_until ? `<p class="verified-line">Verified by owner until ${esc(p.attested_until)}</p>` : ""}
+      ${tabsHtml}
+      <div id="page-content-panel">
       ${toc}
       <div class="lf-controls" role="group" aria-label="Line focus">
         <span class="caption">Line focus:</span>
@@ -1115,6 +1265,10 @@ function renderRead(id, anchor) {
       </div>`).join("")}` : ""}
       <h2 style="font-family:var(--font-display)">Linked from</h2>
       ${p.backlinks.length ? `<ul>${p.backlinks.map(b => `<li>${pageLink(b.from)}</li>`).join("")}</ul>` : `<p class="caption">No page links here yet.</p>`}
+      </div>
+      ${historyPanel}
+      ${diffPanel}
+      ${feedbackControlsHtml(p)}
     </div>`;
   canvas.querySelectorAll("[data-anchor]").forEach(a => {
     a.addEventListener("click", ev => {
@@ -1123,6 +1277,14 @@ function renderRead(id, anchor) {
       if (t) t.scrollIntoView();
     });
   });
+  canvas.querySelectorAll("[data-ptab]").forEach(b => b.addEventListener("click", () => {
+    const which = b.getAttribute("data-ptab");
+    canvas.querySelectorAll("[data-ptab]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    const cp = document.getElementById("page-content-panel"); if (cp) cp.hidden = which !== "content";
+    const hp = document.getElementById("page-history-panel"); if (hp) hp.hidden = which !== "history";
+    const dp = document.getElementById("page-diff-panel"); if (dp) dp.hidden = which !== "diff";
+  }));
+  wireFeedbackControls(p);
   const lfWrap = canvas.querySelector(".reading-focus-wrap");
   const lfArticle = canvas.querySelector(".reading-body");
   if (lfWrap && lfArticle) setupLineFocus(lfWrap, lfArticle);
@@ -1146,6 +1308,7 @@ let graphTypeFilter = null;     // display-group key, or null
 let graphCommFilter = null;     // community id, or null
 let graphInsightsOpen = true;
 let graphNodeQuery = "";
+let graphEdgeTypeFilter = null;   // relation-map edge type, or null (TB4 wiring point 1)
 
 const FALLBACK_TYPE_COLOURS = { overview: "#F2C94C", source: "#F2994A", entity: "#5B8DEF", concept: "#A06CD5", synthesis: "#5FA88F", query: "#95A5A6", other: "#95A5A6" };
 const TYPE_COLOUR = {};
@@ -1223,6 +1386,13 @@ function graphInsightsSectionHtml() {
   return `<h2 style="font-family:var(--font-display)">Insights · ${insightTotal()}</h2>` + cats.map(c => `
     <div class="card"><h3>${esc(c.label)} · ${c.count}</h3>${c.items.map(it => insightItemHtml(it, ++n)).join("")}</div>`).join("");
 }
+function hoistingPanelHtml() {
+  const rows = (GRAPH.relation_maps && GRAPH.relation_maps.hoisting) || [];
+  if (!rows.length) return `<h2 style="font-family:var(--font-display)">Hoisting candidates</h2><p class="caption">No hoisting candidates in evaluation/relation-maps.json at this build.</p>`;
+  return `<h2 style="font-family:var(--font-display)">Hoisting candidates</h2>
+    <div class="card"><p class="caption">Pages with enough linked children to hoist into a section view, computed by scripts/wiki_relation_maps.py — a computed suggestion, never an edit.</p>
+    <ul>${rows.map(h => `<li>${pageLinkByPath(h.page)} <span class="caption">— ${esc(h.child_count)} linked children${h.suggestion ? ` · ${esc(h.suggestion)}` : ""}</span></li>`).join("")}</ul></div>`;
+}
 function renderGraph() {
   const mode = graphView;
   const stats = GRAPH.stats || { pages: GRAPH.nodes.length, direct_links: GRAPH.edges.filter(e => e.direct).length, relations: GRAPH.edges.length };
@@ -1236,6 +1406,7 @@ function renderGraph() {
       const w = 0.8 + Math.min(2.7, e.weight / 3);
       const incident = graphSelected && (e.a === graphSelected || e.b === graphSelected);
       const dim = (graphSelected && !incident)
+        || (graphEdgeTypeFilter && !(e.rm_types || []).includes(graphEdgeTypeFilter))
         || (graphTypeFilter && groupOf(a) !== graphTypeFilter && groupOf(b) !== graphTypeFilter)
         || (graphCommFilter !== null && a.community !== graphCommFilter && b.community !== graphCommFilter);
       return `<line class="graph-edge ${incident ? "incident" : ""}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke-width="${w.toFixed(1)}" style="opacity:${dim ? 0.05 : incident ? 0.95 : 0.35}"></line>`;
@@ -1273,9 +1444,18 @@ function renderGraph() {
         <button class="chip" data-gview="canvas" aria-pressed="${mode === "canvas"}">Graph</button>
         <button class="chip" data-gview="list" aria-pressed="${mode === "list"}">Graph as list</button>
       </span>
+      <span class="toolbar-group" role="group" aria-label="Relation edge type">
+        ${(GRAPH.relation_maps && GRAPH.relation_maps.edge_types || []).map(et => `<button class="chip" data-edge-type="${esc(et)}" aria-pressed="${graphEdgeTypeFilter === et}">${esc(et)}</button>`).join("")}
+      </span>
       <form id="graph-search-form" class="graph-search"><input id="graph-search-input" type="search" placeholder="Find a page in the graph…" value="${esc(graphNodeQuery)}" aria-label="Find a page in the graph"><button class="chip" type="submit">Find</button></form>
     </div>
-    ${main}`;
+    ${main}
+    ${hoistingPanelHtml()}`;
+  canvas.querySelectorAll("[data-edge-type]").forEach(b => b.addEventListener("click", () => {
+    const k = b.getAttribute("data-edge-type");
+    graphEdgeTypeFilter = graphEdgeTypeFilter === k ? null : k;
+    renderGraph();
+  }));
   canvas.querySelectorAll("[data-gview]").forEach(b => b.addEventListener("click", () => { graphView = b.getAttribute("data-gview"); renderGraph(); }));
   canvas.querySelectorAll("[data-colour]").forEach(b => b.addEventListener("click", () => { graphColourMode = b.getAttribute("data-colour"); renderGraph(); }));
   const it = document.getElementById("insights-toggle");
@@ -1823,7 +2003,9 @@ function renderQaHistory() {
       const verdictChip = entry.trust_verdict === "ok" ? chip("verified", "Trust · ok")
         : entry.trust_verdict === "hold" ? chip("atrisk", "Trust · hold")
         : entry.trust_verdict === "review" ? chip("stale", "Trust · review") : "";
-      const metaChips = (modeLabel || verdictChip) ? `<div class="chip-row">${modeLabel ? chip("info", "Mode · " + modeLabel) : ""}${verdictChip}</div>` : "";
+      const groundedChip = (typeof entry.grounded_claims === "number")
+        ? chip("info", `grounded in ${entry.grounded_claims} claim${entry.grounded_claims === 1 ? "" : "s"}`) : "";
+      const metaChips = (modeLabel || verdictChip || groundedChip) ? `<div class="chip-row">${modeLabel ? chip("info", "Mode · " + modeLabel) : ""}${verdictChip}${groundedChip}</div>` : "";
       const verdictNote = !answered ? "" : entry.trust_verdict === "hold" && !entry.abstained
         ? `<p class="qa-warning">Weak evidence — this answer rests on thin or low-scoring citations. Treat it with care.</p>`
         : entry.trust_verdict === "review"
@@ -1916,13 +2098,55 @@ function answerQuestion(q) {
     const snip = makeSnippet(text, L.terms, 420);
     return `<div class="excerpt">${esc(snip)}<a class="cite-chip" href="#/read/${encodeURIComponent(r.doc.id)}">${esc(r.doc.title)} · wiki page</a></div>`;
   }).join("");
+  const claimPages = new Set((MEMORY.claims || []).map(c => c.claim_id));
+  const groundedN = used.filter(r => claimPages.has(r.doc.path)).length;
   box.innerHTML = `
-    <div class="chip-row">${state}</div>
+    <div class="chip-row">${state}${chip("info", `grounded in ${groundedN} claim${groundedN === 1 ? "" : "s"}`)}</div>
     <p class="caption">Extractive answer — the passages below are quoted from the pages cited, not composed. Lanes searched: ${lanesSearched}.</p>
     ${excerpts}
     <h3 style="font-family:var(--font-display)">Sources used</h3>
     <ul>${used.map(r => `<li>${pageLink(r.doc.id)} <span class="caption">(${esc(r.doc.path)})</span></li>`).join("")}</ul>
     ${notUsed.length ? `<h3 style="font-family:var(--font-display)">Looked at, not used</h3><ul>${notUsed.map(r => `<li>${esc(r.doc.title)} <span class="caption">(${esc(r.doc.path)})</span></li>`).join("")}</ul>` : ""}`;
+}
+
+/* ---------------- Mode: Memory (memory transparency) ----------------
+   The Sakana "My Fish" pattern, idea only and re-implemented: over
+   the artefact scripts/wiki_memory_transparency.py builds from the
+   wiki's existing records — the claims list, each claim's history,
+   its connections (pages that cite it, Ask events grounded in it),
+   and the Ask events themselves with the pages each answer used. */
+function renderMemory() {
+  const claims = MEMORY.claims || [];
+  const history = MEMORY.claim_history || {};
+  const connections = MEMORY.connections || [];
+  const events = MEMORY.ask_events || [];
+  canvas.innerHTML = `
+    <h1 class="mode-title">Memory</h1>
+    <p class="caption">What the wiki remembers, shown from its own records: the claim index, the Ask door's Q&A log, notices, outcomes and re-verifications. Nothing here is generated prose — every row is a record, and a view with no records says so.</p>
+    <h2 style="font-family:var(--font-display)">Claims · ${claims.length}</h2>
+    ${claims.length ? claims.map(c => `
+      <div class="card">
+        <p>${esc(c.text || "")}</p>
+        <p class="caption">${pageLinkByPath(c.claim_id)} · stated ${esc(c.stated || "—")} · supports ${esc(c.supports)} · contradicts ${esc(c.contradicts)} · verified ${esc(c.verified_n)}${c.superseded ? " · superseded" : ""} · hash <span class="mono">${esc(c.hash || "")}</span></p>
+      </div>`).join("") : `<p class="caption">No claims in the claim index yet.</p>`}
+    <h2 style="font-family:var(--font-display)">Claim history</h2>
+    ${Object.keys(history).length ? Object.keys(history).sort().map(cid => `
+      <div class="card"><h3>${pageLinkByPath(cid)}</h3>
+      <ul>${(history[cid] || []).map(e => `<li><span class="mono">${esc(e.event || "")}</span> · ${esc(e.date || "—")}${e.notice ? ` · ${esc(e.notice)}` : ""}${e.outcome ? ` · ${esc(e.outcome)}` : ""}${e.result ? ` · ${esc(e.result)}` : ""}${e.reason ? `<br><span class="caption">${esc(e.reason)}</span>` : ""}</li>`).join("")}</ul></div>`).join("") : `<p class="caption">No claim-history events derivable from the records.</p>`}
+    <h2 style="font-family:var(--font-display)">Connections</h2>
+    ${connections.length ? connections.map(c => `
+      <div class="card"><h3>${pageLinkByPath(c.claim_id)}</h3>
+      <p class="caption">Cited by: ${(c.cited_by_pages || []).length ? c.cited_by_pages.map(pp => pageLinkByPath(pp)).join(" · ") : "no page cites it yet"}<br>
+      Ask events grounded in it: ${(c.ask_event_ids || []).length ? c.ask_event_ids.map(esc).join(", ") : "none"} · supports ${esc(c.supports)} · contradicts ${esc(c.contradicts)}</p></div>`).join("") : `<p class="caption">No claim connections derivable from the records.</p>`}
+    <h2 style="font-family:var(--font-display)">Ask events · ${events.length}</h2>
+    ${events.length ? events.map(e => `
+      <div class="card qa-entry">
+        <p class="qa-question">${esc(e.question || "")}</p>
+        <p class="caption">Asked by ${esc(e.asker || "")}${e.asked_at ? ` · ${esc(e.asked_at)}` : ""} · ${esc(e.status || "")}</p>
+        <div class="chip-row">${chip("info", `grounded in ${e.grounded_claims || 0} claim${(e.grounded_claims || 0) === 1 ? "" : "s"}`)}</div>
+        <p class="caption">Pages used: ${(e.cited_pages || []).length ? e.cited_pages.map(pp => pageLinkByPath(pp)).join(" · ") : "none recorded"}</p>
+      </div>`).join("") : `<p class="caption">No Ask events recorded yet.</p>`}`;
+  defaultInspector(`<p class="caption">The Memory view renders evaluation/memory-transparency.json, built by scripts/wiki_memory_transparency.py from the claim index and the Ask log. Rebuild it with the Lens.</p>`);
 }
 
 /* ---------------- Mode: Black Box ---------------- */
@@ -2371,6 +2595,7 @@ function route() {
      available for the standalone renderer checks. */
   else if (head === "search") { setRail("ask"); renderAsk(qParam); }
   else if (head === "blackbox") { setRail("blackbox"); renderBlackBox(); }
+  else if (head === "memory") { setRail("memory"); renderMemory(); }
   else if (head === "state") { setRail("state"); renderState(); }
   else if (head === "reading") { setRail("reading"); renderReading(); }
   else { setRail("briefing"); renderBriefing(); }

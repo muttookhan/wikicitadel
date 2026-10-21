@@ -50,6 +50,12 @@ The kinds are the corpus's real intake doors, no more:
                  Marathon Round 3): the title is the line, the
                  only provenance is the invocation's, and the
                  draft waits in staging like every other kind
+    memo         a timeline-inbox capture (usememos/memos
+                 shape, Marathon Round 4): text plus TAGS as
+                 the only structure (--tags, memo kind only);
+                 the store door is scripts/wiki_memo.py
+                 (add/list/timeline over staging/memos.jsonl)
+                 and the read doors list memos from day one
     note         a session observation ([[capture-rules]])
 
 Every draft renders to staging/captures/ — NEVER into wiki/.
@@ -136,6 +142,19 @@ KINDS = {
                 "(given at invocation, or a TODO prompt — "
                 "never faked)",
     },
+    "memo": {
+        "template": "memo.md",
+        "destination": "staging/memos.jsonl — the timeline "
+                       "inbox (scripts/wiki_memo.py); tags are "
+                       "its only structure; read via the "
+                       "traverse `memos` command and the MCP "
+                       "read door's wiki_memos tool",
+        "when": "a short capture for the timeline inbox — "
+                "text plus tags, no folder, no hierarchy "
+                "(usememos/memos pattern, Marathon Round 4): "
+                "the draft renders here like every kind, and "
+                "the memo store is staging/memos.jsonl",
+    },
     "note": {
         "template": "note.md",
         "destination": "wiki/filings/, or the page the note "
@@ -187,6 +206,8 @@ def expand(template_text, values):
             return ("TODO (prompt: the date the ruling was "
                     "made, if not the capture date — dual "
                     "dating is not optional)")
+        if key == "tags":
+            return values.get("tags") or "[]"
         if key in ("title", "by", "kind", "destination"):
             return values[key]
         raise CaptureError("template uses unknown keyword "
@@ -211,7 +232,7 @@ def expand(template_text, values):
 
 
 def render(kind, title, by="agent", provenance=None,
-           decided=None, now=None, root=ROOT):
+           decided=None, tags=None, now=None, root=ROOT):
     if kind not in KINDS:
         raise CaptureError(
             "unknown capture kind %r; the kinds are: %s"
@@ -219,6 +240,21 @@ def render(kind, title, by="agent", provenance=None,
     if decided and kind != "decision":
         raise CaptureError("--decided belongs to the decision "
                            "kind only")
+    if tags and kind != "memo":
+        raise CaptureError("--tags belongs to the memo kind "
+                           "only (tags are a memo's only "
+                           "structure)")
+    clean_tags = []
+    for tag in tags or []:
+        for piece in str(tag).split(","):
+            piece = piece.strip().lower().lstrip("#")
+            if not piece:
+                continue
+            if not re.match(r"^[a-z0-9][a-z0-9-]*$", piece):
+                raise CaptureError(
+                    "memo tag %r is not a slug tag" % piece)
+            if piece not in clean_tags:
+                clean_tags.append(piece)
     if decided:
         try:
             _date.fromisoformat(decided)
@@ -242,19 +278,22 @@ def render(kind, title, by="agent", provenance=None,
         "destination": spec["destination"],
         "provenance": provenance,
         "decided": decided,
+        "tags": "[" + ", ".join(clean_tags) + "]",
     }
     return expand(template_path.read_text(encoding="utf-8"),
                   values)
 
 
 def new_capture(kind, title, by="agent", provenance=None,
-                decided=None, file=None, now=None, root=ROOT):
+                decided=None, tags=None, file=None, now=None,
+                root=ROOT):
     """Render a capture draft into staging/captures/ and return
     its repo-relative path. Refuses anything that would write
     outside staging/captures/."""
     now = now or datetime.now().astimezone()
-    text = render(kind, title, by=by, provenance=provenance,
-                  decided=decided, now=now, root=root)
+    text = render(kind, title, tags=tags, by=by,
+                  provenance=provenance, decided=decided,
+                  now=now, root=root)
     if file:
         if Path(file).is_absolute() or "/" in file \
                 or "\\" in file or ".." in file:
@@ -297,16 +336,20 @@ def main(argv=None):
     p.add_argument("--by", default="agent")
     p.add_argument("--provenance")
     p.add_argument("--decided")
+    p.add_argument("--tags",
+                   help="memo kind only: comma-separated slug "
+                        "tags — a memo's only structure")
     p.add_argument("--file")
     args = ap.parse_args(argv)
     try:
         if args.cmd == "list":
             print(list_kinds())
         else:
+            tags = args.tags.split(",") if args.tags else None
             rel = new_capture(args.kind, args.title, by=args.by,
                               provenance=args.provenance,
-                              decided=args.decided, file=args.file,
-                              root=args.root)
+                              decided=args.decided, tags=tags,
+                              file=args.file, root=args.root)
             print("capture draft: %s" % rel)
             print("staged only — nothing was filed; the "
                   "sensitivity TODO in its frontmatter must be "

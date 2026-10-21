@@ -9,6 +9,7 @@ on the owner.
 
 - [[overview]] — why this wiki exists, in the owner's own founding terms.
 - [[decision-register]] — the founding decision pair: a blanket direction, and its same-day reversal for decisions.
+- [[source-registry]] — generated catalogue of the raw source collections: per-collection counts and date span.
 - [[ideas]] — the ideas board: waiting / approved / disapproved, ruled by the owner only.
 - [[notices]] — the Notice vocabulary: fixed-text caution labels, quoted verbatim from `evaluation/notice-vocabulary.json`.
 - [[evidence-ttl]] — the evidence TTL convention: evidence_as_of + evidence_ttl_days on a page, due-for-refresh reported by scripts/wiki_evidence_ttl.py; due is a re-check owed, never a deletion, and is not an owner attestation
@@ -32,6 +33,7 @@ on the owner.
 - [[marathon-r3-ta5-proposal-machinery-2026-10-21]] — Marathon Round 3, Lane TA5 — proposal machinery (2026-10-21): Graphify EXTRACTED/INFERRED edge tags, sage-wiki merge proposals, ReMe compaction proposals, LightMem consolidation proposals, KR-R1 threshold compile proposals, Vanillaflava Pending Review checker; all proposal-only.
 - [[marathon-r3-tb8-patterns-2026-10-21]] — Marathon Round 3 lane TB8: five gated patterns built (env-flagged destructive gateway tools, workflow-as-MCP-tool, sandboxed verification scripts, low-confidence web expansion, narration plans); gap-12 preset marketplace parked by gate.
 - [[marathon-r3-tb7-retrieval]] — Retrieval and ranking machinery (Marathon R3, TB7): exact-title boost, ranking-expression evaluator, bounded graph expansion + GraphRAG community summaries, citation-scope checker, structured ingest register, KAG relation index, MemoRAG global memory, script normalization + Japanese dual-track profile, RAPTOR tree index, agent-object loader. Lens mirror data regenerates at Lens build.
+- [[marathon-round-4-2026-10-21]] — the Marathon Round 4 record (2026-10-21): the fix round (citation lock 12/12, lifecycle warnings 19→0, ambiguous wikilinks 9→0, README corrected), memory-transparency views + TB4 Lens wiring, CJK segmentation, publish CLI, source catalogue, memo capture, schema extraction, memory distil, packing/MILU/reading-notes; suites 1456/274/91/52/56/31, validator PASS.
 
 ## Sources
 

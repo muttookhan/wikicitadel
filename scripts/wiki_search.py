@@ -717,8 +717,68 @@ TITLE_RE = re.compile(r"^title:\s*\"?([^\"\n]+)\"?\s*$", re.M)
 H1_RE = re.compile(r"^#\s+(.+)$", re.M)
 
 
+# ---------------------------------------------------------------------------
+# CJK search-mode segmentation (Marathon Round 4; pattern from
+# ikawaha/kagome's search mode, MIT -- idea/pattern only, our own
+# implementation, no external dependency): a run of CJK characters
+# is indexed BOTH whole (the compound as one token) and segmented
+# into character bigrams, so a CJK page retrieves on the whole
+# compound and on any partial-compound query of two or more
+# characters. Kagome does this with a morphological dictionary;
+# character bigrams are the honest dictionary-free segmentation
+# in pure Python. A single-character CJK run indexes as itself
+# (one CJK character is a whole morpheme, unlike a lone Latin
+# letter, which the len>=2 filter still drops). Non-CJK behaviour
+# is unchanged: the same [a-z0-9]+ tokens, in the same order.
+# tools/lens/lenslib.py and tools/lens/assets/app.js mirror this
+# exactly; scripts/wiki_traverse.py delegates search to this
+# module, so the traverse door inherits it without a third copy.
+# ---------------------------------------------------------------------------
+
+_CJK_CLASS = ("\u3400-\u4dbf"   # CJK ext A
+              "\u4e00-\u9fff"   # CJK unified ideographs
+              "\u3040-\u309f"   # hiragana
+              "\u30a0-\u30ff"   # katakana
+              "\uac00-\ud7a3")  # hangul syllables
+TOKEN_SCAN_RE = re.compile(r"[a-z0-9]+|[" + _CJK_CLASS + r"]+")
+_CJK_RE = re.compile(r"[" + _CJK_CLASS + r"]")
+
+
+def is_cjk_char(ch: str) -> bool:
+    return bool(_CJK_RE.match(ch))
+
+
+def cjk_segment(run: str):
+    """[whole run, bigram, bigram, ...] for a CJK run; a lone
+    character segments to itself only."""
+    if len(run) <= 1:
+        return [run] if run else []
+    return [run] + [run[i:i + 2] for i in range(len(run) - 1)]
+
+
 def tokenize(text: str):
-    return [t for t in TOKEN_RE.findall(text.lower()) if len(t) >= 2]
+    out = []
+    for m in TOKEN_SCAN_RE.finditer(text.lower()):
+        tok = m.group(0)
+        if is_cjk_char(tok[0]):
+            out.extend(cjk_segment(tok))
+        elif len(tok) >= 2:
+            out.append(tok)
+    return out
+
+
+def first_term_offset(line_lower: str, qset):
+    """Character offset of the first query term in an already-
+    lowercased line, or -1. Latin/digit terms match on token
+    boundaries (the historical rule); a term the token regex
+    cannot see (CJK) falls back to a substring search, so a
+    CJK snippet windows around its hit instead of the line head."""
+    for match in TOKEN_RE.finditer(line_lower):
+        if match.group(0) in qset:
+            return match.start()
+    hits = [line_lower.find(t) for t in qset if t]
+    hits = [h for h in hits if h >= 0]
+    return min(hits) if hits else -1
 
 
 def iter_md(base: Path):
@@ -1406,14 +1466,10 @@ def make_snippet(text: str, query_terms, width: int = 170) -> str:
     if len(line) <= width:
         return line
     # Centre the window on the first matching token position.
-    m = None
-    for match in TOKEN_RE.finditer(line.lower()):
-        if match.group(0) in qset:
-            m = match
-            break
-    if m is None:
+    mpos = first_term_offset(line.lower(), qset)
+    if mpos < 0:
         return line[:width] + "…"
-    start = max(0, m.start() - width // 3)
+    start = max(0, mpos - width // 3)
     end = start + width
     out = line[start:end]
     if start > 0:

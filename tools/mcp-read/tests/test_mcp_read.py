@@ -31,7 +31,7 @@ on purpose:
     is not the owner).
 
 It also pins the protocol handshake, the tools/list shape
-(exactly the nine read tools — the eight reads plus
+(exactly the ten read tools — the nine reads plus
 wiki_workflow, which composes reads only; the read/write
 split is the point), and the no-write proof: sha256 of every
 fixture content file identical before and after a call
@@ -252,7 +252,8 @@ class TestProtocol(McpReadFixture):
             {t["name"] for t in tools},
             {"wiki_search", "wiki_read_page", "wiki_read_source",
              "wiki_neighbors", "wiki_path", "wiki_census",
-             "wiki_claim", "wiki_cite", "wiki_workflow"})
+             "wiki_claim", "wiki_cite", "wiki_memos",
+             "wiki_workflow"})
         for t in tools:
             self.assertEqual(t["inputSchema"]["type"], "object")
             self.assertIn("description", t)
@@ -583,6 +584,48 @@ class TestWorkflow(McpReadFixture):
             {"workflow": "census_and_cite", "arguments": {}})
         self.assertTrue(is_err)
         self.assertIn("required input", payload["error"])
+
+
+
+
+class TestMemos(McpReadFixture):
+    """wiki_memos (Marathon Round 4, lane C): the memo timeline
+    inbox through this door — newest first, tag-filtered, an
+    absent store an empty timeline."""
+
+    def _write_store(self):
+        staging = self._mk("staging")
+        rows = [
+            {"kind": "memo", "id": "memo-20261020-a",
+             "captured": "2026-10-20T09:00:00+00:00",
+             "date": "2026-10-20", "text": "older memo",
+             "tags": ["demo"], "by": "tester"},
+            {"kind": "memo", "id": "memo-20261021-b",
+             "captured": "2026-10-21T09:00:00+00:00",
+             "date": "2026-10-21", "text": "newer memo",
+             "tags": ["demo", "garden"], "by": "tester"},
+        ]
+        (staging / "memos.jsonl").write_text(
+            "".join(json.dumps(m) + "\n" for m in rows),
+            encoding="utf-8")
+
+    def test_wiki_memos_timeline_and_tag(self):
+        self._write_store()
+        is_err, payload = self.call("wiki_memos", {})
+        self.assertFalse(is_err)
+        self.assertEqual(payload["count"], 2)
+        self.assertEqual([m["text"] for m in payload["memos"]],
+                         ["newer memo", "older memo"])
+        is_err, payload = self.call("wiki_memos",
+                                    {"tag": "garden"})
+        self.assertFalse(is_err)
+        self.assertEqual([m["text"] for m in payload["memos"]],
+                         ["newer memo"])
+
+    def test_wiki_memos_absent_store_is_empty(self):
+        is_err, payload = self.call("wiki_memos", {})
+        self.assertFalse(is_err)
+        self.assertEqual(payload["count"], 0)
 
 
 if __name__ == "__main__":

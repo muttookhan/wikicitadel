@@ -221,11 +221,11 @@ class TestSessionPin(PinFixture):
 
 
 class TestToolsListPin(PinFixture):
-    def test_tools_still_nine_each_with_optional_pin(self):
+    def test_tools_still_ten_each_with_optional_pin(self):
         out = self.rpc({"jsonrpc": "2.0", "id": 1,
                         "method": "tools/list"})
         tools = out[1]["result"]["tools"]
-        self.assertEqual(len(tools), 9)
+        self.assertEqual(len(tools), 10)
         for t in tools:
             props = t["inputSchema"]["properties"]
             self.assertIn("pin", props, t["name"])

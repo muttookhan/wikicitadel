@@ -652,6 +652,12 @@ def main():
     # below. A page (or claim) absent from the lockfile gets an
     # empty list and the reading view shows nothing for it.
     cite_lock_pages = L.load_citation_lockfile(repo)
+    # TB4 Lens wiring points 2 + 3 (Marathon R4 lane A): per-page
+    # History/Diff data and the scored related-pages rail, read
+    # from the TB4 artefacts by page path. A page absent from an
+    # artefact gets an empty value and the view says so.
+    page_history_by_path = L.load_page_history(repo)
+    related_by_path = L.load_related_pages(repo)
     # Argdown (item 63c): a fenced ```argdown block in a page is
     # compiled at build time to an inline SVG argument map by our
     # own subset parser (stateviews.parse_argdown — nothing
@@ -737,6 +743,9 @@ def main():
             "stage": pg["stage"], "planted": pg["planted"] or None,
             "tended": pg["tended"] or None,
             "cite_passages": cite_lock_pages.get(pg["path"], []),
+            "page_history": page_history_by_path.get(pg["path"]) or
+                            {"history": [], "latest_diff": "", "commits": 0},
+            "related_pages": related_by_path.get(pg["path"], []),
         }
 
     routes = {"routes": [{"id": pg["id"], "path": pg["path"], "title": pg["title"],
@@ -1045,7 +1054,36 @@ def main():
                    "direct_links": sum(1 for v in pair_signals.values() if v["direct"]),
                    "relations": len(graph_edges),
                    "communities": len(comm_data)}
+    # TB4 Lens wiring point 1 (Marathon R4 lane A): the relation
+    # maps artefact feeds the Graph mode's edge-type filter and
+    # its Hoisting candidates panel. Per-pair relation-map types
+    # are attached to the graph edges they describe (a relation
+    # edge's source is a page path and its target a page slug, so
+    # both ends resolve through the build's own route table); an
+    # edge with no relation-map row carries no rm_types and is
+    # faded by an active type filter, never hidden silently —
+    # the panel says so.
+    relation_maps = L.load_relation_maps(repo)
+    rm_types_by_pair = defaultdict(set)
+    path_to_id = {pg["path"]: pg["id"] for pg in pages_raw}
+    for re_ in relation_maps.get("edges") or []:
+        if not isinstance(re_, dict):
+            continue
+        src_id = path_to_id.get(re_.get("source"))
+        dst_id = route_by_stem.get(str(re_.get("target") or ""))
+        if src_id and dst_id and src_id in page_by_id and dst_id in page_by_id:
+            rm_types_by_pair[pair_key(src_id, dst_id)].add(
+                str(re_.get("type") or "wikilink"))
+    for ge in graph_edges:
+        rm = rm_types_by_pair.get(pair_key(ge["a"], ge["b"]))
+        if rm:
+            ge["rm_types"] = sorted(rm)
+    graph_relation_maps = {
+        "edge_types": relation_maps.get("edge_types") or [],
+        "hoisting": relation_maps.get("hoisting") or [],
+    }
     graph = {"nodes": graph_nodes, "edges": graph_edges,
+             "relation_maps": graph_relation_maps,
              "communities": comm_data,
              "community_colours": COMMUNITY_COLOURS,
              "type_groups": type_groups,
@@ -1837,11 +1875,60 @@ def main():
                 continue
             qa_entries.append({f: rec.get(f) for f in qa_fields})
     qa_entries.sort(key=lambda e: str(e.get("asked_at") or ""), reverse=True)
+    # Memory transparency (Marathon R4 lane A, item 1): every Ask
+    # answer rendered here carries its grounded-in count — the
+    # cited pages (resolved through the route table) that are
+    # claim pages in the claim index, computed by lenslib.
+    claim_paths = L.claim_page_paths(repo)
+    path_by_id = {pg["id"]: pg["path"] for pg in pages_raw}
+
+    def _qa_resolve(cit):
+        text = L.citation_text(cit)
+        if not text:
+            return None
+        pid = route_by_stem.get(text) or route_by_stem.get(Path(text).stem)
+        return pid if pid in page_by_id else None
+
+    for entry in qa_entries:
+        grounded = L.grounded_claims(entry.get("citations"),
+                                     claim_paths, _qa_resolve, path_by_id)
+        entry["grounded_claims"] = grounded["count"]
+        entry["grounded_claim_ids"] = grounded["claim_ids"]
     qa_data = {"entries": qa_entries}
     dump_json(out / "data" / "qa.json", qa_data)
     dump_js(out / "data" / "qa.js", "LENS_QA", qa_data)
     qa_answered = sum(1 for e in qa_entries if e.get("status") == "answered")
     print(f"Q&A: {len(qa_entries)} records ({qa_answered} answered)")
+
+    # ---------------- Memory transparency + feedback triage ----------------
+    # Item 1 (Marathon R4 lane A): the Memory view's data is the
+    # artefact scripts/wiki_memory_transparency.py builds from
+    # the existing records. If it has not been run, build it in
+    # memory with the script's own builder (loaded, not mirrored)
+    # so the view never depends on a stale file.
+    memory_data = L.load_memory_transparency(repo)
+    if not memory_data.get("claims"):
+        try:
+            _mspec = importlib.util.spec_from_file_location(
+                "wiki_memory_transparency",
+                repo / "scripts" / "wiki_memory_transparency.py")
+            _mmod = importlib.util.module_from_spec(_mspec)
+            _mspec.loader.exec_module(_mmod)
+            memory_data = _mmod.build_transparency(repo)
+        except Exception:
+            pass
+    memory_data = {**memory_data, **stamp}
+    dump_json(out / "data" / "memory.json", memory_data)
+    dump_js(out / "data" / "memory.js", "LENS_MEMORY", memory_data)
+    print(f"Memory: {len(memory_data.get('claims') or [])} claims, "
+          f"{len(memory_data.get('ask_events') or [])} ask events")
+    # TB4 wiring point 5, read side: the feedback log's triage
+    # ships with the build so the portal can show per-page counts;
+    # the controls themselves append records (see app.js).
+    feedback_data = {**L.load_feedback_triage(repo), **stamp}
+    dump_json(out / "data" / "feedback.json", feedback_data)
+    dump_js(out / "data" / "feedback.js", "LENS_FEEDBACK", feedback_data)
+    print(f"Feedback: {feedback_data.get('total', 0)} record(s) triaged")
 
     # ---------------- Staged proposals (diff view) ----------------
     # Wave-3 item C2: the gateway's staged proposals
@@ -1917,6 +2004,9 @@ def main():
                    "(data/graph-report.json)",
                    "- [Search documents + postings](data/search/docs.json)",
                    "- [Q&A history](data/qa.json)",
+                   "- [Memory transparency — claims, claim history, "
+                   "connections, Ask events](data/memory.json)",
+                   "- [Feedback triage](data/feedback.json)",
                    "- [Staged proposals with per-hunk diffs, display "
                    "only](data/proposals.json)",
                    "- [Authored reading trails over the typed-edge "

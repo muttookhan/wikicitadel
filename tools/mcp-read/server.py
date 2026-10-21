@@ -129,6 +129,10 @@ TOOLS = [
      "inputSchema": {"type": "object", "properties": {
          "page": {"type": "string"},
          "cite_id": {"type": "string"}}}},
+    {"name": "wiki_memos",
+     "description": "The memo timeline inbox (staging/memos.jsonl, the Memos-shaped capture store): memos newest first, optionally filtered to one tag. Read-only; an absent store is an empty timeline.",
+     "inputSchema": {"type": "object", "properties": {
+         "tag": {"type": "string"}}}},
     {"name": "wiki_workflow",
      "description": "Run a named workflow — stated steps over this door's read tools only, exposed as a single tool (Langflow pattern). Call with no 'workflow' name to list the registered workflows. Read-only: a workflow composes reads and gains the door no write verb.",
      "inputSchema": {"type": "object", "properties": {
@@ -335,6 +339,11 @@ class ReadDoor:
             root, DOOR_IDENTITY, page or None,
             cite_id or None, True), commit)
 
+    def _memos(self, tag=None, pin=None) -> dict:
+        root, commit = self._root_for(pin)
+        return self._stamp(self.traverse.cmd_memos(
+            root, DOOR_IDENTITY, tag or None, True), commit)
+
     # -- workflows (Langflow pattern: a workflow is one tool) -------
     def _workflow_call(self, tool, args):
         """One workflow step, run through this door's own dispatch
@@ -438,6 +447,9 @@ class ReadDoor:
                 return self._result(self._cite(
                     args.get("page"), args.get("cite_id"),
                     pin=pin))
+            if name == "wiki_memos":
+                return self._result(self._memos(
+                    args.get("tag"), pin))
             if name == "wiki_workflow":
                 return self._result(self._run_workflow(
                     args.get("workflow"), args.get("arguments")))
