@@ -37,6 +37,7 @@ on the owner.
 - [[marathon-round-5-2026-10-21]] — the Marathon Round 5 record (2026-10-21): six queued builds — web-fetch contract, BEIR task register, RO-Crate sidecar, corpus-generated eval-question drafts (staging only), the FActScore atomic-claim check (report-only), reflexion post-failure notes; suites 1503/274/91/52/56/31, validator PASS.
 - [[marathon-round-6-2026-10-21]] — the Marathon Round 6 record (2026-10-21): seven queued builds — CommonMark pin + conformance test (15/29 pass; 14 divergences recorded, renderer unchanged), RFC 7763 variant label, MTEB task definitions, PosQ slice (no collapse; end-position penalty pinned), FAIR reuse statement, ORKG quality track, domain-analysis preamble; suites 1541/274/91/52/56/36, validator PASS.
 - [[marathon-round-7-2026-10-21]] — the Marathon Round 7 record (2026-10-21): eight queued builds — DocETL decompose+glean, CiteSee Lens citation augmentation, Memoize git provenance, tracking-strip at capture, textlint starter check, Jotter pattern, feed-clip tri-state register, bookmarks importer; suites 1586/274/91/52/56/42, validator PASS.
+- [[marathon-round-8-2026-10-21]] — the Marathon Round 8 record (2026-10-21): twelve queued builds — model-identity provenance, coverage-at-accuracy reporting, Rosenthal threat register (two classes blank as findings), weighted snapshot damage, WARC capture, in-toto pilot, Difftastic adoption, PID checker, PPI judge reporting, CRUD definitions, RAGBench schema, guidelines-as-data; suites 1648/274/91/52/56/42, validator PASS.
 
 ## Sources
 

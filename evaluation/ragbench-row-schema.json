@@ -1,0 +1,17 @@
+{
+  "kind": "ragbench-row-schema",
+  "version": 1,
+  "registered": "2026-10-21",
+  "pattern": "RAGBench sentence-support row shape restated for this wiki's own labelled set: a response decomposed into sentences, each sentence carrying a support verdict and the keys that support it, scorer outputs kept as separate per-scorer columns, and generator/annotator provenance on every row. SCHEMA ONLY: the external RAGBench dataset is NOT imported - its licence was unverified on the opened page - and no RAGBench rows, code or text are held here.",
+  "row": {
+    "required_fields": ["id", "question", "response_sentences", "scorer_columns", "provenance"],
+    "sentence_fields": ["sentence", "support_verdict", "supporting_keys"],
+    "support_verdicts": ["supported", "partially-supported", "unsupported"],
+    "supporting_keys_note": "Keys are this wiki's citation keys / page paths (the same keys a compiled claim cites). A supported or partially-supported sentence must name at least one; an unsupported sentence must name none.",
+    "scorer_columns_note": "An object keyed by scorer name; each scorer's verdicts/scores live in its own column object (e.g. {\"deterministic\": {...}, \"judge\": {...}}) so scorers are never blended into one number at row level.",
+    "provenance_fields": {
+      "generator": "Who/what produced the response: {kind, name} - kind is one of human / model / deterministic-harness, name identifies it.",
+      "annotator": "Who/what assigned the support verdicts: {kind, name}, same vocabulary."
+    }
+  }
+}

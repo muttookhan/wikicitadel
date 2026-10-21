@@ -221,6 +221,37 @@ def run_record_case(case):
     return ok, verdict, detail
 
 
+def coverage_report(results):
+    """Coverage-at-accuracy (Kamath et al., ACL 2020; Marathon R8,
+    Tier A — REPORTING ONLY: no threshold, case or decision rule
+    changes). Coverage = the share of cases the pipeline ANSWERED
+    (observed verdict "answer"); accuracy-on-answered = the share
+    of those answered cases that passed. Beside it, for symmetry,
+    accuracy-on-abstained over cases whose observed verdict is
+    "abstain". Record-mode verdicts (hold / ok / error) are
+    neither answered nor abstained and are counted separately —
+    they are contract verdicts over composed records, not
+    answers ventured on a question."""
+    answered = [r for r in results if r["observed"] == "answer"]
+    abstained = [r for r in results if r["observed"] == "abstain"]
+    other = [r for r in results
+             if r["observed"] not in ("answer", "abstain")]
+
+    def _acc(rows):
+        return (sum(1 for r in rows if r["pass"]) / len(rows)) if rows \
+            else None
+
+    return {
+        "total": len(results),
+        "answered": len(answered),
+        "abstained": len(abstained),
+        "other_verdicts": len(other),
+        "coverage": (len(answered) / len(results)) if results else None,
+        "accuracy_on_answered": _acc(answered),
+        "accuracy_on_abstained": _acc(abstained),
+    }
+
+
 def main(argv):
     ap = argparse.ArgumentParser(
         description="Abstention regression battery.")
@@ -273,10 +304,25 @@ def main(argv):
     passed = sum(1 for r in results if r["pass"])
     print(f"battery: {passed}/{len(results)} cases pass "
           f"(tau={tau}, severance={'on' if sev_list else 'OFF'})")
+    cov = coverage_report(results)
+    acc_a = cov["accuracy_on_answered"]
+    acc_s = cov["accuracy_on_abstained"]
+    print(f"coverage-at-accuracy: answered {cov['answered']}/"
+          f"{cov['total']} (coverage "
+          f"{cov['coverage']:.3f}), abstained {cov['abstained']}, "
+          f"other verdicts {cov['other_verdicts']}; "
+          f"accuracy-on-answered "
+          f"{acc_a:.3f}" if acc_a is not None else
+          "coverage-at-accuracy: no answered cases")
+    if acc_a is not None:
+        print(f"  accuracy-on-abstained "
+              f"{acc_s:.3f}" if acc_s is not None else
+              "  accuracy-on-abstained n/a (no abstentions)")
     if args.out:
         Path(args.out).write_text(
-            json.dumps({"tau": tau, "results": results}, indent=2,
-                       ensure_ascii=False) + "\n", encoding="utf-8")
+            json.dumps({"tau": tau, "coverage": cov, "results": results},
+                       indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8")
     return 0 if passed == len(results) else 1
 
 

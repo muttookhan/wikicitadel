@@ -230,7 +230,7 @@ def due_claims(today):
 
 # -- commands ------------------------------------------------------------------
 
-def cmd_record(args):
+def cmd_record(args):  # provenance: wiki_model_provenance.py (R8)
     page = (ROOT / args.page).resolve()
     if not page.is_file() or ROOT not in page.parents:
         print(f"page not found in repo: {args.page}")
@@ -246,9 +246,17 @@ def cmd_record(args):
     if parse_date(when) is None:
         print(f"bad --date: {when!r}")
         return 1
-    append_history({"claim": rel, "date": when,
-                    "outcome": args.outcome,
-                    "note": args.note or "", "source": "manual"})
+    record = {"claim": rel, "date": when,
+              "outcome": args.outcome,
+              "note": args.note or "", "source": "manual"}
+    if args.generator_model is not None or args.verifier_model is not None:
+        import wiki_model_provenance as _mp
+        try:
+            record.update(_mp.provenance_fields(
+                args.generator_model, args.verifier_model))
+        except ValueError as exc:
+            print(str(exc)); return 1
+    append_history(record)
     sched = claim_schedule(fields, [e for e in load_history()
                                     if e.get("claim") == rel],
                            date.today())
@@ -344,6 +352,14 @@ def main(argv):
     p_rec.add_argument("--outcome", choices=OUTCOMES_VOCAB, required=True)
     p_rec.add_argument("--note", default="")
     p_rec.add_argument("--date", default=None)
+    p_rec.add_argument("--generator-model", default=None,
+                       help="model that generated the claim (Marathon "
+                            "R8 model-identity provenance; must be given "
+                            "with --verifier-model)")
+    p_rec.add_argument("--verifier-model", default=None,
+                       help="model performing this verification; a "
+                            "verifier equal to the generator flags the "
+                            "line report-only (self-verification)")
     sub.add_parser("seed", help="seed history from the outcomes log")
     p_due = sub.add_parser("due", help="the re-verification schedule")
     p_due.add_argument("--today", default=None,

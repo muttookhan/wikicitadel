@@ -1,0 +1,171 @@
+{
+  "kind": "eval-guidelines-settings",
+  "version": 1,
+  "registered": "2026-10-21",
+  "convention": {
+    "field": "guidelines: {name, version, text|ref} - a named, versioned annotation-guidelines record per evaluation dataset (Argilla pattern, Apache-2.0 - pattern only)",
+    "placement": "In the dataset's own header/settings record where the format has one; otherwise in this sidecar, keyed by dataset path. Existing dataset files are not rewritten to add the field - this sidecar is the settings record for datasets whose format has no header.",
+    "null_means": "guidelines: null records, honestly, that no named/versioned guidelines were in force for that dataset when this register was created; the coverage checker reports it as lacking guidelines until a guidelines record is deliberately added."
+  },
+  "datasets": {
+    "agent-objects/demo-reader.agent.json": {
+      "guidelines": null
+    },
+    "beir-tasks.json": {
+      "guidelines": null
+    },
+    "bookmarks-register.jsonl": {
+      "guidelines": null
+    },
+    "canonical-names.json": {
+      "guidelines": null
+    },
+    "citation-lockfile.json": {
+      "guidelines": null
+    },
+    "claim-index.jsonl": {
+      "guidelines": null
+    },
+    "commonmark-conformance.json": {
+      "guidelines": null
+    },
+    "compile-decompose.json": {
+      "guidelines": null
+    },
+    "crud-lifecycle-tasks.json": {
+      "guidelines": null
+    },
+    "decisions-register.jsonl": {
+      "guidelines": null
+    },
+    "entity-aliases.json": {
+      "guidelines": null
+    },
+    "extended-questions.jsonl": {
+      "guidelines": null
+    },
+    "extraction-schema.json": {
+      "guidelines": null
+    },
+    "feed-clips.jsonl": {
+      "guidelines": null
+    },
+    "golden-questions.jsonl": {
+      "guidelines": null
+    },
+    "halumem-ops-sample.jsonl": {
+      "guidelines": null
+    },
+    "importance.json": {
+      "guidelines": null
+    },
+    "judge-calibration/judge-config.json": {
+      "guidelines": null
+    },
+    "judge-calibration/labeled-examples.jsonl": {
+      "guidelines": null
+    },
+    "judge-lang-ab-fixtures.jsonl": {
+      "guidelines": null
+    },
+    "lit-ragbench-fixture.jsonl": {
+      "guidelines": null
+    },
+    "loadouts.json": {
+      "guidelines": null
+    },
+    "longmem-fixtures.jsonl": {
+      "guidelines": null
+    },
+    "markdown-dialect.json": {
+      "guidelines": null
+    },
+    "memory-transparency.json": {
+      "guidelines": null
+    },
+    "mteb-tasks.json": {
+      "guidelines": null
+    },
+    "native-eval-fixtures/annotations-a.jsonl": {
+      "guidelines": null
+    },
+    "native-eval-fixtures/annotations-b.jsonl": {
+      "guidelines": null
+    },
+    "native-eval-fixtures/set-ja.jsonl": {
+      "guidelines": null
+    },
+    "native-eval-fixtures/set-ko.jsonl": {
+      "guidelines": null
+    },
+    "notice-vocabulary.json": {
+      "guidelines": null
+    },
+    "page-history.json": {
+      "guidelines": null
+    },
+    "posq-slice.json": {
+      "guidelines": null
+    },
+    "ragbench-row-schema.json": {
+      "guidelines": null
+    },
+    "related-pages.json": {
+      "guidelines": null
+    },
+    "relation-maps.json": {
+      "guidelines": null
+    },
+    "results/repro-scale-2026-10-20.corpus-manifest.json": {
+      "guidelines": null
+    },
+    "results/repro-scale-2026-10-20.json": {
+      "guidelines": null
+    },
+    "results/repro-seed-2026-10-20.json": {
+      "guidelines": null
+    },
+    "results/repro-seed-r2-2026-10-20.json": {
+      "guidelines": null
+    },
+    "results/scale-bench.json": {
+      "guidelines": null
+    },
+    "retraction-watch.jsonl": {
+      "guidelines": null
+    },
+    "retrieval-profiles/japanese-dual-track.json": {
+      "guidelines": null
+    },
+    "retrieval-severance.json": {
+      "guidelines": null
+    },
+    "reuse-vocabulary.json": {
+      "guidelines": null
+    },
+    "source-catalog.json": {
+      "guidelines": null
+    },
+    "source-manifest.jsonl": {
+      "guidelines": null
+    },
+    "source-record-schema.json": {
+      "guidelines": null
+    },
+    "stale-context-bench.jsonl": {
+      "guidelines": null
+    },
+    "textlint-config.json": {
+      "guidelines": null
+    },
+    "treatment-register.jsonl": {
+      "guidelines": null
+    },
+    "typed-ir.json": {
+      "guidelines": null
+    },
+    "verification-status.jsonl": {
+      "guidelines": null
+    }
+  }
+}

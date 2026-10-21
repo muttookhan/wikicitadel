@@ -225,6 +225,13 @@ def cmd_measure(args):
         return 1
     record = {"page": rel, "date": when, "outcome": args.outcome,
               "note": args.note or ""}
+    if args.generator_model is not None or args.verifier_model is not None:
+        import wiki_model_provenance as _mp
+        try:
+            record.update(_mp.provenance_fields(
+                args.generator_model, args.verifier_model))
+        except ValueError as exc:
+            print(str(exc)); return 1
     OUTCOMES.parent.mkdir(parents=True, exist_ok=True)
     with OUTCOMES.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -267,6 +274,13 @@ def main(argv):
     p_meas.add_argument("--outcome", choices=("supports", "contradicts"), required=True)
     p_meas.add_argument("--note", default="")
     p_meas.add_argument("--date", default=None)
+    p_meas.add_argument("--generator-model", default=None,
+                        help="model that generated the claim (Marathon "
+                             "R8 model-identity provenance; must be given "
+                             "with --verifier-model)")
+    p_meas.add_argument("--verifier-model", default=None,
+                        help="model measuring this outcome; equal to "
+                             "the generator flags the line report-only")
     sub.add_parser("list", help="list claim pages and statuses")
     args = ap.parse_args(argv[1:])
     if args.cmd == "check":

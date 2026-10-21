@@ -38,6 +38,108 @@ import sys
 from pathlib import Path
 
 
+# -- Weighted damage (Brunelle et al., JCDL 2014; Marathon R8) -----
+# A snapshot bundle whose embedded resources are partly missing is
+# not damaged in proportion to the COUNT of missing files: losing
+# the primary document is worse than losing a decorative image.
+# Each resource is classed and weighted; a bundle record carries
+# missing_weight beside missing_count. REPORT-ONLY for existing
+# bundles: damage_report() computes the field read-only and no
+# existing manifest is ever rewritten; bundle() stamps the field
+# on NEW manifests at capture time.
+RESOURCE_WEIGHTS = {
+    "document": 5.0,    # the primary page / document itself
+    "script": 3.0,
+    "stylesheet": 3.0,
+    "image": 2.0,
+    "font": 2.0,
+    "media": 2.0,
+    "other": 1.0,
+}
+_EXT_CLASS = {
+    ".html": "document", ".htm": "document", ".pdf": "document",
+    ".js": "script", ".mjs": "script",
+    ".css": "stylesheet",
+    ".png": "image", ".jpg": "image", ".jpeg": "image",
+    ".gif": "image", ".svg": "image", ".webp": "image",
+    ".woff": "font", ".woff2": "font", ".ttf": "font",
+    ".mp4": "media", ".mp3": "media", ".webm": "media",
+}
+_CT_CLASS = {
+    "text/html": "document", "application/pdf": "document",
+    "text/javascript": "script", "application/javascript": "script",
+    "text/css": "stylesheet", "font/woff2": "font", "font/woff": "font",
+}
+
+
+def classify_resource(name, content_type=""):
+    """Resource class for a captured file / URL leaf, from its
+    content type first, then its extension, else 'other'."""
+    ct = (content_type or "").split(";")[0].strip().lower()
+    if ct in _CT_CLASS:
+        return _CT_CLASS[ct]
+    if ct.startswith("image/"):
+        return "image"
+    if ct.startswith(("audio/", "video/")):
+        return "media"
+    leaf = str(name).split("?")[0].split("#")[0].rstrip("/").rsplit("/", 1)[-1]
+    dot = leaf.rfind(".")
+    if dot >= 0:
+        return _EXT_CLASS.get(leaf[dot:].lower(), "other")
+    return "other"
+
+
+def weighted_damage(resources):
+    """resources: [{name, resource_class?, content_type?,
+    present: bool}] -> the damage field: missing_count beside
+    missing_weight, over total_weight, as a ratio in [0, 1]."""
+    total = missing_w = 0.0
+    missing = 0
+    rows = []
+    for res in resources:
+        cls = res.get("resource_class") or classify_resource(
+            res.get("name", ""), res.get("content_type", ""))
+        weight = float(RESOURCE_WEIGHTS[cls])
+        total += weight
+        present = bool(res.get("present", True))
+        if not present:
+            missing += 1
+            missing_w += weight
+        rows.append({"name": res.get("name", ""), "resource_class": cls,
+                     "weight": weight, "present": present})
+    return {
+        "missing_count": missing,
+        "missing_weight": missing_w,
+        "total_weight": total,
+        "weighted_damage": (missing_w / total) if total else 0.0,
+        "resources": rows,
+    }
+
+
+def damage_report(bundle_dir):
+    """The weighted-damage field for an EXISTING bundle, computed
+    read-only from its manifest (its recorded resources when the
+    manifest carries them, else the files the manifest lists).
+    Nothing is written back."""
+    dest = Path(bundle_dir)
+    manifest = json.loads((dest / "manifest.json").read_text(
+        encoding="utf-8"))
+    recorded = manifest.get("damage", {}).get("resources")
+    if recorded:
+        resources = [{"name": r["name"],
+                      "resource_class": r.get("resource_class"),
+                      "present": (dest / r["name"]).exists()
+                      if r["name"] else r.get("present", True)}
+                     for r in recorded]
+    else:
+        resources = [{"name": name,
+                      "content_type": manifest.get("content_type", "")
+                      if name == "original.bin" else "",
+                      "present": (dest / name).exists()}
+                     for name in manifest.get("files", {})]
+    return weighted_damage(resources)
+
+
 def slugify(url):
     s = re.sub(r"^https?://", "", url.lower())
     s = re.sub(r"[^a-z0-9]+", "-", s).strip("-")
@@ -70,7 +172,15 @@ def bundle(url, out_dir, fetcher, fetched_at=""):
     (dest / "headers.json").write_text(
         json.dumps(headers, indent=2, sort_keys=True) + "\n",
         encoding="utf-8")
+    _resources = [{
+        "name": "original.bin",
+        "resource_class": classify_resource(
+            url, headers.get("Content-Type")
+            or headers.get("content-type") or ""),
+        "present": True,
+    }]
     manifest = {
+        "damage": weighted_damage(_resources),
         "url": url,
         "original_url": _original,
         "url_normalisation": _url_changes,
@@ -123,6 +233,8 @@ def main(argv=None):
     b.add_argument("--fetched-at", default="")
     v = sub.add_parser("verify")
     v.add_argument("bundle_dir")
+    d = sub.add_parser("damage")
+    d.add_argument("bundle_dir")
     ns = ap.parse_args(argv)
     if ns.cmd == "bundle":
         out = Path(ns.out_dir) if ns.out_dir \
@@ -130,6 +242,11 @@ def main(argv=None):
         dest, manifest = bundle(ns.url, out, urllib_fetcher,
                                 ns.fetched_at)
         print(json.dumps({"bundle": str(dest), "manifest": manifest},
+                         indent=2))
+        return 0
+    if ns.cmd == "damage":
+        print(json.dumps({"bundle": ns.bundle_dir,
+                          "damage": damage_report(ns.bundle_dir)},
                          indent=2))
         return 0
     problems = verify(ns.bundle_dir)
