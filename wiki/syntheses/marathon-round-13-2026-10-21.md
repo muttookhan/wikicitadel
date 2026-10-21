@@ -42,3 +42,10 @@ the snapshots land as soon as the publish route works again.
 **Queue at programme close:** 20 Tier A items stand boarded
 (Round 12's ten, then Round 13's ten), plus the per-round Tier
 B bundles; every Tier C item remains parked untouched.
+
+**Custody addendum (2026-10-21, programme close, later the
+same day):** the combined publish landed after the custody
+section above was written: this repository's main is now
+`ee664a2af0c2748452890be2a1fe9640c7ae6eb6`, one snapshot
+carrying Rounds 11–13 (91 paths), sync entry 26, verified by
+reading the remote HEAD. Nothing stands unpublished.
