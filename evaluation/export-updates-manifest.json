@@ -1,0 +1,23 @@
+{
+  "ledger_entries": [],
+  "pattern": "Crossref Crossmark (pattern only; no DOI registration)",
+  "sources": {
+    "corrections_ledger": "absent",
+    "treatment_register": "present"
+  },
+  "tool": "wiki_updates_manifest",
+  "updated_pages": [
+    "wiki/syntheses/decision-register.md"
+  ],
+  "updates": [
+    {
+      "by_detail": "Reversed by the owner the same day it was made (decision seed-d1, form D2); the blanket form is severed from retrieval.",
+      "by_record": "owner",
+      "claim": "The blanket direction covers decisions as well as work",
+      "date": "2026-01-15",
+      "page": "wiki/syntheses/decision-register.md",
+      "status": "superseded",
+      "treatment_id": "seed-treat-1"
+    }
+  ]
+}

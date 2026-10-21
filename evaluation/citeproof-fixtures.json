@@ -1,0 +1,63 @@
+{
+  "kind": "citeproof-fixtures",
+  "version": 1,
+  "note": "Held-out seeded-bad fixtures for the citation lockfile checker. Synthetic sources only; the real lockfile, golden sets and pinned battery are never touched by these fixtures.",
+  "sources": {
+    "src/alpha.md": [
+      "The archive holds forty two boxes of letters.",
+      "Each box is labelled by year and sender.",
+      "Nothing leaves the archive without a receipt."
+    ],
+    "src/beta.md": [
+      "The harbour office opens at dawn each day.",
+      "Boats are inspected before they depart."
+    ]
+  },
+  "fixtures": [
+    {
+      "id": "cp-clean-1",
+      "kind": "clean-control",
+      "source": "src/alpha.md",
+      "start": 1,
+      "end": 1,
+      "quote": "The archive holds forty two boxes of letters.",
+      "expected": "passed"
+    },
+    {
+      "id": "cp-clean-2",
+      "kind": "clean-control",
+      "source": "src/beta.md",
+      "start": 2,
+      "end": 2,
+      "quote": "Boats are inspected before they depart.",
+      "expected": "passed"
+    },
+    {
+      "id": "cp-bad-locator",
+      "kind": "fabricated-locator",
+      "source": "src/alpha.md",
+      "start": 99,
+      "end": 100,
+      "quote": "The archive holds forty two boxes of letters.",
+      "expected": "caught"
+    },
+    {
+      "id": "cp-bad-swapped",
+      "kind": "swapped-source",
+      "source": "src/beta.md",
+      "start": 1,
+      "end": 2,
+      "quote": "The archive holds forty two boxes of letters.",
+      "expected": "caught"
+    },
+    {
+      "id": "cp-bad-oneword",
+      "kind": "one-word-altered-quote",
+      "source": "src/alpha.md",
+      "start": 1,
+      "end": 1,
+      "quote": "The archive holds forty three boxes of letters.",
+      "expected": "caught"
+    }
+  ]
+}

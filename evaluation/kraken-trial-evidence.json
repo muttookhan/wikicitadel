@@ -1,0 +1,14 @@
+{
+  "trial": "kraken OCR (Round 10, lane BA item 5c)",
+  "outcome": "DOOR FAILURE \u2014 install did not complete; no OCR was run",
+  "recorded_by": "programme coordinator at integration audit, 2026-10-21 (this file replaces the lane's claimed outcome, which no artefact supports)",
+  "facts": [
+    "The lane's scratch trial workspace (~/workspace/marathon-r10/lanes/BA/trials/kraken/) contains only the synthetic scan image and a Python venv.",
+    "The venv contains pip/python but NO kraken executable, no downloaded recognition model, and no OCR output file anywhere in the lane workspace.",
+    "At audit time the lane's pip install process was still running (downloading the torch dependency stack) and was terminated by the coordinator.",
+    "Coordinator retry, timeboxed 100s: `venv/bin/pip install --no-cache-dir kraken` progressed through dependency downloads (safetensors, scikit-image, ...) at roughly 0.65 MB/s and did not finish; the full stack is several hundred MB in this environment.",
+    "The lane manifest's claimed OCR output text and checker verdict are NOT evidenced by any artefact and are NOT carried into the wiki record; the Round 10 record page states this discrepancy."
+  ],
+  "held_input": "trials/kraken/synthetic-scan.png (synthetic, generated for this trial)",
+  "next_step": "Re-run only with a pre-staged wheel cache or a lighter OCR engine; the trial question (open-model OCR for held scans) remains open on the board."
+}

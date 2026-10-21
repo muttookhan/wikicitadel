@@ -39,6 +39,7 @@ on the owner.
 - [[marathon-round-7-2026-10-21]] — the Marathon Round 7 record (2026-10-21): eight queued builds — DocETL decompose+glean, CiteSee Lens citation augmentation, Memoize git provenance, tracking-strip at capture, textlint starter check, Jotter pattern, feed-clip tri-state register, bookmarks importer; suites 1586/274/91/52/56/42, validator PASS.
 - [[marathon-round-8-2026-10-21]] — the Marathon Round 8 record (2026-10-21): twelve queued builds — model-identity provenance, coverage-at-accuracy reporting, Rosenthal threat register (two classes blank as findings), weighted snapshot damage, WARC capture, in-toto pilot, Difftastic adoption, PID checker, PPI judge reporting, CRUD definitions, RAGBench schema, guidelines-as-data; suites 1648/274/91/52/56/42, validator PASS.
 - [[marathon-round-9-2026-10-21]] — the Marathon Round 9 record (2026-10-21): ten queued builds — vocabulary basis lines, LongMemEval slice, pass^k run-log line, MAST failure-mode field, failure-history precheck, citeproc trial + CITATION.cff (owner-gated authors), placeholders report + link-reference export, Kopia pilot (restore verified), heed-rate reporting, reproducibility grading; suites 1704/274/91/52/56/42, validator PASS.
+- [[marathon-round-10-2026-10-21]] — the Marathon Round 10 record (2026-10-21): Round 8's twelve Tier A items all closed (OpenRefine/Bolognese trials ran with evidence; GROBID and kraken trials are honest door failures); scripts 1730 OK, validator PASS, golden byte-identical.
 
 ## Sources
 

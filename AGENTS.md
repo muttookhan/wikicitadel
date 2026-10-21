@@ -713,3 +713,37 @@ Five Tier A items from the Round-7 research group on [[ideas]], built in one bun
 - **Kopia pilot (witness/off-repo tier).** `scripts/wiki_kopia_pilot.py` + `evaluation/kopia-pilot-protocol.md`: kopia (Apache-2.0, external binary, never vendored) snapshots a COPY of a tree, restores it elsewhere, and verifies restored SHA-256 hashes, recording `evaluation/kopia-pilot-evidence.json`. The pilot copy is a side-copy only, never the backup of record (owner's decision), the pilot refuses a real tree as its source, and the Drive zip flow is untouched.
 - **Correction heed rate (AgentRecall-X pattern).** `evaluation/correction-outcomes.jsonl` is the additive outcome register beside the corrections ledger (ledger entries are never rewritten); `scripts/wiki_heed_rate.py` records per-correction retrieved/heeded/recurred outcomes and reports the heed rate with a Wilson 95% interval over measured entries only — entries without outcomes are reported UNMEASURED, honestly.
 - **Benchmark reproducibility + traced-or-null (memory-bench-registry pattern).** `evaluation/bench-reproducibility.json` is a sidecar (after the guidelines-settings precedent; existing eval files are never rewritten) carrying a `reproducibility` level per benchmark/eval record from the closed vocabulary paper_only / data_public / official_script / smoke_tested / full_run, or null when ungraded. Traced-or-null: an externally-sourced field (upstream, upstream_url, paper, dataset_url) asserted while `source` is null is a finding of `scripts/wiki_bench_registry.py check` (report-only).
+
+## Marathon R10 lane BA additions (appended 2026-10-21, append-only)
+
+- Retraction-propagation audit (`scripts/wiki_retraction_audit.py`):
+  the watch register (`evaluation/retraction-watch.jsonl`) is
+  seeded empty and hand-fed; the audit register is derived and
+  report-only — direct dependents first, indirect pages promoted
+  only on claim match; it never edits pages or the watch register.
+- Citation-function register (`scripts/wiki_citation_functions.py`):
+  Jurgens et al.'s six frames in our own vocabulary, hand-applied
+  in the side register `evaluation/citation-functions.jsonl`; no
+  page-schema change; unclassified rows stay unclassified.
+- External-tool trials (GROBID, CETEIcean, kraken, Annotorious):
+  tools live OUTSIDE the trees; in-tree deliverables are the
+  protocol + evidence records under `evaluation/` plus any checker
+  machinery. An honest door failure with the exact command and
+  error is a complete trial deliverable. GROBID's run is recorded
+  as a door failure in this environment (no Java runtime; the
+  Gradle distribution download stalled) — see
+  `evaluation/grobid-trial-evidence.json`.
+- Annotation shape checking (`scripts/wiki_annotation_check.py`)
+  validates W3C-shaped annotation JSON only; prototype pages stay
+  in the trial workspace, never in the trees.
+
+## Marathon R10 lane BB additions (appended 2026-10-21, append-only)
+
+Six Tier A items from the Round-8 research/deep-dive group on [[ideas]], built in scratch; stdlib only inside the trees, no new runtime dependencies, tools/ask/router.py untouched:
+
+- **OpenRefine bench trial** (est. 2026-10-21, R10 BB; OpenRefine, BSD-3-Clause — external tool, Kopia precedent): `evaluation/openrefine-trial-protocol.md` + `evaluation/openrefine-trial-evidence.json` + `scripts/wiki_openrefine_trial.py`. OpenRefine and its JRE live OUTSIDE the trees; trials run on COPIES in the lane trials area; the evidence records input hash, operations applied, output hash and the exported operation-history artefact location, so a cleaning transformation is citable. A door failure is recorded exactly in the evidence and is never a trial result.
+- **Bolognese conversion trial** (est. 2026-10-21, R10 BB; Bolognese/DataCite, MIT — Ruby CLI trial only, not a library integration): `evaluation/bolognese-trial-protocol.md` + `evaluation/bolognese-trial-evidence.json` + `scripts/wiki_bolognese_trial.py`. Bounded held records convert BibTeX -> CSL JSON (the 2.7.0 writer named `citeproc`, one record per invocation) outside the trees, with before/after diffs as the acceptance check. If Ruby/gem cannot be obtained, the exact door failure is the deliverable.
+- **CiteIndex evidence gate** (est. 2026-10-21, R10 BB; CiteIndex pattern, MIT per catalogue, judged at opened (search-rendered) level): `scripts/wiki_citeindex_gate.py` lists identifying-field changes in the source catalog/manifest across git history that lack a quote+locator evidence entry; the evidence-entry shape is stated AS DATA in the script, entries live in `evaluation/citeindex-evidence.jsonl`, and the current report is the derived artefact `evaluation/citeindex-gate-report.json`. REPORT-ONLY: never blocks, never edits.
+- **Generated CSL-JSON bibliography export** (est. 2026-10-21, R10 BB; Citation.js pattern, MIT — pattern only, stdlib implementation): `scripts/wiki_csl_export.py` generates `evaluation/citekeys-csl.json`, a derived CSL-JSON representation of the citekeys register (the register stays the record; fields the record does not carry are omitted, never invented). Regeneration is byte-stable; `check` verifies the export matches the register. Honest state: the register currently holds zero citekeys in both trees, so the export is an empty list until literature notes exist.
+- **Generated updates manifest for exports** (est. 2026-10-21, R10 BB; Crossref Crossmark pattern — pattern only, NO DOI registration): `scripts/wiki_updates_manifest.py` generates `evaluation/export-updates-manifest.json` from the corrections ledger + treatment register, stating which exported pages were later corrected/superseded, by which record, on what date. Byte-stable; `check` verifies it against the registers; an absent register is reported absent, never as clean.
+- **Checker-accuracy ledger** (est. 2026-10-21, R10 BB; CiteProof pattern): `evaluation/citeproof-fixtures.json` is a held-out seeded-bad fixture set (fabricated locator, swapped source, one-word-altered quote, plus clean controls) in its OWN new file; `scripts/wiki_citeproof_ledger.py` runs the citation lockfile checker's quote/range verification against fixture copies in a temporary directory — the real lockfile is never modified by the fixtures and the golden sets / pinned battery stay byte-identical — and writes catches / false-cleans beside the lockfile check summary in the derived artefact `evaluation/citeproof-ledger.json`.

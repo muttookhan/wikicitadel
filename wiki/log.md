@@ -138,3 +138,19 @@ Model-identity provenance on verification lines (same-model lines stamped report
 ## [2026-10-21] ingest | Marathon Round 9 — ten queued builds
 
 Vocabulary basis lines, the LongMemEval knowledge-update + temporal slice (a separate slice; the pinned battery untouched), the pass^k job-reliability line over a new run register, the MAST failure-mode sidecar beside the corrections ledger, the report-only failure-history precheck, the citeproc bibliography trial plus CITATION.cff (public facts only — the authors field awaits the owner's credit ruling and was not invented), the placeholders report (none found) with a link-reference export option, the Kopia snapshot pilot (a copy of this tree restored with 1,307/1,307 files hash-identical; side-copy only), heed-rate reporting (first report honestly unmeasured), and benchmark reproducibility grading (all records ungraded, stated plainly). Record: [[marathon-round-9-2026-10-21]].
+
+## [2026-10-21] ingest | Marathon Round 10 — twelve queued items closed
+
+The retraction-propagation audit register and citation-function
+register; trials of GROBID (door failure — no Java runtime in
+the environment; evidence records the exact commands and
+errors), CETEIcean (ran on a labelled fixture), kraken (door
+failure at install — the dependency stack did not finish
+downloading; no OCR output exists), Annotorious (ran headless,
+W3C shape checker), OpenRefine and Bolognese (both ran with
+evidence); the CiteIndex evidence gate (report-only), the
+CSL-JSON bibliography export (empty by fact — the citekeys
+register holds no citekeys), the Crossmark updates manifest, and
+the CiteProof checker-accuracy ledger (3/3 seeded-bad fixtures
+caught, controls clean, the real lockfile untouched). Record:
+[[marathon-round-10-2026-10-21]].
