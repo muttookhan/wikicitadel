@@ -18,6 +18,20 @@ Classes in the extended set:
   multi_page  answerable only by combining two pages (must_cite
               lists both; full hit = both in top-K).
 
+LEADERBOARD AXES + DIRECTIONAL SLICE (Marathon R2 lane B2):
+  questions may carry `axes: [...]` tags from the closed vocabulary
+  (governance | safety | privacy | personalisation). Tags are
+  conservative editorial metadata: untagged is a valid outcome and
+  an unknown tag is reported in the result's "axes_invalid", never
+  silently dropped. When any answerable question carries a valid
+  tag, the report adds "by_axis" aggregates per axis. Questions
+  carrying `slice: "directional"` form the DIRECTIONAL slice:
+  supersession fixtures (an A form superseded by B; the expected
+  answer must follow B, and forbidden_claims carry A's form). When
+  any exist, the report adds "by_slice" aggregates and a printed
+  directional line. Directional questions keep class "temporal"
+  so the existing class aggregates include them.
+
 The conflict slice (evaluation/conflict-questions.jsonl)
 runs through this same harness with --questions: its questions
 carry class "conflict" and score on the deterministic axes here;
@@ -90,6 +104,26 @@ BASELINE_PATH = ROOT / "evaluation" / "extended-baseline.json"
 EPSILON = 0.02
 GATED_METRICS = ("citation_coverage@10", "hit_rate_topk",
                  "mrr_must_cite", "abstention_rate")
+
+# Leaderboard axes (Marathon R2 lane B2): the closed vocabulary a
+# question's `axes` tags may draw from.
+ALLOWED_AXES = ("governance", "safety", "privacy", "personalisation")
+
+
+def question_axes(q):
+    """The question's VALID axis tags, in vocabulary order."""
+    tags = q.get("axes") or []
+    return [a for a in ALLOWED_AXES if a in tags]
+
+
+def invalid_axes(questions):
+    """{question id: [unknown tags]} — surfaced, never dropped."""
+    out = {}
+    for q in questions:
+        bad = [t for t in (q.get("axes") or []) if t not in ALLOWED_AXES]
+        if bad:
+            out[q["id"]] = bad
+    return out
 
 spec = importlib.util.spec_from_file_location(
     "wiki_search", ROOT / "scripts" / "wiki_search.py")
@@ -178,6 +212,8 @@ def score_answerable(q, ranked, top):
     must_rank = next((i + 1 for i, p in enumerate(paths) if p in must), None)
     return {
         "id": q["id"], "class": q["class"],
+        "axes": question_axes(q),
+        "slice": q.get("slice"),
         "must_cite_rank": must_rank,
         "hit_in_topk": any(p in good for p in topk),
         "must_in_topk": must_rank is not None and must_rank <= top,
@@ -249,6 +285,8 @@ def main(argv):
         ranked = rank_with_scores(args.engine, ws.tokenize(q["question"]), docs, adj)
         if q.get("expected_abstain"):
             row = {"id": q["id"], "class": q["class"],
+                   "axes": question_axes(q),
+                   "slice": q.get("slice"),
                    "top1_score": ranked[0][0] if ranked else 0.0,
                    "top1_path": ranked[0][1] if ranked else None,
                    "top3": [p for _s, p in ranked[:3]]}
@@ -279,6 +317,18 @@ def main(argv):
     temporal_rows = [r for r in answerable_rows if r["class"] == "temporal"]
     if temporal_rows:
         by_class["temporal"]["current_page_hit_rate"] = by_class["temporal"]["hit_rate_topk"]
+
+    by_axis = {}
+    for axis in ALLOWED_AXES:
+        rows = [r for r in answerable_rows if axis in (r.get("axes") or [])]
+        if rows:
+            by_axis[axis] = aggregates(rows)
+    by_slice = {}
+    dir_rows = [r for r in answerable_rows if r.get("slice") == "directional"]
+    if dir_rows:
+        by_slice["directional"] = aggregates(dir_rows)
+        by_slice["directional"]["current_page_hit_rate"] = (
+            by_slice["directional"]["hit_rate_topk"])
 
     ans_top1 = [r["top1_score"] for r in answerable_rows]
     noans_top1 = [r["top1_score"] for r in noanswer_rows]
@@ -319,6 +369,9 @@ def main(argv):
         "top_k": args.top,
         "aggregates": agg,
         "by_class": by_class,
+        "by_axis": by_axis,
+        "by_slice": by_slice,
+        "axes_invalid": invalid_axes(questions),
         "abstention": abstention,
         "citation_presence": citation,
         "judgement_axes_not_scored": (
@@ -380,6 +433,18 @@ def main(argv):
           f"abstention rate: {abstention['abstention_rate']}")
     print(f"  citation presence: sources {citation['source_declaration_rate']:.2f}   "
           f"inline cites {citation['inline_cite_rate']:.2f}")
+    for axis, aagg in by_axis.items():
+        print(f"  axis {axis}: n={aagg['questions']}  "
+              f"coverage@10={aagg['citation_coverage']['@10']:.2f}  "
+              f"MRR={aagg['mrr_must_cite']:.3f}")
+    if by_slice:
+        dagg = by_slice["directional"]
+        print(f"  slice directional: n={dagg['questions']}  "
+              f"coverage@10={dagg['citation_coverage']['@10']:.2f}  "
+              f"current-page hit={dagg['current_page_hit_rate']:.2f}")
+    bad_axes = invalid_axes(questions)
+    if bad_axes:
+        print(f"  WARNING: unknown axis tags ignored: {bad_axes}")
     misses = [r["id"] for r in answerable_rows if not r["must_in_topk"]]
     print(f"  must-cite misses @{args.top}: {', '.join(misses) if misses else 'none'}")
     print(f"  wrote {out_path.relative_to(ROOT)}")
