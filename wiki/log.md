@@ -118,3 +118,7 @@ The earlier TA2 log entry ("evaluation benches (as persisted)") was written from
 ## [2026-10-21] ingest | Marathon Round 4 — fix round + builds
 
 The fix round: citation lockfile regenerated (12 OK / 0 UNLOCKED, pre-existing hashes verified unchanged), Dockerfile lens-requirements fix, CI workflow added, lifecycle states declared (19 warnings → 0), ambiguous wikilinks path-qualified (9 → 0; the 2 duplicate-stem warnings remain by design — translations at parallel paths), checkpoint-test portability skip, README corrections, and the investigations (orphans/index, marathon-page citation sample, lenslib/build_lens sizes) reported in [[marathon-round-4-2026-10-21]]. Builds: memory-transparency views, TB4 Lens wiring points 1/2/3/5, CJK segmentation, publish CLI, source catalogue, memo capture + the wiki_memos read tool, schema-guided extraction, memory distil, packing check, MILU rule, reading notes.
+
+## [2026-10-21] ingest | Marathon Round 5 — six queued builds
+
+The web-fetch contract, the BEIR task register + harness, the RO-Crate sidecar generator, corpus-generated eval-question drafts (staging only, boundary enforced in code), the report-only FActScore atomic-claim check, and reflexion post-failure notes — with the three conventions recorded in AGENTS.md. Record: [[marathon-round-5-2026-10-21]].

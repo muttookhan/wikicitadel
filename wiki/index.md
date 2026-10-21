@@ -34,6 +34,7 @@ on the owner.
 - [[marathon-r3-tb8-patterns-2026-10-21]] — Marathon Round 3 lane TB8: five gated patterns built (env-flagged destructive gateway tools, workflow-as-MCP-tool, sandboxed verification scripts, low-confidence web expansion, narration plans); gap-12 preset marketplace parked by gate.
 - [[marathon-r3-tb7-retrieval]] — Retrieval and ranking machinery (Marathon R3, TB7): exact-title boost, ranking-expression evaluator, bounded graph expansion + GraphRAG community summaries, citation-scope checker, structured ingest register, KAG relation index, MemoRAG global memory, script normalization + Japanese dual-track profile, RAPTOR tree index, agent-object loader. Lens mirror data regenerates at Lens build.
 - [[marathon-round-4-2026-10-21]] — the Marathon Round 4 record (2026-10-21): the fix round (citation lock 12/12, lifecycle warnings 19→0, ambiguous wikilinks 9→0, README corrected), memory-transparency views + TB4 Lens wiring, CJK segmentation, publish CLI, source catalogue, memo capture, schema extraction, memory distil, packing/MILU/reading-notes; suites 1456/274/91/52/56/31, validator PASS.
+- [[marathon-round-5-2026-10-21]] — the Marathon Round 5 record (2026-10-21): six queued builds — web-fetch contract, BEIR task register, RO-Crate sidecar, corpus-generated eval-question drafts (staging only), the FActScore atomic-claim check (report-only), reflexion post-failure notes; suites 1503/274/91/52/56/31, validator PASS.
 
 ## Sources
 
