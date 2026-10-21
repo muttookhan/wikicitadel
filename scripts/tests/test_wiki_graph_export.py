@@ -25,7 +25,12 @@ repo does for the traversal door this tool delegates to):
     @import); the search / focus / neighbour-highlight /
     seeded-layout / details-pane JavaScript is present;
   - determinism: two CLI runs over the same fixture emit
-    byte-identical files.
+    byte-identical files;
+  - analytics (Marathon R2 Lane G): deterministic label-
+    propagation communities (input order must not matter),
+    god nodes ranked by degree with in/out shown, node tags
+    from frontmatter, and the communities / god-nodes
+    panels plus the type/tag filter controls in the HTML.
 
 Run:  python3 -m unittest discover -s scripts/tests -v
 """
@@ -48,6 +53,7 @@ title: Alpha
 type: entity
 stage: seedling
 status: active
+tags: [graph, fixture]
 sources:
   - raw/sources/open-note.md
 ---
@@ -67,6 +73,9 @@ BETA = """---
 title: Beta
 type: concept
 stage: budding
+tags:
+  - graph
+  - hub
 links:
   extends:
     - wiki/entities/alpha.md
@@ -82,6 +91,7 @@ Beta body text about graphs.
 GAMMA = """---
 title: Gamma
 type: entity
+tags: [fixture]
 ---
 
 # Gamma
@@ -371,6 +381,103 @@ class TestHtml(GraphFixture):
         # And the pure render path agrees with itself too.
         self.assertEqual(self.mod.render_html(self.graph),
                          self.mod.render_html(self.graph))
+
+
+class TestAnalytics(GraphFixture):
+    """Marathon R2 Lane G: communities, god nodes, tags."""
+
+    def test_tags_ride_on_nodes_sorted(self):
+        self.assertEqual(self.node("wiki/entities/alpha.md")["tags"],
+                         ["fixture", "graph"])
+        self.assertEqual(self.node("wiki/concepts/beta.md")["tags"],
+                         ["graph", "hub"])
+        self.assertEqual(self.node("wiki/entities/gamma.md")["tags"],
+                         ["fixture"])
+        self.assertEqual(self.node("wiki/queries/lonely.md")["tags"], [])
+
+    def test_communities_partition_the_fixture(self):
+        comms = self.graph["communities"]
+        self.assertEqual(self.graph["counts"]["communities"], 2)
+        self.assertEqual([c["size"] for c in comms], [5, 1])
+        big, solo = comms
+        self.assertEqual(big["id"], "C1")
+        self.assertEqual(set(big["members"]), EXPECTED_IDS
+                         - {"wiki/queries/lonely.md"})
+        self.assertEqual(big["members"], sorted(big["members"]))
+        self.assertIn(big["label"], big["members"])
+        self.assertEqual(solo["id"], "C2")
+        self.assertEqual(solo["members"], ["wiki/queries/lonely.md"])
+        # Every node records the community it was assigned to.
+        for n in self.graph["nodes"]:
+            expect = "C2" if n["id"] == "wiki/queries/lonely.md" else "C1"
+            self.assertEqual(n["community"], expect)
+        # Top pages are the community's highest-degree members.
+        self.assertEqual(big["top_pages"][0]["id"],
+                         "wiki/entities/alpha.md")
+        self.assertEqual(big["top_pages"][0]["degree"], 6)
+
+    def test_community_detection_is_deterministic(self):
+        a1, c1 = self.mod.compute_communities(
+            self.graph["nodes"], self.graph["edges"])
+        a2, c2 = self.mod.compute_communities(
+            self.graph["nodes"], self.graph["edges"])
+        self.assertEqual((a1, c1), (a2, c2))
+        # Input order must not matter: reversed inputs, same result.
+        a3, c3 = self.mod.compute_communities(
+            list(reversed(self.graph["nodes"])),
+            list(reversed(self.graph["edges"])))
+        self.assertEqual((a1, c1), (a3, c3))
+        # And a full rebuild agrees byte-for-byte on the analytics.
+        again = self.mod.build_graph(self.tmp)
+        self.assertEqual(again["communities"], self.graph["communities"])
+        self.assertEqual(again["god_nodes"], self.graph["god_nodes"])
+
+    def test_god_nodes_rank_the_fixture(self):
+        gods = self.graph["god_nodes"]
+        self.assertEqual(
+            [g["id"] for g in gods],
+            ["wiki/entities/alpha.md", "wiki/entities/gamma.md",
+             "wiki/concepts/beta.md", "wiki/concepts/retired.md",
+             "wiki/sources/severed-note.md", "wiki/queries/lonely.md"])
+        alpha = gods[0]
+        self.assertEqual(alpha["degree"], 6)
+        self.assertEqual(alpha["in_degree"], 4)
+        self.assertEqual(alpha["out_degree"], 2)
+        self.assertEqual(alpha["title"], "Alpha")
+        # The limit is honoured.
+        top2 = self.mod.compute_god_nodes(self.graph["nodes"], limit=2)
+        self.assertEqual([g["id"] for g in top2],
+                         ["wiki/entities/alpha.md",
+                          "wiki/entities/gamma.md"])
+
+    def test_panels_and_filters_are_in_the_html(self):
+        html = self.mod.render_html(self.graph)
+        # Communities + god-nodes panels, rendered from the data.
+        self.assertIn('id="communities-panel"', html)
+        self.assertIn('id="god-nodes-panel"', html)
+        self.assertIn('id="communities-list"', html)
+        self.assertIn('id="god-nodes-list"', html)
+        self.assertIn("buildPanels", html)
+        self.assertIn("God nodes (top 10 by degree)", html)
+        data = extract_data(html)
+        self.assertEqual(len(data["communities"]), 2)
+        self.assertEqual(data["god_nodes"][0]["id"],
+                         "wiki/entities/alpha.md")
+        self.assertEqual(data["god_nodes"][0]["in_degree"], 4)
+        self.assertEqual(data["god_nodes"][0]["out_degree"], 2)
+        # Client-side filters by page type and by tag.
+        self.assertIn('id="filter-type"', html)
+        self.assertIn('id="filter-tag"', html)
+        self.assertIn('id="filter-clear"', html)
+        self.assertIn("applyFilters", html)
+        self.assertIn("nodeMatchesFilter", html)
+        self.assertIn("buildFilters", html)
+        # The data the filters consume is present per node.
+        by_id = {n["id"]: n for n in data["nodes"]}
+        self.assertEqual(by_id["wiki/concepts/beta.md"]["tags"],
+                         ["graph", "hub"])
+        self.assertEqual(by_id["wiki/entities/alpha.md"]["type"],
+                         "entity")
 
 
 if __name__ == "__main__":

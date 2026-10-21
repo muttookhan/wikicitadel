@@ -46,7 +46,27 @@ across runs: no timestamp is embedded), pan and zoom, click
 a node to highlight its neighbours, a search box that
 focuses a node by title, colour by page type (the Lens's
 functional palette), and a details pane with the node's
-title, type, out/in degree and neighbour list.
+title, type, tags, out/in degree and neighbour list.
+
+Graph analytics (Marathon Round 2, Lane G): the export graph
+also carries, computed in pure stdlib Python at build time —
+
+  * communities — deterministic label propagation over the
+    undirected page graph (nodes visited in sorted id order,
+    labels updated in that fixed order, ties broken by the
+    smallest label; no randomness, so the partition is
+    byte-identical across runs on the same corpus). Each
+    node records its community id; the top-level
+    "communities" list gives each community's size, sorted
+    member ids and top pages (by degree);
+  * god nodes — the top 10 pages by total degree (ties:
+    higher in-degree, then higher out-degree, then id),
+    with in/out degree shown separately;
+
+and the HTML renders a communities panel, a god-nodes
+panel, and client-side filters by page type and by tag
+(a filtered-out node and its edges are not drawn; the
+underlying data is untouched).
 
 Usage:
     python3 scripts/wiki_graph_export.py [--root DIR]
@@ -129,6 +149,121 @@ def _scalar(value):
     return text or None
 
 
+def _tags(value):
+    """Frontmatter `tags` as a sorted list of strings.
+
+    Mirrors wiki_validate.as_list's shapes: a list stays a
+    list, a flow string "[a, b]" splits on commas, a bare
+    scalar is a single tag. Sorting keeps the export
+    deterministic whatever order the page declared."""
+    if value is None:
+        return []
+    if isinstance(value, list):
+        raw = [str(v) for v in value]
+    elif isinstance(value, str):
+        text = value.strip()
+        if text.startswith("[") and text.endswith("]"):
+            raw = text[1:-1].split(",")
+        elif text:
+            raw = [text]
+        else:
+            raw = []
+    else:
+        raw = [str(value)]
+    return sorted({t.strip().strip('"').strip("'")
+                   for t in raw if t.strip()})
+
+
+# ---------------------------------------------------------------------------
+# Graph analytics: god nodes + deterministic communities
+# ---------------------------------------------------------------------------
+
+def compute_god_nodes(nodes, limit=10):
+    """The `limit` highest-degree nodes: [{id, title, type,
+    degree, out_degree, in_degree}] sorted by total degree
+    desc, then in-degree desc, then out-degree desc, then
+    id asc — a total order, so the list is deterministic."""
+    ranked = sorted(
+        nodes,
+        key=lambda n: (-(n["out_degree"] + n["in_degree"]),
+                       -n["in_degree"], -n["out_degree"], n["id"]))
+    return [{
+        "id": n["id"], "title": n["title"], "type": n["type"],
+        "degree": n["out_degree"] + n["in_degree"],
+        "out_degree": n["out_degree"], "in_degree": n["in_degree"],
+    } for n in ranked[:limit]]
+
+
+def compute_communities(nodes, edges):
+    """Deterministic label propagation (pure stdlib).
+
+    Undirected view of the emitted edges. Every node starts
+    labelled with its own id; passes visit nodes in sorted
+    id order and a node adopts the most frequent label among
+    its neighbours (ties: the smallest label wins), updating
+    in place in that fixed order. Passes repeat until a full
+    pass changes nothing (or 100 passes — a hard bound that
+    keeps the result finite; the assignment at the bound is
+    still fully determined by the fixed order). An isolated
+    node keeps its own label and forms a singleton community.
+
+    Returns (assignment, communities): assignment maps node
+    id -> community id ("C1", "C2", ... assigned by size
+    desc, then smallest member id asc); communities is the
+    list of {"id", "label", "size", "members", "top_pages"}
+    in that same order, where "label" is the propagation
+    label (a member page id) and "top_pages" holds up to 5
+    {"id", "title", "degree"} entries by degree desc, id asc.
+    """
+    ids = sorted(n["id"] for n in nodes)
+    by_id = {n["id"]: n for n in nodes}
+    degree = {n["id"]: n["out_degree"] + n["in_degree"]
+              for n in nodes}
+    neighbours = {i: set() for i in ids}
+    for e in edges:
+        neighbours[e["source"]].add(e["target"])
+        neighbours[e["target"]].add(e["source"])
+    neighbours = {i: sorted(ns) for i, ns in neighbours.items()}
+
+    labels = {i: i for i in ids}
+    for _pass in range(100):
+        changed = False
+        for node_id in ids:
+            ns = neighbours[node_id]
+            if not ns:
+                continue
+            counts = {}
+            for nb in ns:
+                counts[labels[nb]] = counts.get(labels[nb], 0) + 1
+            best = min(counts, key=lambda lab: (-counts[lab], lab))
+            if best != labels[node_id]:
+                labels[node_id] = best
+                changed = True
+        if not changed:
+            break
+
+    groups = {}
+    for node_id in ids:
+        groups.setdefault(labels[node_id], []).append(node_id)
+    ordered = sorted(groups.items(),
+                     key=lambda kv: (-len(kv[1]), kv[1][0]))
+    assignment = {}
+    communities = []
+    for idx, (label, members) in enumerate(ordered, start=1):
+        cid = f"C{idx}"
+        for m in members:
+            assignment[m] = cid
+        top = sorted(members,
+                     key=lambda m: (-degree[m], m))[:5]
+        communities.append({
+            "id": cid, "label": label, "size": len(members),
+            "members": list(members),
+            "top_pages": [{"id": m, "title": by_id[m]["title"],
+                           "degree": degree[m]} for m in top],
+        })
+    return assignment, communities
+
+
 def build_graph(root: Path) -> dict:
     """The export graph: {"nodes": [...], "edges": [...],
     "counts": {...}} — fully sorted, so the artefact derived
@@ -172,6 +307,7 @@ def build_graph(root: Path) -> dict:
             "title": _scalar(fields.get("title"))
                      or Path(rel).stem,
             "type": _scalar(fields.get("type")),
+            "tags": _tags(fields.get("tags")),
             "stage": _scalar(fields.get("stage")),
             "status": status,
             "tombstoned": bool(status
@@ -181,6 +317,10 @@ def build_graph(root: Path) -> dict:
             "out_degree": out_deg[rel],
             "in_degree": in_deg[rel],
         })
+    assignment, communities = compute_communities(nodes, edges)
+    for n in nodes:
+        n["community"] = assignment[n["id"]]
+    god_nodes = compute_god_nodes(nodes)
     counts = {
         "pages": len(nodes),
         "edges": len(edges),
@@ -189,8 +329,10 @@ def build_graph(root: Path) -> dict:
         "orphans": sum(1 for n in nodes
                        if n["out_degree"] == 0
                        and n["in_degree"] == 0),
+        "communities": len(communities),
     }
-    return {"nodes": nodes, "edges": edges, "counts": counts}
+    return {"nodes": nodes, "edges": edges, "counts": counts,
+            "communities": communities, "god_nodes": god_nodes}
 
 
 # ---------------------------------------------------------------------------
@@ -266,6 +408,23 @@ TEMPLATE = """<!DOCTYPE html>
   #details li button { width: 100%; text-align: left;
                        background: #faf9f6; }
   .hint { color: #6b6455; font-size: 12.5px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px;
+             align-items: center; margin-top: 8px; font-size: 13px; }
+  .filters select { padding: 5px 7px; font-size: 13px;
+                    border: 1px solid #b9b2a4; border-radius: 6px;
+                    background: #fff; }
+  #filter-status { font-size: 12.5px; color: #5c564a; }
+  #panels { display: flex; flex-wrap: wrap; gap: 0;
+            border-bottom: 1px solid #ddd6c9; background: #fff; }
+  .panel { flex: 1 1 340px; padding: 8px 16px 10px;
+           max-height: 190px; overflow-y: auto; }
+  .panel + .panel { border-left: 1px solid #ddd6c9; }
+  .panel h2 { font-size: 13.5px; margin: 2px 0 6px; }
+  .panel ul { list-style: none; padding: 0; margin: 0;
+              font-size: 12.5px; }
+  .panel li { margin: 0 0 4px; }
+  .panel li button { padding: 2px 7px; font-size: 12px; }
+  .panel .meta { color: #6b6455; }
 </style>
 </head>
 <body>
@@ -281,7 +440,31 @@ TEMPLATE = """<!DOCTYPE html>
     <span id="search-status" role="status"></span>
   </div>
   <div id="legend" aria-label="Legend"></div>
+  <div class="filters" aria-label="Graph filters">
+    <label>Filter by type
+      <select id="filter-type" aria-label="Filter by page type">
+        <option value="">All types</option>
+      </select>
+    </label>
+    <label>Filter by tag
+      <select id="filter-tag" aria-label="Filter by tag">
+        <option value="">All tags</option>
+      </select>
+    </label>
+    <button id="filter-clear" type="button">Clear filters</button>
+    <span id="filter-status" role="status"></span>
+  </div>
 </header>
+<section id="panels" aria-label="Graph analytics">
+  <div class="panel" id="communities-panel">
+    <h2>Communities</h2>
+    <ul id="communities-list"></ul>
+  </div>
+  <div class="panel" id="god-nodes-panel">
+    <h2>God nodes (top 10 by degree)</h2>
+    <ul id="god-nodes-list"></ul>
+  </div>
+</section>
 <main>
   <div id="canvas-wrap"><canvas id="graph"></canvas></div>
   <aside id="details" aria-label="Node details">
@@ -321,8 +504,34 @@ function mulberry32(a) {
 }
 var nodes = DATA.nodes;
 var edges = DATA.edges;
+var communities = DATA.communities || [];
+var godNodes = DATA.god_nodes || [];
 var byId = {};
 nodes.forEach(function (n) { byId[n.id] = n; });
+var activeFilter = { type: "", tag: "" };
+function nodeMatchesFilter(node) {
+  if (activeFilter.type && node.type !== activeFilter.type) { return false; }
+  if (activeFilter.tag &&
+      (node.tags || []).indexOf(activeFilter.tag) === -1) { return false; }
+  return true;
+}
+function isFilteredOut(id) { return !nodeMatchesFilter(byId[id]); }
+function visibleCount() {
+  return nodes.filter(nodeMatchesFilter).length;
+}
+function applyFilters() {
+  activeFilter.type = document.getElementById("filter-type").value;
+  activeFilter.tag = document.getElementById("filter-tag").value;
+  var status = document.getElementById("filter-status");
+  if (!activeFilter.type && !activeFilter.tag) {
+    status.textContent = "";
+  } else {
+    status.textContent = visibleCount() + " of " + nodes.length +
+      " pages shown.";
+  }
+  if (selectedId && isFilteredOut(selectedId)) { selectNode(null); }
+  draw();
+}
 var outAdj = {}, inAdj = {}, allAdj = {};
 nodes.forEach(function (n) {
   outAdj[n.id] = []; inAdj[n.id] = []; allAdj[n.id] = {};
@@ -434,6 +643,7 @@ function draw() {
   var s = canvasSize();
   ctx.clearRect(0, 0, s.w, s.h);
   edges.forEach(function (e) {
+    if (isFilteredOut(e.source) || isFilteredOut(e.target)) { return; }
     var a = toScreen(byId[e.source]), b = toScreen(byId[e.target]);
     var hot = selectedId !== null &&
       (e.source === selectedId || e.target === selectedId);
@@ -444,6 +654,7 @@ function draw() {
   });
   ctx.globalAlpha = 1;
   nodes.forEach(function (node) {
+    if (isFilteredOut(node.id)) { return; }
     var p = toScreen(node);
     var r = nodeRadius(node);
     ctx.globalAlpha = isDimmed(node.id) ? 0.18 : 1;
@@ -557,6 +768,8 @@ function showDetails(node) {
     dl.appendChild(el("dd", v === null || v === undefined || v === "" ? "—" : String(v)));
   }
   row("Type", node.type);
+  row("Tags", (node.tags || []).join(", "));
+  row("Community", node.community);
   row("Stage", node.stage);
   row("Status", node.status);
   row("Out-degree", node.out_degree);
@@ -581,6 +794,62 @@ function showDetails(node) {
     ul.appendChild(el("li", "No neighbours — this page is an orphan in the graph."));
   }
   pane.appendChild(ul);
+}
+function buildPanels() {
+  var clist = document.getElementById("communities-list");
+  communities.forEach(function (c) {
+    var li = el("li");
+    var head = el("strong", c.id + " — " + c.size +
+      (c.size === 1 ? " page" : " pages"));
+    li.appendChild(head);
+    var tops = (c.top_pages || []).map(function (p) { return p.title; });
+    if (tops.length) {
+      var meta = el("span", " · top: " + tops.join(", "));
+      meta.className = "meta";
+      li.appendChild(meta);
+    }
+    clist.appendChild(li);
+  });
+  if (!communities.length) {
+    clist.appendChild(el("li", "No communities — the graph is empty."));
+  }
+  var glist = document.getElementById("god-nodes-list");
+  godNodes.forEach(function (g) {
+    var li = el("li");
+    var btn = el("button", g.title);
+    btn.type = "button";
+    btn.addEventListener("click", function () { focusNode(g.id); });
+    li.appendChild(btn);
+    var meta = el("span", " degree " + g.degree +
+      " (in " + g.in_degree + " / out " + g.out_degree + ")");
+    meta.className = "meta";
+    li.appendChild(meta);
+    glist.appendChild(li);
+  });
+  if (!godNodes.length) {
+    glist.appendChild(el("li", "No god nodes — the graph is empty."));
+  }
+}
+function buildFilters() {
+  var typeSel = document.getElementById("filter-type");
+  var typesSeen = {};
+  nodes.forEach(function (node) { if (node.type) { typesSeen[node.type] = true; } });
+  Object.keys(typesSeen).sort().forEach(function (t) {
+    var o = el("option", t); o.value = t; typeSel.appendChild(o);
+  });
+  var tagSel = document.getElementById("filter-tag");
+  var tagsSeen = {};
+  nodes.forEach(function (node) {
+    (node.tags || []).forEach(function (t) { tagsSeen[t] = true; });
+  });
+  Object.keys(tagsSeen).sort().forEach(function (t) {
+    var o = el("option", t); o.value = t; tagSel.appendChild(o);
+  });
+  typeSel.addEventListener("change", applyFilters);
+  tagSel.addEventListener("change", applyFilters);
+  document.getElementById("filter-clear").addEventListener("click", function () {
+    typeSel.value = ""; tagSel.value = ""; applyFilters();
+  });
 }
 function buildChrome() {
   var c = DATA.counts;
@@ -623,6 +892,7 @@ function hitTest(px, py) {
   var w = toWorld(px, py);
   for (var i = nodes.length - 1; i >= 0; i--) {
     var node = nodes[i];
+    if (isFilteredOut(node.id)) { continue; }
     var dx = node.x - w.x, dy = node.y - w.y;
     var r = (nodeRadius(node) + 4) / view.scale;
     if (dx * dx + dy * dy <= r * r) { return node; }
@@ -680,6 +950,8 @@ canvas.addEventListener("wheel", function (ev) {
   draw();
 }, { passive: false });
 window.addEventListener("resize", resize);
+buildPanels();
+buildFilters();
 buildChrome();
 fitView();
 resize();
@@ -719,7 +991,8 @@ def main(argv=None) -> int:
     c = graph["counts"]
     print(f"graph export: {c['pages']} pages · {c['edges']} edges "
           f"({c['tombstoned']} tombstoned, {c['severed']} severed, "
-          f"{c['orphans']} orphans) -> {out}")
+          f"{c['orphans']} orphans, {c['communities']} communities) "
+          f"-> {out}")
     return 0
 
 

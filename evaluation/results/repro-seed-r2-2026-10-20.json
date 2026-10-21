@@ -1,0 +1,179 @@
+{
+  "kind": "reproducible-benchmark-pack",
+  "label": "seed-r2-2026-10-20",
+  "generated_at": "2026-10-21T00:53:47+00:00",
+  "recipe": {
+    "engines": [
+      "bm25",
+      "hybrid",
+      "hindsight"
+    ],
+    "top_k": 10,
+    "questions_file": "evaluation/golden-questions.jsonl",
+    "questions_sha256": "800e6c3205123a25697cb32adef22bd019e4343f736da1c4e9028c50be00d28c",
+    "questions_count": 3
+  },
+  "environment": {
+    "git_head": "a5452b4ce61deb89858d65d20216b208025cee33",
+    "corpus_docs": 11,
+    "python": "3.12.3",
+    "platform": "Linux-7.0.0-39-generic-x86_64-with-glibc2.39"
+  },
+  "results": {
+    "bm25": {
+      "citation_coverage": {
+        "@1": 0.3333,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mrr_must_cite": 0.6111,
+      "per_question": [
+        {
+          "id": "SQ-001",
+          "route": "decision",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2222222222222222,
+          "top3": [
+            "wiki/concepts/standing-approval.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/index.md"
+          ]
+        },
+        {
+          "id": "SQ-002",
+          "route": "entity",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1111111111111111,
+          "top3": [
+            "wiki/entities/owner.md",
+            "wiki/rules/notices.md",
+            "wiki/ideas.md"
+          ]
+        },
+        {
+          "id": "SQ-003",
+          "route": "source",
+          "must_cite_rank": 3,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2222222222222222,
+          "top3": [
+            "wiki/overview.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/sources/founding-note.md"
+          ]
+        }
+      ]
+    },
+    "hybrid": {
+      "citation_coverage": {
+        "@1": 0.3333,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mrr_must_cite": 0.6111,
+      "per_question": [
+        {
+          "id": "SQ-001",
+          "route": "decision",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/overview.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/concepts/standing-approval.md"
+          ]
+        },
+        {
+          "id": "SQ-002",
+          "route": "entity",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/entities/owner.md",
+            "wiki/overview.md",
+            "wiki/syntheses/decision-register.md"
+          ]
+        },
+        {
+          "id": "SQ-003",
+          "route": "source",
+          "must_cite_rank": 3,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/overview.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/sources/founding-note.md"
+          ]
+        }
+      ]
+    },
+    "hindsight": {
+      "citation_coverage": {
+        "@1": 0.6667,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mrr_must_cite": 0.7778,
+      "per_question": [
+        {
+          "id": "SQ-001",
+          "route": "decision",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/syntheses/decision-register.md",
+            "wiki/concepts/standing-approval.md",
+            "wiki/overview.md"
+          ]
+        },
+        {
+          "id": "SQ-002",
+          "route": "entity",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/entities/owner.md",
+            "wiki/rules/notices.md",
+            "wiki/overview.md"
+          ]
+        },
+        {
+          "id": "SQ-003",
+          "route": "source",
+          "must_cite_rank": 3,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/overview.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/sources/founding-note.md"
+          ]
+        }
+      ]
+    }
+  },
+  "corpus_kind": "seed",
+  "note": "Fresh dated run on the public seed corpus (the fictional demo corpus: 11 wiki pages, 3 seed golden questions SQ-001..SQ-003), executed in a scratch copy of the public tree at HEAD a5452b4ce61deb89858d65d20216b208025cee33 (git_head pinned by the caller; the scratch copy has no .git). This is the public tree's counterpart to the private repro-marathon-r2-2026-10-20.json. Baseline: the existing repro-seed-2026-10-20.json pack over the same seed corpus."
+}
