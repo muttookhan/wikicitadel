@@ -1,5 +1,5 @@
 ---
-id: decision-register
+id: decision-register-ja
 title: 決定レジスタ
 type: synthesis
 status: current

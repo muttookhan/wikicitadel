@@ -108,6 +108,22 @@ Exit codes: 0 ok · 1 refusal (unadmitted identity, gated raw,
 no such page — the refusal on stderr says which) · 2 usage
 error.
 
+## Packing assembled context — Lost in the Middle
+
+When you assemble retrieved pages into a context pack for an
+answer, order is evidence handling, not cosmetics: models use
+material at the head and the tail of a long context better than
+material buried in the middle (Liu et al., "Lost in the
+Middle"). The packing rule is therefore: the most relevant
+pages sit first or last in the assembled pack, in
+relevance-descending order at the edges, and the weakest pages
+sit in the middle — never bury the strongest page mid-pack.
+Packs of three or fewer need no rearrangement (every position
+is edge-adjacent). The Ask door's packing module
+(`tools/ask/evidence_packing.py`) applies this rule to packs of
+four or more, and `scripts/wiki_packing_check.py` reports, for
+a pack you have in hand, whether the rule holds.
+
 ## Worked habits
 
 - **Orient before reading**: `census` once, then `neighbours`

@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /
 WORKDIR /srv/wikicitadel
 COPY . /srv/wikicitadel
 
+# Lens compiler dependencies (PyYAML; everything else is stdlib).
+RUN pip install --no-cache-dir -r tools/lens/requirements.txt
+
 # The Lens build stamps itself from git; a container copy has no .git,
 # so initialise a throwaway one for the build stamp only.
 RUN git init -q . && git add -A && \

@@ -22,6 +22,6 @@ The owner's founding dictation, preserved verbatim at
 visibly, in versioned files), grants a blanket direction over work, and —
 in the same sitting — reverses that direction for decisions.
 
-Compiled into [[overview]] (the purpose) and [[decision-register]] (the
+Compiled into [[wiki/overview|overview]] (the purpose) and [[wiki/syntheses/decision-register|decision-register]] (the
 decision pair, including the superseded blanket form under a negative
 treatment).

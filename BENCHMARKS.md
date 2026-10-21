@@ -19,6 +19,14 @@ measurements on your own wiki and compare like with like.
 - Abstention is measured on its own battery of unanswerable questions,
   tuned at a frozen threshold. A system that answers everything scores
   zero here by construction.
+- Golden-set questions follow the MILU design rule (Verma et al.,
+  CC BY 4.0): they are written from the wiki's OWN source material, in
+  its own terms — never translated or templated from generic items.
+  The golden-set builder (`scripts/wiki_golden_builder.py`) enforces
+  this with a check that flags any candidate question whose subject
+  terms do not appear in its cited source material (the builder's
+  `--milu-check` mode); the builder never writes to an existing
+  golden set.
 
 ## Reference-deployment results (October 2026)
 

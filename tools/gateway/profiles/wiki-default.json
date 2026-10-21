@@ -16,7 +16,9 @@
    "active",
    "needs-verification",
    "superseded",
-   "deprecated"
+   "deprecated",
+   "current",
+   "tombstoned"
   ]
  },
  "comment": "Lifecycle profile for the LLM Wiki (harvest item 7, pattern: atomicstrata/llm-wiki-compiler, MIT; versioned fields + grandfathering: Phase-2 item 5, pattern: pyrite-wiki/pyrite, MIT). warn-legacy is deliberate: violations are recorded (gateway proposal meta, validator warnings) and never refuse a write. Flipping mode to enforce is an Owner decision (Phase 2 gate) and has NOT been taken. Schema v2 adds the field 'status' (since_version 2): pages declaring _schema_version >= 2 must carry it (error); older pages are grandfathered (warning only).",
@@ -96,7 +98,16 @@
  },
  "schema_version": 2,
  "status_transitions": {
+  "active": [
+   "archived",
+   "tombstoned"
+  ],
   "archived": [],
+  "current": [
+   "superseded",
+   "archived",
+   "tombstoned"
+  ],
   "draft": [
    "verified",
    "published"
@@ -104,6 +115,7 @@
   "published": [
    "archived"
   ],
+  "tombstoned": [],
   "verified": [
    "published",
    "draft"

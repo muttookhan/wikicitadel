@@ -64,6 +64,12 @@ fewer keep the consideration order exactly — every position in
 such a pack is already edge-adjacent, and rearranging them would
 only disturb the standing/tie order for no positional gain.
 
+Position check (Marathon R4 lane D): whether an assembled pack
+obeys the rule above is checked, pack in hand, by
+``scripts/wiki_packing_check.py`` — it reports HOLDS / VIOLATED
+for a ``pack_evidence`` result (or a bare packed list), packs of
+three or fewer holding trivially; it packs and changes nothing.
+
 Prompt Capsules (same lane): a passage dict carrying
 ``"pinned": True`` (built by ``tools/ask/capsules.py`` from a
 named capsule's pinned pages) is considered BEFORE every

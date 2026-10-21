@@ -1,5 +1,5 @@
 ---
-id: overview
+id: overview-zh
 title: 概述
 type: synthesis
 status: current
@@ -25,4 +25,4 @@ translation_of: wiki/overview.md
 
 编译层中的每项主张都以这种形式带有其引用，因此读者可以在几秒钟内把任何一句话与所保存的来源核对。原始层在摄取之后从不编辑；更正以新的来源和新的编译文本形式出现，日志记录所发生的变化及其原因。
 
-创始决定——包括在作出当天就被推翻的那项决定——载于 [[decision-register]]；两个页面背后的来源是 [[founding-note]]，页面可以携带的警示标签在 [[notices]] 规则页面上定义。本安装的人员与席位编目于 `wiki/entities/` 之下；所有者自己的页面是 [[owner]]。
+创始决定——包括在作出当天就被推翻的那项决定——载于 [[wiki/syntheses/decision-register|decision-register]]；两个页面背后的来源是 [[founding-note]]，页面可以携带的警示标签在 [[notices]] 规则页面上定义。本安装的人员与席位编目于 `wiki/entities/` 之下；所有者自己的页面是 [[owner]]。

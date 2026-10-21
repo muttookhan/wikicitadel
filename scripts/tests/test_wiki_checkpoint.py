@@ -50,6 +50,9 @@ def git(root, *args, env_extra=None):
                           check=True)
 
 
+@unittest.skipIf(shutil.which("ssh-keygen") is None,
+                 "ssh-keygen not found on PATH: the checkpoint fixture "
+                 "generates a throwaway ed25519 signing key with it")
 class CheckpointFixture(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp(prefix="wiki-checkpoint-"))

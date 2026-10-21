@@ -27,7 +27,7 @@ The raw layer is never edited after ingest; corrections land as new
 sources and new compiled text, and the log records what changed and why.
 
 The founding decisions — including the one that was reversed the day it
-was made — stand in [[decision-register]]; the source behind both pages
+was made — stand in [[wiki/syntheses/decision-register|decision-register]]; the source behind both pages
 is [[founding-note]], and the caution labels pages can carry are defined
 on the [[notices]] rules page. The people and seats of this
 installation are catalogued under `wiki/entities/`; the owner's own page

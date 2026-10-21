@@ -1,5 +1,5 @@
 ---
-id: decision-register
+id: decision-register-ko
 title: 결정 등록부
 type: synthesis
 status: current

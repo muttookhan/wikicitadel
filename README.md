@@ -1,14 +1,18 @@
 # WikiCitadel
 
-**The LLM Wiki that proves what it says.**
+**The LLM Wiki that detects when its cited text changes.**
 
 WikiCitadel is a complete, working implementation of the LLM Wiki pattern:
 an agent maintains a personal wiki — raw sources preserved untouched, a
 compiled layer of interlinked pages, and a schema file that teaches the
-agent how the wiki is run — except that here, **every claim carries a
-verifiable citation, dead claims are severed so they cannot leak back
+agent how the wiki is run — except that here, **claims that rest on a
+specific passage carry a verifiable citation (in the seed corpus: 12
+citation markers across 29 pages; 9 pages list no sources), dead claims
+are severed so they cannot leak back
 into answers, and the system will say "not recorded" instead of
 inventing.** Most LLM wikis compile knowledge. This one can be *checked*.
+A citation lockfile detects when cited text changes; it does not
+verify that a claim is true.
 
 ```
 raw/        sources, preserved verbatim, never edited after ingest
@@ -35,8 +39,8 @@ files in minutes, with no account and no API key:
    corpus resolves to the exact lines it cites.
 3. Build the reading portal: `tools/lens/rebuild.sh`, then open the
    generated Lens — search the seed wiki, open the Briefing, and find
-   the one idea waiting on an owner's ruling, with its Approve / Reject
-   buttons.
+   the one idea waiting on an owner's ruling, shown read-only —
+   rulings are given in chat with the agent, never in the portal.
 4. Ask the corpus a question it cannot answer and watch it abstain
    rather than guess (the Ask door's contract, `tools/ask/`).
 
@@ -46,14 +50,17 @@ work under `AGENTS.md`.
 ## What makes it different
 
 - **Citation integrity, mechanically enforced.** Claims cite
-  `file#La–Lb`; a lockfile hashes the cited lines; a nightly audit
-  re-verifies them, and drift is a named finding, never a silent rot.
+  `file#La–Lb`; a lockfile hashes the cited lines; an operator-run
+  audit (`python3 scripts/wiki_cite_lock.py check`) re-verifies them,
+  and drift is a named finding, never a silent rot.
 - **Severance.** When a claim is superseded or withdrawn, a register
   entry removes it from retrieval — including its paraphrases — while
   the record of what was believed, and why it died, stays inspectable.
-  (Independent measurement of a popular memory system found corrected
-  values resurrected in 46.7% of trials. Here, resurrection is a test
-  failure.)
+  (Inspeximus — DanceNitra/inspeximus, the measurement cited in
+  `scripts/wiki_erasure.py` — found a popular memory system
+  resurrected corrected values in 46.7% of trials, while a
+  supersede-with-receipt discipline held at 0%. Here, resurrection is
+  a test failure.)
 - **Abstention as a feature.** An explicit gate, tuned on a frozen
   battery, decides when the corpus does not know — and the door says so.
 - **Governance with receipts.** Agent writes go through a governed
@@ -98,6 +105,30 @@ Apache-2.0-licensed project, the schema credits it by name; mechanisms
 from copyleft or source-available projects were re-implemented from
 their published ideas only. Third-party code and fonts keep their own
 licences where they appear.
+
+## Status and known limitations
+
+WikiCitadel v1: a working seed installation and engine, maintained as
+a public edition. Known limitations, stated plainly:
+
+- **The seed corpus is a demo, not coverage.** 29 pages, 12 citation
+  markers, 9 pages listing no sources. The machinery is the product;
+  the corpus only demonstrates it.
+- **Citation checks detect change, not truth.** The lockfile proves
+  cited text has not moved since it was locked. Whether a claim is
+  *true* is settled by the proof bar in `AGENTS.md`, not by a hash.
+- **The checkpoint tests need `ssh-keygen`** (OpenSSH client) on the
+  PATH: they generate a throwaway signing key per run. Without it
+  those tests skip with the reason stated; the CI workflow installs
+  `openssh-client`.
+- **The container image is step-verified, not image-verified, in the
+  maintainer's environment:** every Dockerfile step is exercised
+  locally, but the image build itself has not been run where Docker
+  is unavailable.
+- **The model router is a seam, not a service:** no model provider is
+  wired in this edition, by design.
+- **Audits are operator-run.** Nothing in this edition runs on a
+  schedule by itself; the commands are in `AGENTS.md` and this README.
 
 ## Licence
 

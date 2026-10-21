@@ -1,5 +1,5 @@
 ---
-id: overview
+id: overview-ko
 title: 개요
 type: synthesis
 status: current
@@ -25,4 +25,4 @@ translation_of: wiki/overview.md
 
 컴파일된 층의 모든 주장은 그런 형식의 인용을 달고 있어서, 독자는 어떤 문장이라도 몇 초 만에 보존된 출처와 대조할 수 있다. 원본(raw) 층은 수집 이후 결코 편집되지 않는다. 수정은 새 출처와 새 컴파일 텍스트로 들어오며, 로그에는 무엇이 왜 바뀌었는지가 기록된다.
 
-창립 당시의 결정들 ― 내려진 바로 그날 뒤집힌 결정까지 포함하여 ― 은 [[decision-register]] 에 서 있고, 두 페이지의 배후에 있는 출처는 [[founding-note]] 이며, 페이지가 달 수 있는 주의 라벨은 [[notices]] 규칙 페이지에 정의되어 있다. 이 설치의 사람들과 자리는 `wiki/entities/` 아래에 목록화되어 있고, 소유자 자신의 페이지는 [[owner]] 이다.
+창립 당시의 결정들 ― 내려진 바로 그날 뒤집힌 결정까지 포함하여 ― 은 [[wiki/syntheses/decision-register|decision-register]] 에 서 있고, 두 페이지의 배후에 있는 출처는 [[founding-note]] 이며, 페이지가 달 수 있는 주의 라벨은 [[notices]] 규칙 페이지에 정의되어 있다. 이 설치의 사람들과 자리는 `wiki/entities/` 아래에 목록화되어 있고, 소유자 자신의 페이지는 [[owner]] 이다.

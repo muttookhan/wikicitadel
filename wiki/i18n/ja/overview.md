@@ -1,5 +1,5 @@
 ---
-id: overview
+id: overview-ja
 title: 概要
 type: synthesis
 status: current
@@ -25,4 +25,4 @@ translation_of: wiki/overview.md
 
 コンパイル層のすべての主張はその形式での引用を伴うため、読者はどの文でも数秒で保存された出典と照合できる。raw層は取り込み後に決して編集されない。修正は新しい出典と新しいコンパイル済みテキストとして加わり、ログには何がなぜ変わったかが記録される。
 
-創設時の決定――なされたその日のうちに覆された決定を含む――は [[decision-register]] にあり、両ページの背後にある出典は [[founding-note]] で、ページが帯びうる注意ラベルは [[notices]] ルールページで定義されている。このインスタレーションの人々と席は `wiki/entities/` の下に目録化されており、所有者自身のページは [[owner]] である。
+創設時の決定――なされたその日のうちに覆された決定を含む――は [[wiki/syntheses/decision-register|decision-register]] にあり、両ページの背後にある出典は [[founding-note]] で、ページが帯びうる注意ラベルは [[notices]] ルールページで定義されている。このインスタレーションの人々と席は `wiki/entities/` の下に目録化されており、所有者自身のページは [[owner]] である。

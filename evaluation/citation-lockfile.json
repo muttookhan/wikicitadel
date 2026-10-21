@@ -1,19 +1,19 @@
 {
   "tool": "wiki_cite_lock citation lockfile",
   "lockfile_version": 2,
-  "generated": "2026-10-20",
+  "generated": "2026-10-21",
   "note": "Per-citation lock: claim hash + cited-line hashes as of the generated date, plus a TextQuoteSelector second anchor per citation (dual anchoring). CHANGED means the cited content differs — re-verify the claim by hand; MOVED means the same passage lives at a new range (re-run build to re-lock); AMBIGUOUS means the quoted passage occurs more than once and its context cannot disambiguate it. The manifest records each source's converter identity where the record supports one (unknown-legacy where it does not). Patterns: tng-wiki lockfile (MIT), okf-harness manifest (Apache-2.0), zissa-wiki quote check (MIT), wiki-skills audit (MIT), KNOX converter identity (MIT), W3C Web Annotation selectors — all re-implemented.",
   "converter": {
     "tool": "wiki_convert.py",
-    "script_sha256": "b728a79687feb0a10f18dc1dd5698b0c279ef02e74c23cbdc93aacdef30954a7",
+    "script_sha256": "79de1cbe923c9ca8a7a7a8b63fd3f5a86a64545c51ae28baf6d39330eb63f155",
     "sanitizer_sha256": "a9a1770506b265b6e7f51bc2b86b503c3ee31e5183cf89d709959563dc3a212d"
   },
   "coverage": {
-    "pages_scanned": 9,
-    "pages_with_markers": 3,
-    "citations": 4,
+    "pages_scanned": 29,
+    "pages_with_markers": 9,
+    "citations": 12,
     "sources_registered": 1,
-    "selectors": 4,
+    "selectors": 12,
     "converter_recorded": 0,
     "converter_unknown_legacy": 1
   },
@@ -45,8 +45,212 @@
     },
     {
       "id": "c0002",
+      "page": "wiki/i18n/de/overview.md",
+      "page_line": 24,
+      "claim": "Dieses Wiki existiert, weil der Eigentümer sich entschied, den Kontext des Agenten sichtbar zu halten, in versionierten Dateien, die jede Person prüfen kann, statt im eigenen Gedächtnis des Agenten.",
+      "claim_hash": "ca248b66d2bc17fe3398826c86a75ab2da03ce7a5784afc0640e37928a901d14",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        3,
+        7
+      ],
+      "line_hashes": [
+        "4408bc4b4a3c151e005b92f005ff0343a3e6885298540109cd22ccba0229ce83",
+        "cdbb7ddad51f1e9c365765ca78e0437a992f9786aa8b9dddcf2d03c7cf44f533",
+        "82e0002876a0a8459cd229282a9542c48cc9fe292981d2d00cb3cd3be33a5a3a",
+        "852ad901f1b4ef04472da04b7842a9f2b653f3cf4eade833251ee896a9797464",
+        "dd8e8f0ee2d21bb5533bd056df130116428d29ea2738abea97f8aabe6169f065"
+      ],
+      "content_hash": "3f0de5c9edd17ccc4b61d1dbc9d0c500d6dfc4a96e071d6817ba0526e262d513",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "I am setting up this wiki because I do not want the agent's working memory\nto live inside the agent, where I cannot see it, check it, or hand it to\nanother agent. Everything the agent knows about my work should live here,\nin plain files under version control, with the source of every claim\nattached to the claim.",
+        "prefix": "tated by the owner, 2026-01-15\n\n",
+        "suffix": "\n\nTo keep things moving I am giv"
+      }
+    },
+    {
+      "id": "c0003",
+      "page": "wiki/i18n/ja/decision-register.md",
+      "page_line": 26,
+      "claim": "**D1 ― 一括指示（置き換えられた形式）。** 所有者は、エージェントが毎回尋ねることなく作業――読むこと、ファイリングすること、構築すること――を進めてよいと指示した。 この形式の決定は同日のうちにD2によって置き換えられた。ここに残され、処遇レジスタにも否定的な処遇とともに残されているのは、静かに書き換えられたレジスタが後のすべての読者に偽りの歴史を教えてしまうためである。",
+      "claim_hash": "975aa4d27b9aaecb38c2cb8d47f7edfa7c017f2bd5e9b3d392a882a87067e1a9",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        9,
+        12
+      ],
+      "line_hashes": [
+        "aa7f6cce2dd058b0fdd7ad652264333171f83172c6e67137b429ca2be921e854",
+        "041b1274423a01ef0d92d47c00478c7365237a767b711a0e6ae1e786c97a55cb",
+        "69d9298917ab0b8e536e8054620d0536cacb792042a6690ed963d4053a4e2a23",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ],
+      "content_hash": "ca62113a89653cdde347adfdbf166c6d7382827644e83ebb01112cb55ae2a99b",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "To keep things moving I am giving a blanket direction: the agent may\nproceed with the work — reading, filing, building — without asking me\neach time.\n",
+        "prefix": "y claim\nattached to the claim.\n\n",
+        "suffix": "\nOne correction, the same day, a"
+      }
+    },
+    {
+      "id": "c0004",
+      "page": "wiki/i18n/ja/decision-register.md",
+      "page_line": 28,
+      "claim": "**D2 ― 決定は決して対象に含まれない（現行）。** 所有者は同日のうちに一括指示を覆した。決定はその対象に含まれず、すべての決定には所有者自身の承認が必要である。",
+      "claim_hash": "1891c1ead6f979c00e5e1a871bcfe899f90df26d4acdc5c6d31e5fbd2eb16601",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        13,
+        16
+      ],
+      "line_hashes": [
+        "6f964512d0630a3aa74ba646b1ffa40e4ab0fd5ca9b843b7a06aec5984b9b405",
+        "4a7ec0cee94ff0735e0a2aaa0417f4dc4a20dfc79e0411b96ac899722430aae3",
+        "e5fa6dd1d3bdf563accec9f92bfe3d6b9195bce95cce9e107869e1078502d25d",
+        "d54015565d0d61cf1a5412496ea344f92792a29f7c66e31d53037bd251480ece"
+      ],
+      "content_hash": "cb6d807b466ee6c5c44db08f52d9c997a943c15b48b0859fd510980b1c46be23",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "One correction, the same day, and it overrides the sentence above wherever\nthe two conflict: that direction covers work, never decisions. Every\ndecision — what to adopt, what to publish, what to spend, what to delete —\nneeds my own approval, asked for one at a time.",
+        "prefix": "— without asking me\neach time.\n\n",
+        "suffix": ""
+      }
+    },
+    {
+      "id": "c0005",
+      "page": "wiki/i18n/ja/overview.md",
+      "page_line": 24,
+      "claim": "このウィキが存在するのは、所有者が、エージェントの文脈を、エージェント自身の記憶の中ではなく、誰もが検証できる版管理されたファイルの中に、目に見える形で保持することを選んだからである。",
+      "claim_hash": "8fc84cc7f2ef1ac7b30ee1982653c3441e5d578a5816bd0055802b05c9eac1d7",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        3,
+        7
+      ],
+      "line_hashes": [
+        "4408bc4b4a3c151e005b92f005ff0343a3e6885298540109cd22ccba0229ce83",
+        "cdbb7ddad51f1e9c365765ca78e0437a992f9786aa8b9dddcf2d03c7cf44f533",
+        "82e0002876a0a8459cd229282a9542c48cc9fe292981d2d00cb3cd3be33a5a3a",
+        "852ad901f1b4ef04472da04b7842a9f2b653f3cf4eade833251ee896a9797464",
+        "dd8e8f0ee2d21bb5533bd056df130116428d29ea2738abea97f8aabe6169f065"
+      ],
+      "content_hash": "3f0de5c9edd17ccc4b61d1dbc9d0c500d6dfc4a96e071d6817ba0526e262d513",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "I am setting up this wiki because I do not want the agent's working memory\nto live inside the agent, where I cannot see it, check it, or hand it to\nanother agent. Everything the agent knows about my work should live here,\nin plain files under version control, with the source of every claim\nattached to the claim.",
+        "prefix": "tated by the owner, 2026-01-15\n\n",
+        "suffix": "\n\nTo keep things moving I am giv"
+      }
+    },
+    {
+      "id": "c0006",
+      "page": "wiki/i18n/ko/decision-register.md",
+      "page_line": 26,
+      "claim": "이 형식의 결정은 같은 날 D2에 의해 대체되었다.",
+      "claim_hash": "2bfb250c34261a36f765cf84d74232842686f510d9f8d10d3c9f0099f82d1839",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        9,
+        12
+      ],
+      "line_hashes": [
+        "aa7f6cce2dd058b0fdd7ad652264333171f83172c6e67137b429ca2be921e854",
+        "041b1274423a01ef0d92d47c00478c7365237a767b711a0e6ae1e786c97a55cb",
+        "69d9298917ab0b8e536e8054620d0536cacb792042a6690ed963d4053a4e2a23",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ],
+      "content_hash": "ca62113a89653cdde347adfdbf166c6d7382827644e83ebb01112cb55ae2a99b",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "To keep things moving I am giving a blanket direction: the agent may\nproceed with the work — reading, filing, building — without asking me\neach time.\n",
+        "prefix": "y claim\nattached to the claim.\n\n",
+        "suffix": "\nOne correction, the same day, a"
+      }
+    },
+    {
+      "id": "c0007",
+      "page": "wiki/i18n/ko/decision-register.md",
+      "page_line": 28,
+      "claim": "**D2 ― 결정은 결코 포함되지 않는다(현행).** 소유자는 같은 날 포괄 지시를 뒤집었다. 결정은 그 대상에 포함되지 않으며, 모든 결정에는 소유자 자신의 승인이 필요하다.",
+      "claim_hash": "1a8602610a448ade3d3ae5dca8f13e2d992bab45634077ed553c392ab44d6a06",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        13,
+        16
+      ],
+      "line_hashes": [
+        "6f964512d0630a3aa74ba646b1ffa40e4ab0fd5ca9b843b7a06aec5984b9b405",
+        "4a7ec0cee94ff0735e0a2aaa0417f4dc4a20dfc79e0411b96ac899722430aae3",
+        "e5fa6dd1d3bdf563accec9f92bfe3d6b9195bce95cce9e107869e1078502d25d",
+        "d54015565d0d61cf1a5412496ea344f92792a29f7c66e31d53037bd251480ece"
+      ],
+      "content_hash": "cb6d807b466ee6c5c44db08f52d9c997a943c15b48b0859fd510980b1c46be23",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "One correction, the same day, and it overrides the sentence above wherever\nthe two conflict: that direction covers work, never decisions. Every\ndecision — what to adopt, what to publish, what to spend, what to delete —\nneeds my own approval, asked for one at a time.",
+        "prefix": "— without asking me\neach time.\n\n",
+        "suffix": ""
+      }
+    },
+    {
+      "id": "c0008",
+      "page": "wiki/i18n/ko/overview.md",
+      "page_line": 24,
+      "claim": "이 위키가 존재하는 것은, 소유자가 에이전트의 맥락을 에이전트 자신의 기억이 아니라 누구나 검사할 수 있는 버전 관리 파일 안에 눈에 보이게 보관하기로 선택했기 때문이다.",
+      "claim_hash": "a64dc597d2785de06a28d7d3258df1fa4b398720694c686949fc9615057708af",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        3,
+        7
+      ],
+      "line_hashes": [
+        "4408bc4b4a3c151e005b92f005ff0343a3e6885298540109cd22ccba0229ce83",
+        "cdbb7ddad51f1e9c365765ca78e0437a992f9786aa8b9dddcf2d03c7cf44f533",
+        "82e0002876a0a8459cd229282a9542c48cc9fe292981d2d00cb3cd3be33a5a3a",
+        "852ad901f1b4ef04472da04b7842a9f2b653f3cf4eade833251ee896a9797464",
+        "dd8e8f0ee2d21bb5533bd056df130116428d29ea2738abea97f8aabe6169f065"
+      ],
+      "content_hash": "3f0de5c9edd17ccc4b61d1dbc9d0c500d6dfc4a96e071d6817ba0526e262d513",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "I am setting up this wiki because I do not want the agent's working memory\nto live inside the agent, where I cannot see it, check it, or hand it to\nanother agent. Everything the agent knows about my work should live here,\nin plain files under version control, with the source of every claim\nattached to the claim.",
+        "prefix": "tated by the owner, 2026-01-15\n\n",
+        "suffix": "\n\nTo keep things moving I am giv"
+      }
+    },
+    {
+      "id": "c0009",
+      "page": "wiki/i18n/zh/overview.md",
+      "page_line": 24,
+      "claim": "本维基之所以存在，是因为所有者选择把智能体的上下文以可见的方式保存在任何人都可以检查的受版本管理的文件中，而不是保存在智能体自身的记忆里。",
+      "claim_hash": "132ac311535a1564da0f7909a4ab4deaf542dd308c73a930e9ab1b1dc6d4925d",
+      "source": "raw/sources/founding-note.md",
+      "range": [
+        3,
+        7
+      ],
+      "line_hashes": [
+        "4408bc4b4a3c151e005b92f005ff0343a3e6885298540109cd22ccba0229ce83",
+        "cdbb7ddad51f1e9c365765ca78e0437a992f9786aa8b9dddcf2d03c7cf44f533",
+        "82e0002876a0a8459cd229282a9542c48cc9fe292981d2d00cb3cd3be33a5a3a",
+        "852ad901f1b4ef04472da04b7842a9f2b653f3cf4eade833251ee896a9797464",
+        "dd8e8f0ee2d21bb5533bd056df130116428d29ea2738abea97f8aabe6169f065"
+      ],
+      "content_hash": "3f0de5c9edd17ccc4b61d1dbc9d0c500d6dfc4a96e071d6817ba0526e262d513",
+      "selector": {
+        "type": "TextQuoteSelector",
+        "exact": "I am setting up this wiki because I do not want the agent's working memory\nto live inside the agent, where I cannot see it, check it, or hand it to\nanother agent. Everything the agent knows about my work should live here,\nin plain files under version control, with the source of every claim\nattached to the claim.",
+        "prefix": "tated by the owner, 2026-01-15\n\n",
+        "suffix": "\n\nTo keep things moving I am giv"
+      }
+    },
+    {
+      "id": "c0010",
       "page": "wiki/overview.md",
-      "page_line": 19,
+      "page_line": 22,
       "claim": "This wiki exists because the owner chose to hold the agent's context visibly, in versioned files anyone can inspect, rather than in the agent's own memory.",
       "claim_hash": "a10b6bb2290ec68bc9fc8521cf40ca1b1e64f058c4133d1d3b93aa4ca1588dcd",
       "source": "raw/sources/founding-note.md",
@@ -70,9 +274,9 @@
       }
     },
     {
-      "id": "c0003",
+      "id": "c0011",
       "page": "wiki/syntheses/decision-register.md",
-      "page_line": 23,
+      "page_line": 26,
       "claim": "This form of the decision was superseded the same day by D2; it is retained here, and in the treatment register with a negative treatment, because a register that quietly rewrote it would teach every later reader a false history.",
       "claim_hash": "0b7902f902a0116d717d9a6d60dd0b8409f54e7f56064e870c335d41b80121c7",
       "source": "raw/sources/founding-note.md",
@@ -95,9 +299,9 @@
       }
     },
     {
-      "id": "c0004",
+      "id": "c0012",
       "page": "wiki/syntheses/decision-register.md",
-      "page_line": 28,
+      "page_line": 31,
       "claim": "**D2 — Decisions are never covered (current).** The owner reversed the blanket direction the same day: decisions are NOT covered by it — every decision needs the owner's own approval.",
       "claim_hash": "bc57ef12a42b35d2d45f2825f3cdf28a8be3215fcbcda6a6ba3836a6fc7cd6e9",
       "source": "raw/sources/founding-note.md",
