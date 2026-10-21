@@ -112,7 +112,7 @@ WikiCitadel is an implementation of Andrej Karpathy's LLM Wiki pattern — immut
 - **Golden sets & extended baselines** — a golden question set (deliberately small), pooled coverage/MRR baselines, and a severance benchmark whose regressions must be explained on the record.
 - **Retrieval watch & search health** — standing instrumentation over search quality, filed on a cadence; anomalies are a security signal, not just a quality one.
 - **Judge calibration** — model-judge scoring kept honest against human labels, with certification refused until the labelled set exists.
-- **Test suites** — in the reference deployment: 834 checks over the wiki scripts, 163 over the Ask door, 74 over the gateway (October 2026), plus a corpus validator that must pass before any integration lands.
+- **Test suites** — in the reference deployment: 907 checks over the wiki scripts, 252 over the Ask door, 74 over the gateway, 28 over the local editor (re-measured 2026-10-20), plus a corpus validator that must pass before any integration lands.
 
 ## 12 · Adopted for this edition (from the 2026-10 landscape research)
 
@@ -127,7 +127,9 @@ The public edition adds the adoption machinery the research showed the category'
 - **Standard exports** — JSON-LD, GraphML, Marp, `llms.txt`, an OKF-style bundle — and a plain-markdown import path: you can leave, and you can arrive.
 - **A README in the winning order** — promise and proof above the fold, principles first, honest capability boundaries, a comparison table, changelog on top.
 
-**Not in this edition, stated plainly:** a desktop or mobile app, a hosted cloud, real-time co-editing, a browser clipper, and a hybrid vector-search engine (the index-based path's scale limit is stated in §4 instead). Later versions may revisit each; this edition would rather be honest than broad.
+**Added in the 2026-10-20 build wave** (each scoped, each with its remainder stated in its own doc): standard exports (JSON-LD / GraphML / Marp) and a byte-preserving markdown-vault import; a persistent, crash-recovering ingest queue with leased claims; a CLI web clipper + media capture through the converter's injection defences; a standalone interactive graph export (one offline HTML file); a multi-provider routing seam with cost ledger and response cache (decision + accounting only — no provider is wired); a CaMeLS-style quarantined extractor for untrusted text; a single-user local editor (loopback-only, concurrency-guarded); a git sync helper that surfaces divergence instead of resolving it; starter presets; reproducible benchmark packs and a measured search scale ceiling (BENCHMARKS.md); a one-command demo runner; narration-script generation for audio briefings (script only, no audio); community files and Japanese/Korean seed demo pages.
+
+**Not in this edition, stated plainly:** a desktop or mobile app, a hosted cloud, real-time co-editing, a browser-*extension* clipper (the clipper ships as a CLI), synced audio generation, and a hybrid vector-search engine (the measured scale ceiling is stated in BENCHMARKS.md). Later versions may revisit each; this edition would rather be honest than broad.
 
 ---
 
