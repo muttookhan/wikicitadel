@@ -13,10 +13,16 @@ Subcommands:
                     reported, never merged or rebased (exit 2)
   push              push the current branch (refuses while conflicted)
   sync              pull, then push
+  bundle            write ONE self-contained offline HTML reading
+                    bundle (page index + full page texts + in-page
+                    search, no external assets) for phone reading;
+                    refuses while the tree is conflicted
 
 Stdlib only. All git output is passed through; nothing is hidden.
 """
 import argparse
+import html
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -99,13 +105,111 @@ def cmd_push(root, remote):
     return r.returncode
 
 
+# ----------------------------------------------------------------
+# Offline reading bundle (mobile): ONE self-contained HTML file.
+# ----------------------------------------------------------------
+
+def _page_title(text, stem):
+    """A page's title: frontmatter title, else first H1, else stem."""
+    fm = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+    if fm:
+        m = re.search(r"^title:\s*[\"']?(.*?)[\"']?\s*$", fm.group(1), re.M)
+        if m and m.group(1):
+            return m.group(1)
+    m = re.search(r"^#\s+(.+)$", text, re.M)
+    return m.group(1).strip() if m else stem
+
+
+def collect_pages(root):
+    """Every compiled page under wiki/, in deterministic order:
+    [{path (repo-relative), title, text}] sorted by path."""
+    root = Path(root)
+    wiki = root / "wiki"
+    pages = []
+    if wiki.is_dir():
+        for p in sorted(wiki.rglob("*.md")):
+            if p.is_file():
+                text = p.read_text(encoding="utf-8", errors="replace")
+                pages.append({"path": str(p.relative_to(root)),
+                              "title": _page_title(text, p.stem),
+                              "text": text})
+    return pages
+
+
+_BUNDLE_CSS = (
+    "body{font-family:system-ui,sans-serif;margin:1rem auto;"
+    "max-width:42rem;padding:0 1rem;line-height:1.6}"
+    "article{border-top:1px solid #999;margin-top:2rem}"
+    "pre{white-space:pre-wrap;word-wrap:break-word}"
+    "#q{width:100%;font-size:1.1rem;padding:.5rem}")
+
+
+def build_bundle(root):
+    """The bundle HTML for a tree: page index + full page texts +
+    in-page search, inline CSS/JS only, NO external assets, and
+    deterministic (sorted pages, no timestamps) — the same tree
+    always builds the byte-identical bundle."""
+    pages = collect_pages(root)
+    parts = ["<!DOCTYPE html>", '<html lang="en"><head>',
+             '<meta charset="utf-8">',
+             '<meta name="viewport" content="width=device-width, '
+             'initial-scale=1">',
+             "<title>Wiki reading bundle</title>",
+             f"<style>{_BUNDLE_CSS}</style></head><body>",
+             "<h1>Wiki reading bundle</h1>",
+             '<input id="q" type="search" placeholder="Search pages" '
+             'aria-label="Search pages">',
+             "<nav><ul>"]
+    for i, pg in enumerate(pages):
+        parts.append(f'<li><a href="#p{i}">'
+                     f'{html.escape(pg["title"])}</a> '
+                     f'({html.escape(pg["path"])})</li>')
+    parts.append("</ul></nav>")
+    for i, pg in enumerate(pages):
+        parts.append(f'<article id="p{i}" data-title="'
+                     f'{html.escape(pg["title"], quote=True)}">')
+        parts.append(f"<h2>{html.escape(pg['title'])}</h2>")
+        parts.append(f"<p><em>{html.escape(pg['path'])}</em></p>")
+        parts.append(f"<pre>{html.escape(pg['text'])}</pre>")
+        parts.append("</article>")
+    parts.append(
+        "<script>var q=document.getElementById('q');"
+        "q.addEventListener('input',function(){"
+        "var needle=q.value.toLowerCase();"
+        "document.querySelectorAll('article').forEach(function(a){"
+        "a.style.display=(!needle||a.textContent.toLowerCase()"
+        ".indexOf(needle)>=0)?'':'none';});});</script>")
+    parts.append("</body></html>")
+    return "\n".join(parts) + "\n", pages
+
+
+def cmd_bundle(root, out=None):
+    """Write the reading bundle. Refuses while the tree is
+    conflicted — the same custody check push uses."""
+    if conflicted_paths(root):
+        print("refusing to bundle: unresolved conflicts present",
+              file=sys.stderr)
+        return 1
+    text, pages = build_bundle(root)
+    dest = Path(out) if out else Path(root) / "wiki-bundle.html"
+    dest.write_text(text, encoding="utf-8")
+    print(f"bundle: {dest} ({len(pages)} pages, {len(text)} bytes)")
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("command", choices=["status", "pull", "push", "sync"])
+    ap.add_argument("command",
+                    choices=["status", "pull", "push", "sync", "bundle"])
     ap.add_argument("--root", default=str(Path(__file__).resolve().parent.parent))
     ap.add_argument("--remote", default="origin")
+    ap.add_argument("--out", default=None,
+                    help="bundle output path (bundle command only; "
+                    "default: <root>/wiki-bundle.html)")
     args = ap.parse_args(argv)
     root = Path(args.root)
+    if args.command == "bundle":
+        return cmd_bundle(root, args.out)
     if args.command == "status":
         return cmd_status(root, args.remote)
     if args.command == "pull":

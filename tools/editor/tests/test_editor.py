@@ -26,6 +26,7 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from tools.editor import core  # noqa: E402
+from tools.editor import preview  # noqa: E402
 from tools.editor import server as editor_server  # noqa: E402
 
 TODAY = "2026-10-20"
@@ -511,6 +512,355 @@ class TestLiveServer(FixtureCase):
         self.assertEqual(status, 400)
         status, _ = self._request("GET", "/edit?path=concepts/missing.md")
         self.assertEqual(status, 404)
+
+
+# ---------------------------------------------------------------------
+# Lane E additions: safe preview, recent-pages log, create-from-template.
+# ---------------------------------------------------------------------
+
+TEMPLATE_CONCEPT = """---
+title: ""
+type: concept
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+sources: []
+tags: []
+---
+
+# <Concept>
+
+## Definition (in our own words)
+
+Template body marker.
+"""
+
+TEMPLATE_ENTITY = """---
+title: ""
+type: entity
+created: YYYY-MM-DD
+updated: YYYY-MM-DD
+sources: []
+tags: []
+---
+
+# <Name>
+
+Entity template body.
+"""
+
+
+def _make_templates(root: Path) -> Path:
+    templates = root / "templates"
+    (templates / "capture").mkdir(parents=True)
+    (templates / "presets" / "demo" / "files").mkdir(parents=True)
+    (templates / "concept.md").write_text(TEMPLATE_CONCEPT, encoding="utf-8")
+    (templates / "entity.md").write_text(TEMPLATE_ENTITY, encoding="utf-8")
+    (templates / "capture" / "note.md").write_text(
+        TEMPLATE_CONCEPT.replace("concept", "concept"), encoding="utf-8"
+    )
+    (templates / "presets" / "demo" / "preset.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
+    (templates / "presets" / "demo" / "files" / "seed.md").write_text(
+        "preset file, not a page template\n", encoding="utf-8"
+    )
+    return templates
+
+
+class TestPreview(unittest.TestCase):
+    def test_script_tag_renders_inert(self) -> None:
+        out = preview.render_markdown("<script>alert(1)</script>")
+        self.assertNotIn("<script", out)
+        self.assertIn("&lt;script&gt;", out)
+        self.assertIn("alert(1)", out)
+
+    def test_img_onerror_renders_inert(self) -> None:
+        out = preview.render_markdown('<img src=x onerror="alert(1)">')
+        self.assertNotIn("<img", out)
+        self.assertIn("&lt;img", out)
+
+    def test_raw_html_in_heading_and_code_inert(self) -> None:
+        out = preview.render_markdown("# Hi <b>there</b>\n\n`<i>x</i>`\n")
+        self.assertNotIn("<b>", out)
+        self.assertNotIn("<i>", out)
+        self.assertIn("&lt;b&gt;", out)
+        self.assertIn("<h1>", out)
+        self.assertIn("<code>", out)
+
+    def test_javascript_link_neutralised(self) -> None:
+        out = preview.render_markdown("[click](javascript:alert(1))")
+        self.assertNotIn("javascript:", out)
+        self.assertNotIn("<a ", out)
+        self.assertIn("click", out)
+
+    def test_data_uri_link_neutralised(self) -> None:
+        out = preview.render_markdown("[x](data:text/html;base64,AAAA)")
+        self.assertNotIn("<a ", out)
+
+    def test_https_and_relative_links_allowed(self) -> None:
+        out = preview.render_markdown(
+            "[site](https://example.org/a) and [page](concepts/beta.md)"
+        )
+        self.assertIn('<a href="https://example.org/a">site</a>', out)
+        self.assertIn('<a href="concepts/beta.md">page</a>', out)
+
+    def test_headings_paragraph_emphasis(self) -> None:
+        out = preview.render_markdown(
+            "# Title\n\nA **bold** and *calm* word, plus `code`.\n"
+        )
+        self.assertIn("<h1>Title</h1>", out)
+        self.assertIn("<strong>bold</strong>", out)
+        self.assertIn("<em>calm</em>", out)
+        self.assertIn("<code>code</code>", out)
+
+    def test_lists(self) -> None:
+        out = preview.render_markdown("- one\n- two\n\n1. first\n2. second\n")
+        self.assertIn("<ul><li>one</li><li>two</li></ul>", out)
+        self.assertIn("<ol><li>first</li><li>second</li></ol>", out)
+
+    def test_fenced_code_block_escaped_no_inline(self) -> None:
+        out = preview.render_markdown("```\n<b>**not bold**</b>\n```\n")
+        self.assertIn("<pre><code>", out)
+        self.assertIn("&lt;b&gt;**not bold**&lt;/b&gt;", out)
+        self.assertNotIn("<strong>", out)
+
+    def test_table(self) -> None:
+        out = preview.render_markdown(
+            "| Name | Kind |\n| --- | --- |\n| Alpha | concept |\n"
+        )
+        self.assertIn("<th>Name</th>", out)
+        self.assertIn("<td>Alpha</td>", out)
+        self.assertIn("<td>concept</td>", out)
+
+    def test_wikilink_becomes_span_with_target(self) -> None:
+        out = preview.render_markdown("See [[decision-register]] and [[owner|the owner]].")
+        self.assertIn('data-target="decision-register"', out)
+        self.assertIn('data-target="owner"', out)
+        self.assertIn("the owner", out)
+        self.assertNotIn("[[", out)
+
+    def test_blockquote_and_rule(self) -> None:
+        out = preview.render_markdown("> quoted words\n\n---\n\nAfter.\n")
+        self.assertIn("<blockquote><p>quoted words</p></blockquote>", out)
+        self.assertIn("<hr>", out)
+
+    def test_ampersand_escaped_once(self) -> None:
+        out = preview.render_markdown("Fish & chips < 3\n")
+        self.assertIn("Fish &amp; chips &lt; 3", out)
+
+
+class TestRecentLog(unittest.TestCase):
+    def test_most_recent_first_and_deduped(self) -> None:
+        log = core.RecentLog()
+        log.record("open", "a.md", at="2026-10-20T01:00:00+00:00")
+        log.record("open", "b.md", at="2026-10-20T02:00:00+00:00")
+        log.record("save", "a.md", at="2026-10-20T03:00:00+00:00")
+        entries = log.recent()
+        self.assertEqual([e["path"] for e in entries], ["a.md", "b.md"])
+        self.assertEqual(entries[0]["action"], "save")
+
+    def test_limit_caps_entries(self) -> None:
+        log = core.RecentLog(limit=5)
+        for i in range(9):
+            log.record("open", f"p{i}.md", at=f"2026-10-20T0{i}:00:00+00:00")
+        self.assertEqual(len(log.recent(50)), 5)
+        self.assertEqual(log.recent(1)[0]["path"], "p8.md")
+
+    def test_persistence_round_trip(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            data_dir = Path(td) / "editor-state"
+            log = core.RecentLog(data_dir)
+            log.record("create", "concepts/new.md", at="2026-10-20T01:00:00+00:00")
+            self.assertTrue((data_dir / "recent.json").is_file())
+            again = core.RecentLog(data_dir)
+            self.assertEqual(again.recent()[0]["path"], "concepts/new.md")
+            self.assertEqual(again.recent()[0]["action"], "create")
+
+    def test_corrupt_state_file_is_empty_log(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            data_dir = Path(td)
+            (data_dir / "recent.json").write_text("{not json", encoding="utf-8")
+            log = core.RecentLog(data_dir)
+            self.assertEqual(log.recent(), [])
+
+    def test_unknown_action_refused(self) -> None:
+        with self.assertRaises(ValueError):
+            core.RecentLog().record("delete", "a.md")
+
+
+class TestCreateFromTemplate(FixtureCase):
+    def setUp(self) -> None:
+        super().setUp()
+        self.templates = _make_templates(Path(self._tmp.name))
+
+    def test_list_templates_offers_page_and_capture_not_presets(self) -> None:
+        offered = core.list_page_templates(self.templates)
+        names = [t["name"] for t in offered]
+        self.assertEqual(names, ["capture/note.md", "concept.md", "entity.md"])
+        by_name = {t["name"]: t for t in offered}
+        self.assertEqual(by_name["concept.md"]["kind"], "page")
+        self.assertEqual(by_name["capture/note.md"]["kind"], "capture")
+
+    def test_list_templates_missing_dir_is_empty(self) -> None:
+        self.assertEqual(core.list_page_templates(None), [])
+        self.assertEqual(
+            core.list_page_templates(Path(self._tmp.name) / "nope"), []
+        )
+
+    def test_create_from_template_body_and_skeleton(self) -> None:
+        result = core.create_page_from_template(
+            self.wiki, self.templates, "concept.md",
+            "concepts/from-template.md", "Fresh Concept", today=TODAY,
+        )
+        content = Path(self.wiki / "concepts/from-template.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(result["content"], content)
+        self.assertIn('title: "Fresh Concept"', content)
+        self.assertIn(f"created: {TODAY}", content)
+        self.assertIn("# Fresh Concept", content)  # heading placeholder filled
+        self.assertIn("Template body marker.", content)
+        self.assertNotIn("<Concept>", content)
+        self.assertNotIn("YYYY-MM-DD", content)
+
+    def test_template_type_is_default_and_explicit_type_wins(self) -> None:
+        core.create_page_from_template(
+            self.wiki, self.templates, "entity.md",
+            "entities/from-template.md", "Some Entity", today=TODAY,
+        )
+        content = (self.wiki / "entities/from-template.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("type: entity", content)
+        core.create_page_from_template(
+            self.wiki, self.templates, "entity.md",
+            "concepts/override.md", "Override", "concept", today=TODAY,
+        )
+        content = (self.wiki / "concepts/override.md").read_text(encoding="utf-8")
+        self.assertIn("type: concept", content)
+
+    def test_create_from_template_refuses_overwrite(self) -> None:
+        with self.assertRaises(core.AlreadyExistsError):
+            core.create_page_from_template(
+                self.wiki, self.templates, "concept.md",
+                "concepts/alpha.md", "Again", today=TODAY,
+            )
+
+    def test_template_escape_and_missing_refused(self) -> None:
+        with self.assertRaises(core.PathEscapeError):
+            core.create_page_from_template(
+                self.wiki, self.templates, "../outside.md",
+                "concepts/x.md", "X", today=TODAY,
+            )
+        with self.assertRaises(core.PageNotFoundError):
+            core.create_page_from_template(
+                self.wiki, self.templates, "no-such.md",
+                "concepts/x.md", "X", today=TODAY,
+            )
+        with self.assertRaises(core.PathEscapeError):
+            core.create_page_from_template(
+                self.wiki, self.templates, "presets/demo/files/seed.md",
+                "concepts/x.md", "X", today=TODAY,
+            )
+
+
+class TestLiveServerDepth(FixtureCase):
+    """Lane E routes over a real socket: preview, templates, recent."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        tmp = Path(self._tmp.name)
+        self.templates = _make_templates(tmp)
+        self.data_dir = tmp / "editor-data"
+        (self.wiki / "concepts" / "evil.md").write_text(
+            "---\ntitle: Evil\ntype: concept\ncreated: 2026-10-20\n"
+            "updated: 2026-10-20\nsources: []\ntags: []\n---\n\n"
+            "# Evil\n\n<script>alert(1)</script>\n",
+            encoding="utf-8",
+        )
+        self.httpd = editor_server.create_server(
+            self.wiki, self.backups, host="127.0.0.1", port=0,
+            templates_dir=self.templates, data_dir=self.data_dir,
+        )
+        self.port = self.httpd.server_address[1]
+        self.thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
+        self.thread.start()
+        self.addCleanup(self._stop)
+
+    def _stop(self) -> None:
+        self.httpd.shutdown()
+        self.httpd.server_close()
+        self.thread.join(timeout=5)
+
+    def _request(self, method: str, path: str, form: dict | None = None):
+        body = None
+        headers = {}
+        if form is not None:
+            body = urllib.parse.urlencode(form)
+            headers["Content-Type"] = "application/x-www-form-urlencoded"
+        conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
+        try:
+            conn.request(method, path, body=body, headers=headers)
+            response = conn.getresponse()
+            return response.status, response.read().decode("utf-8")
+        finally:
+            conn.close()
+
+    def test_edit_page_has_inert_preview_pane(self) -> None:
+        status, body = self._request(
+            "GET", "/edit?path=" + urllib.parse.quote("concepts/evil.md")
+        )
+        self.assertEqual(status, 200)
+        self.assertIn('class="preview"', body)
+        self.assertIn("&lt;script&gt;", body)
+        self.assertNotIn("<script>alert", body)
+        self.assertIn("<h1>Evil</h1>", body)
+
+    def test_preview_routes_render_without_writing(self) -> None:
+        status, body = self._request(
+            "GET", "/preview?path=" + urllib.parse.quote("concepts/alpha.md")
+        )
+        self.assertEqual(status, 200)
+        self.assertIn("<h1>Alpha</h1>", body)
+        status, body = self._request(
+            "POST", "/preview",
+            {"path": "concepts/alpha.md", "body": "# Draft\n\n**New** text.\n"},
+        )
+        self.assertEqual(status, 200)
+        self.assertIn("<strong>New</strong>", body)
+        # Nothing was written: the saved page is unchanged.
+        self.assertEqual(
+            core.read_page(self.wiki, "concepts/alpha.md")["content"], ALPHA
+        )
+
+    def test_new_page_offers_templates_and_create_uses_one(self) -> None:
+        status, body = self._request("GET", "/new")
+        self.assertEqual(status, 200)
+        self.assertIn("concept.md", body)
+        self.assertIn("capture/note.md", body)
+        status, _body = self._request(
+            "POST", "/create",
+            {"path": "concepts/templated.md", "title": "Templated",
+             "page_type": "concept", "template": "concept.md"},
+        )
+        self.assertEqual(status, 200)
+        content = (self.wiki / "concepts/templated.md").read_text(encoding="utf-8")
+        self.assertIn("Template body marker.", content)
+        self.assertIn('title: "Templated"', content)
+
+    def test_recent_pages_flow_and_state_file(self) -> None:
+        self._request(
+            "GET", "/edit?path=" + urllib.parse.quote("concepts/alpha.md")
+        )
+        status, body = self._request("GET", "/recent")
+        self.assertEqual(status, 200)
+        self.assertIn("concepts/alpha.md", body)
+        self.assertTrue((self.data_dir / "recent.json").is_file())
+        status, body = self._request("GET", "/")
+        self.assertEqual(status, 200)
+        self.assertIn("Recent pages", body)
+        self.assertIn("concepts/alpha.md", body)
+
 
 
 if __name__ == "__main__":

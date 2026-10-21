@@ -2,13 +2,15 @@
 
 Binds to 127.0.0.1 only. One self-contained HTML form page per
 route, no external assets, no JavaScript at all. All real work is
-delegated to :mod:`tools.editor.core`, so the logic is testable
-without a live server.
+delegated to :mod:`tools.editor.core` (pages, templates, recent
+log) and :mod:`tools.editor.preview` (the safe Markdown preview),
+so the logic is testable without a live server.
 
 Run::
 
     python3 -m tools.editor.server --wiki-root wiki \
-        --backup-dir /path/to/backups [--port 8765]
+        --backup-dir /path/to/backups [--port 8765] \
+        [--templates-dir templates] [--data-dir /path/to/editor-data]
 """
 
 from __future__ import annotations
@@ -17,12 +19,13 @@ import argparse
 import html
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 
 try:
-    from . import core
+    from . import core, preview
 except ImportError:  # run as a plain script: python3 server.py
     import core  # type: ignore[no-redef]
+    import preview  # type: ignore[no-redef]
 
 _PAGE_HEAD = """<!DOCTYPE html>
 <html lang="en">
@@ -35,16 +38,37 @@ textarea {{ width: 100%; }}
 table {{ border-collapse: collapse; }}
 td, th {{ padding: 0.25em 0.75em; text-align: left; }}
 .error {{ color: #a00; }}
+.preview {{ border: 1px solid #bbb; padding: 0.5em 1em; margin: 1em 0; }}
+.wikilink {{ color: #555; text-decoration: underline dotted; }}
 </style>
 </head>
 <body>
 """
 
 
-def render_index(pages: list[dict[str, str]]) -> str:
+def _recent_html(recent: list[dict[str, str]]) -> str:
+    if not recent:
+        return ""
+    items = "".join(
+        '<li><a href="/edit?path={path}">{path}</a> '
+        "({action}, {at})</li>\n".format(
+            path=html.escape(entry["path"], quote=True),
+            action=html.escape(entry["action"]),
+            at=html.escape(entry["at"]),
+        )
+        for entry in recent
+    )
+    return "<h2>Recent pages</h2>\n<ul>\n" + items + "</ul>\n"
+
+
+def render_index(
+    pages: list[dict[str, str]],
+    recent: list[dict[str, str]] | None = None,
+) -> str:
     rows = "".join(
         "<tr><td><a href=\"/edit?path={path}\">{path}</a></td>"
-        "<td>{title}</td><td>{stage}</td><td>{ptype}</td></tr>\n".format(
+        "<td>{title}</td><td>{stage}</td><td>{ptype}</td>"
+        "<td><a href=\"/preview?path={path}\">preview</a></td></tr>\n".format(
             path=html.escape(page["path"], quote=True),
             title=html.escape(page["title"]),
             stage=html.escape(page["stage"]),
@@ -55,15 +79,46 @@ def render_index(pages: list[dict[str, str]]) -> str:
     return (
         _PAGE_HEAD.format(title="Wiki pages")
         + "<h1>Wiki pages</h1>\n"
-        + '<p><a href="/new">Create a new page</a></p>\n'
+        + '<p><a href="/new">Create a new page</a> · '
+        + '<a href="/recent">Recent pages</a></p>\n'
+        + _recent_html(recent or [])
         + "<table><tr><th>Path</th><th>Title</th><th>Stage</th>"
-        + "<th>Type</th></tr>\n"
+        + "<th>Type</th><th></th></tr>\n"
         + rows
         + "</table>\n</body>\n</html>\n"
     )
 
 
+def render_recent(recent: list[dict[str, str]]) -> str:
+    return (
+        _PAGE_HEAD.format(title="Recent pages")
+        + "<h1>Recent pages</h1>\n"
+        + (
+            _recent_html(recent)
+            or "<p>No pages opened or saved yet this server.</p>\n"
+        )
+        + '<p><a href="/">Back to the list</a></p>\n'
+        + "</body>\n</html>\n"
+    )
+
+
+def render_preview(path: str, preview_html: str) -> str:
+    """A standalone preview page: rendered pane only, no form."""
+    return (
+        _PAGE_HEAD.format(title="Preview " + html.escape(path))
+        + f"<h1>Preview {html.escape(path)}</h1>\n"
+        + '<div class="preview">\n'
+        + preview_html
+        + "</div>\n"
+        + f'<p><a href="/edit?path={html.escape(quote(path), quote=True)}">'
+        + "Edit this page</a> · "
+        + '<a href="/">Back to the list</a></p>\n'
+        + "</body>\n</html>\n"
+    )
+
+
 def render_edit(page: dict[str, str]) -> str:
+    preview_html = preview.render_markdown(page["body"])
     return (
         _PAGE_HEAD.format(title="Edit " + html.escape(page["title"]))
         + f"<h1>Edit {html.escape(page['path'])}</h1>\n"
@@ -73,17 +128,40 @@ def render_edit(page: dict[str, str]) -> str:
         + "<p>Frontmatter is preserved on save (only an existing "
         + "<code>updated:</code> date changes); edit the body:</p>\n"
         + f'<textarea name="body" rows="30">{html.escape(page["body"])}</textarea>\n'
-        + '<p><input type="submit" value="Save"></p>\n'
+        + '<p><input type="submit" value="Save"> '
+        + '<input type="submit" formaction="/preview" '
+        + 'value="Preview unsaved body"></p>\n'
         + "</form>\n"
+        + "<h2>Preview (saved body)</h2>\n"
+        + '<div class="preview">\n'
+        + preview_html
+        + "</div>\n"
         + '<p><a href="/">Back to the list</a></p>\n'
         + "</body>\n</html>\n"
     )
 
 
-def render_new() -> str:
+def render_new(templates: list[dict[str, str]] | None = None) -> str:
     options = "".join(
         f'<option value="{t}">{t}</option>\n' for t in core.ALLOWED_TYPES
     )
+    template_field = ""
+    if templates:
+        template_options = '<option value="">(plain skeleton)</option>\n' + "".join(
+            '<option value="{name}">{name} — {title}</option>\n'.format(
+                name=html.escape(t["name"], quote=True),
+                title=html.escape(t["title"]),
+            )
+            for t in templates
+        )
+        template_field = (
+            "<p>Start from a template skeleton: "
+            f'<select name="template">{template_options}</select></p>\n'
+            "<p>Choosing a template supplies the new page's body from "
+            "that skeleton (its own frontmatter is replaced by the "
+            "standard skeleton above); leave it on the plain skeleton "
+            "for an empty page.</p>\n"
+        )
     return (
         _PAGE_HEAD.format(title="Create a page")
         + "<h1>Create a new page</h1>\n"
@@ -92,6 +170,7 @@ def render_new() -> str:
         + '<input type="text" name="path" size="50"></p>\n'
         + '<p>Title: <input type="text" name="title" size="50"></p>\n'
         + f'<p>Type: <select name="page_type">{options}</select></p>\n'
+        + template_field
         + '<p><input type="submit" value="Create"></p>\n'
         + "</form>\n"
         + '<p><a href="/">Back to the list</a></p>\n'
@@ -157,14 +236,32 @@ class EditorHandler(BaseHTTPRequestHandler):
         try:
             if parsed.path == "/":
                 pages = core.list_pages(self.server.wiki_root)
-                self._send_html(200, render_index(pages))
+                self._send_html(
+                    200, render_index(pages, self.server.recent.recent())
+                )
             elif parsed.path == "/edit":
                 query = parse_qs(parsed.query)
                 rel = query.get("path", [""])[0]
                 page = core.read_page(self.server.wiki_root, rel)
+                self.server.recent.record("open", page["path"])
                 self._send_html(200, render_edit(page))
+            elif parsed.path == "/preview":
+                query = parse_qs(parsed.query)
+                rel = query.get("path", [""])[0]
+                page = core.read_page(self.server.wiki_root, rel)
+                self._send_html(
+                    200,
+                    render_preview(
+                        page["path"], preview.render_markdown(page["body"])
+                    ),
+                )
+            elif parsed.path == "/recent":
+                self._send_html(
+                    200, render_recent(self.server.recent.recent(50))
+                )
             elif parsed.path == "/new":
-                self._send_html(200, render_new())
+                templates = core.list_page_templates(self.server.templates_dir)
+                self._send_html(200, render_new(templates))
             else:
                 self._send_html(404, render_error("no such route"))
         except Exception as exc:  # surfaced as an error page, not hidden
@@ -182,17 +279,38 @@ class EditorHandler(BaseHTTPRequestHandler):
                     form.get("body", ""),
                     form.get("token", ""),
                 )
+                self.server.recent.record("save", str(result["path"]))
                 self._send_html(
                     200,
                     render_message("Saved", f"Saved {result['path']}."),
                 )
-            elif parsed.path == "/create":
-                result = core.create_page(
-                    self.server.wiki_root,
-                    form.get("path", ""),
-                    form.get("title", ""),
-                    form.get("page_type", "concept"),
+            elif parsed.path == "/preview":
+                # Preview an unsaved body: render only, write nothing,
+                # record nothing.
+                body = form.get("body", "")
+                path = form.get("path", "(unsaved)")
+                self._send_html(
+                    200, render_preview(path, preview.render_markdown(body))
                 )
+            elif parsed.path == "/create":
+                template = form.get("template", "")
+                if template and self.server.templates_dir is not None:
+                    result = core.create_page_from_template(
+                        self.server.wiki_root,
+                        self.server.templates_dir,
+                        template,
+                        form.get("path", ""),
+                        form.get("title", ""),
+                        form.get("page_type") or None,
+                    )
+                else:
+                    result = core.create_page(
+                        self.server.wiki_root,
+                        form.get("path", ""),
+                        form.get("title", ""),
+                        form.get("page_type", "concept"),
+                    )
+                self.server.recent.record("create", str(result["path"]))
                 self._send_html(
                     200,
                     render_message("Created", f"Created {result['path']}."),
@@ -213,9 +331,23 @@ class EditorServer(ThreadingHTTPServer):
         server_address: tuple[str, int],
         wiki_root: str | Path,
         backup_dir: str | Path | None,
+        templates_dir: str | Path | None = None,
+        data_dir: str | Path | None = None,
     ) -> None:
         self.wiki_root = Path(wiki_root)
         self.backup_dir = Path(backup_dir) if backup_dir is not None else None
+        self.templates_dir = (
+            Path(templates_dir) if templates_dir is not None else None
+        )
+        # Recent-pages state lives under the editor's data dir; by
+        # default that is an editor-state folder beside the backups.
+        if data_dir is not None:
+            self.data_dir: Path | None = Path(data_dir)
+        elif self.backup_dir is not None:
+            self.data_dir = self.backup_dir / "editor-state"
+        else:
+            self.data_dir = None
+        self.recent = core.RecentLog(self.data_dir)
         super().__init__(server_address, EditorHandler)
 
 
@@ -224,6 +356,8 @@ def create_server(
     backup_dir: str | Path | None,
     host: str = "127.0.0.1",
     port: int = 8765,
+    templates_dir: str | Path | None = None,
+    data_dir: str | Path | None = None,
 ) -> EditorServer:
     """Create (but do not start) the editor server.
 
@@ -232,7 +366,10 @@ def create_server(
     """
     if host != "127.0.0.1":
         raise ValueError("the editor binds to 127.0.0.1 only")
-    return EditorServer((host, port), wiki_root, backup_dir)
+    return EditorServer(
+        (host, port), wiki_root, backup_dir,
+        templates_dir=templates_dir, data_dir=data_dir,
+    )
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -249,10 +386,28 @@ def main(argv: list[str] | None = None) -> None:
         required=True,
         help="directory receiving a pre-save backup copy of each page",
     )
+    parser.add_argument(
+        "--templates-dir",
+        default=None,
+        help="templates/ directory whose skeletons the new-page flow "
+        "offers (default: templates/ at the repository root, when "
+        "run from a checkout)",
+    )
+    parser.add_argument(
+        "--data-dir",
+        default=None,
+        help="editor data directory holding the recent-pages state "
+        "file (default: <backup-dir>/editor-state)",
+    )
     parser.add_argument("--port", type=int, default=8765)
     args = parser.parse_args(argv)
+    templates_dir = args.templates_dir
+    if templates_dir is None:
+        candidate = Path(__file__).resolve().parents[2] / "templates"
+        templates_dir = str(candidate) if candidate.is_dir() else None
     server = create_server(
-        args.wiki_root, args.backup_dir, host="127.0.0.1", port=args.port
+        args.wiki_root, args.backup_dir, host="127.0.0.1", port=args.port,
+        templates_dir=templates_dir, data_dir=args.data_dir,
     )
     host, port = server.server_address[:2]
     print(f"Wiki editor on http://{host}:{port}/ (Ctrl-C to stop)")

@@ -7,6 +7,12 @@ injection defences.
         [--sensitivity <class>] [--title "..."] [--timeout 30]
     python3 scripts/wiki_clip.py clip --file <path>
         [--sensitivity <class>] [--title "..."]
+    python3 scripts/wiki_clip.py clip --feed <url-or-file>
+        [--sensitivity <class>]   (RSS/Atom; every item staged
+        through the same converter defences as a page clip)
+    python3 scripts/wiki_clip.py clip --pdf <file>
+        [--sensitivity <class>]   (a local PDF, explicitly,
+        through wiki_convert's existing PDF route)
 
 A clip is ONE deliberate act, like every other capture in this
 wiki (AGENTS.md, "Capture templates" / item 52 and the email-in
@@ -76,12 +82,14 @@ Exit codes: 0 ok · 1 door failure / refusal · 2 usage error.
 """
 import argparse
 import hashlib
+import html as _html
 import json
 import re
 import sys
 import tempfile
 import urllib.error
 import urllib.request
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
@@ -439,8 +447,9 @@ def _finish_media(root, source_ref, data, suffix, sensitivity,
 
 def _finish_document(root, source_ref, data, md, report,
                      sensitivity, title, kind, now,
-                     clip_extra=None):
-    base = "%s-%s" % (now.strftime("%Y-%m-%d"), slugify(title))
+                     clip_extra=None, base_stem=None):
+    base = base_stem or ("%s-%s" % (now.strftime("%Y-%m-%d"),
+                                    slugify(title)))
     suffix = clip_extra.pop("suffix") if clip_extra else ".md"
     preserved, sidecar, draft = _plan_writes(
         root, base, suffix, data, sensitivity)
@@ -559,7 +568,7 @@ def clip_url(url, sensitivity=None, title=None, root=ROOT,
 
 
 def clip_file(path, sensitivity=None, title=None, root=ROOT,
-              now=None):
+              now=None, kind="file-clip"):
     """Clip one local file: documents through the converter,
     media preserved as-is. The original file is never modified."""
     _check_sensitivity(sensitivity)
@@ -577,7 +586,7 @@ def clip_file(path, sensitivity=None, title=None, root=ROOT,
     if suffix in MEDIA_EXTS:
         return _finish_media(root, str(src), data, suffix,
                              sensitivity, title or src.stem,
-                             "file-clip", now)
+                             kind, now)
     try:
         md, report = wc.convert_with_report(src, sensitivity)
     except wc.ConvertError as exc:
@@ -590,13 +599,180 @@ def clip_file(path, sensitivity=None, title=None, root=ROOT,
             data.decode("utf-8", errors="replace"), src.stem)
     extra = {
         "suffix": suffix or ".bin",
-        "tool": "wiki_clip.py", "kind": "file-clip",
+        "tool": "wiki_clip.py", "kind": kind,
         "source_file": str(src),
         "captured": now.strftime("%Y-%m-%d %H:%M %Z"),
     }
     return _finish_document(root, str(src), data, md, report,
                             sensitivity, title or src.stem,
-                            "file-clip", now, clip_extra=extra)
+                            kind, now, clip_extra=extra)
+
+
+def clip_pdf(path, sensitivity=None, title=None, root=ROOT,
+             now=None):
+    """Clip one local PDF, explicitly: the file must carry a
+    .pdf suffix, and it is staged through the SAME converter
+    route clip_file uses (wiki_convert.convert_with_report —
+    the PDF path there is the pypdf embedded-text extraction,
+    recorded machine-unverified in the sidecar). No separate
+    PDF handling exists here on purpose."""
+    src = Path(path)
+    if src.suffix.lower() != ".pdf":
+        raise ClipError("door failure: --pdf needs a .pdf file, "
+                        "got %s" % src)
+    return clip_file(src, sensitivity=sensitivity, title=title,
+                     root=root, now=now, kind="pdf-clip")
+
+
+# ----------------------------------------------------------------
+# Feed capture (RSS / Atom, stdlib xml only)
+# ----------------------------------------------------------------
+
+def _localname(tag):
+    return tag.rsplit("}", 1)[-1].lower() if isinstance(tag, str) \
+        else ""
+
+
+def _child_texts(el):
+    """{localname: [element, ...]} for an element's children."""
+    out = {}
+    for child in el:
+        out.setdefault(_localname(child.tag), []).append(child)
+    return out
+
+
+def _el_text(el):
+    """An element's text: its own text, or — for Atom XHTML
+    content — the serialised inner markup."""
+    if el is None:
+        return ""
+    if el.text and el.text.strip():
+        return el.text.strip()
+    parts = [ET.tostring(c, encoding="unicode") for c in el]
+    return "".join(parts).strip()
+
+
+def parse_feed(data):
+    """Parse RSS / Atom bytes into item dicts [{title, link,
+    body}] in feed order. Namespace-agnostic (localname match).
+    Raises ClipError on unreadable XML or a feed with no items —
+    a door failure, never an empty capture."""
+    try:
+        root_el = ET.fromstring(data)
+    except ET.ParseError as exc:
+        raise ClipError("door failure: feed is not readable XML: "
+                        "%s" % exc) from exc
+    items = []
+    for el in root_el.iter():
+        name = _localname(el.tag)
+        if name not in ("item", "entry"):
+            continue
+        kids = _child_texts(el)
+        title = _el_text(kids.get("title", [None])[0])
+        link = _el_text(kids.get("link", [None])[0])
+        if not link:  # Atom: link is an href attribute
+            for link_el in kids.get("link", []):
+                href = link_el.get("href")
+                if href and link_el.get("rel") in (None, "alternate"):
+                    link = href
+                    break
+        body = ""
+        for key in ("encoded", "content", "description", "summary"):
+            body = _el_text(kids.get(key, [None])[0])
+            if body:
+                break
+        items.append({"title": title, "link": link, "body": body})
+    if not items:
+        raise ClipError("door failure: feed carried no items — "
+                        "refusing to stage an empty capture")
+    return items
+
+
+def _item_html(item):
+    """One feed item as a small HTML page, so it runs through
+    EXACTLY the page-clip converter pipeline (sanitise the source
+    first, then the converted output). Plain-text bodies are
+    escaped; bodies carrying markup pass as markup so the gate
+    sees — and drops — any hidden elements in them."""
+    title = _html.escape(item["title"] or "untitled")
+    body = item["body"] or ""
+    if "<" not in body:
+        body = "<p>%s</p>" % _html.escape(body)
+    link = ""
+    if item["link"]:
+        link = '<p><a href="%s">%s</a></p>' % (
+            _html.escape(item["link"], quote=True),
+            _html.escape(item["link"]))
+    return ("<html><head><title>%s</title></head><body>"
+            "<h1>%s</h1>%s%s</body></html>"
+            % (title, title, link, body)).encode("utf-8")
+
+
+def clip_feed(source, sensitivity=None, root=ROOT, fetcher=None,
+              now=None, timeout=DEFAULT_TIMEOUT):
+    """Clip every item of an RSS/Atom feed: `source` is an
+    http(s) URL (read through the fetcher seam) or a local file.
+    Each item is staged as its own capture draft through the
+    same converter sanitise/classify defences as a page clip.
+    Parsing and conversion of ALL items happen before anything
+    is written, so a bad item fails the whole feed with nothing
+    staged."""
+    _check_sensitivity(sensitivity)
+    now = now or datetime.now().astimezone()
+    root = Path(root)
+    if re.match(r"^https?://", source or "", re.I):
+        fetch = fetcher or (
+            lambda u: default_fetch(u, timeout=timeout))
+        try:
+            got = fetch(source)
+        except ClipError:
+            raise
+        except Exception as exc:
+            raise ClipError("door failure: fetch failed for %s: %s"
+                            % (source, exc)) from exc
+        result = got if isinstance(got, FetchResult) \
+            else FetchResult(got)
+        data = result.body
+        if isinstance(data, str):
+            data = data.encode("utf-8")
+    else:
+        src = Path(source)
+        if not src.is_file():
+            raise ClipError("door failure: no such file: %s" % src)
+        data = src.read_bytes()
+    if not data:
+        raise ClipError("door failure: feed returned no bytes — "
+                        "refusing to stage an empty capture")
+    items = parse_feed(data)
+    # Phase 1: convert everything, write nothing.
+    prepared = []
+    for idx, item in enumerate(items, start=1):
+        title = item["title"] or "feed-item-%d" % idx
+        raw = _item_html({**item, "title": title})
+        md, report = _convert_temp(raw, ".html", sensitivity)
+        stem = "%s-%s-%02d" % (now.strftime("%Y-%m-%d"),
+                               slugify(title), idx)
+        draft = root / STAGING_DIR / (stem + "-capture.md")
+        if draft.exists():
+            raise ClipError(
+                "capture draft already exists: %s — refusing to "
+                "overwrite a staged draft" % draft)
+        prepared.append((item, title, raw, md, report, stem))
+    # Phase 2: stage every item.
+    results = []
+    for item, title, raw, md, report, stem in prepared:
+        extra = {
+            "suffix": ".html",
+            "tool": "wiki_clip.py", "kind": "feed-clip",
+            "feed": source, "item_link": item["link"],
+            "captured": now.strftime("%Y-%m-%d %H:%M %Z"),
+        }
+        results.append(_finish_document(
+            root, item["link"] or source, raw, md, report,
+            sensitivity, title, "feed-clip", now,
+            clip_extra=extra, base_stem=stem))
+    return {"kind": "feed-clip", "source": source,
+            "count": len(results), "items": results}
 
 
 # ----------------------------------------------------------------
@@ -626,6 +802,13 @@ def _print_result(res):
           "only; nothing was compiled or filed.")
 
 
+def _print_feed_result(res):
+    print("clip: feed capture — %d item(s) from %s"
+          % (res["count"], res["source"]))
+    for item in res["items"]:
+        _print_result(item)
+
+
 def main(argv=None, fetcher=None, now=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--root", type=Path, default=ROOT,
@@ -635,6 +818,15 @@ def main(argv=None, fetcher=None, now=None):
     p.add_argument("url", nargs="?", default=None)
     p.add_argument("--file", default=None,
                    help="clip a local file instead of a URL")
+    p.add_argument("--feed", default=None, metavar="URL_OR_FILE",
+                   help="clip every item of an RSS/Atom feed "
+                   "(a URL or a local file); each item is staged "
+                   "as its own capture through the same converter "
+                   "defences as a page clip")
+    p.add_argument("--pdf", default=None, metavar="FILE",
+                   help="clip a local PDF explicitly, through "
+                   "wiki_convert's PDF route (the same route "
+                   "--file uses for a .pdf file)")
     p.add_argument("--sensitivity", default=None, metavar="CLASS",
                    help="sensitivity class from "
                    "evaluation/sensitivity.json; with one, the "
@@ -646,11 +838,23 @@ def main(argv=None, fetcher=None, now=None):
     args = ap.parse_args(argv)
     root = Path(args.root)
     try:
-        if args.file and args.url:
-            print("wiki_clip: give a URL or --file, not both",
-                  file=sys.stderr)
+        given = [bool(args.file), bool(args.url), bool(args.feed),
+                 bool(args.pdf)]
+        if sum(given) > 1:
+            print("wiki_clip: give a URL, --file, --feed or --pdf, "
+                  "not more than one", file=sys.stderr)
             return 2
-        if args.file:
+        if args.feed:
+            res = clip_feed(args.feed,
+                            sensitivity=args.sensitivity,
+                            root=root, fetcher=fetcher, now=now,
+                            timeout=args.timeout)
+            _print_feed_result(res)
+            return 0
+        if args.pdf:
+            res = clip_pdf(args.pdf, sensitivity=args.sensitivity,
+                           title=args.title, root=root, now=now)
+        elif args.file:
             res = clip_file(args.file, sensitivity=args.sensitivity,
                             title=args.title, root=root, now=now)
         elif args.url:
@@ -659,7 +863,8 @@ def main(argv=None, fetcher=None, now=None):
                            fetcher=fetcher, now=now,
                            timeout=args.timeout)
         else:
-            print("wiki_clip: a clip needs a URL or --file <path>",
+            print("wiki_clip: a clip needs a URL, --file <path>, "
+                  "--feed <url-or-file> or --pdf <file>",
                   file=sys.stderr)
             return 2
     except ClipError as exc:

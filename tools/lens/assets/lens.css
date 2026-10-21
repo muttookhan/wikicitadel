@@ -408,6 +408,9 @@ body.inspector-open #inspector { transform: none; }
 .reading-body code { background: var(--surface-2); padding: 0 4px; border-radius: 4px; }
 .reading-body pre code { background: transparent; padding: 0; }
 .reading-body blockquote { border-left: 3px solid var(--line-2); margin: 12px 0; padding: 4px 16px; color: var(--ink-2); }
+.reading-body figure.page-figure { margin: 16px 0; }
+.reading-body figure.page-figure img { max-width: 100%; height: auto; display: block; }
+.reading-body figure.page-figure figcaption { font-size: 14px; line-height: 1.5; color: var(--ink-2); margin-top: 6px; }
 .callout { border: 1px solid var(--line-2); border-left: 3px solid var(--status-info); border-radius: var(--radius-md); background: var(--surface-1); padding: 12px 16px; margin: 14px 0; }
 .callout-warning { border-left-color: var(--status-atrisk); }
 .callout-title { font-weight: 600; margin: 0 0 6px; }

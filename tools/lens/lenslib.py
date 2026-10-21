@@ -1131,11 +1131,37 @@ def render_markdown(body: str):
                 lis += f"<li>{_inline(content, wikilinks)}</li>"
             out.append(f"<{tag}>{lis}</{tag}>")
             continue
-        # Image on its own line
+        # Image on its own line -> a figure. The caption
+        # convention: the line IMMEDIATELY after the image line,
+        # when it is a single italic line (*caption* / _caption_)
+        # or starts "Caption:", is the figure's caption — it is
+        # consumed (not also rendered as a paragraph) and becomes
+        # the <figcaption>. The alt text stays on the <img> as its
+        # accessible name either way; without a caption line the
+        # figure carries no <figcaption>.
         im = re.match(r"^!\[([^\]]*)\]\(([^)]+)\)\s*$", s)
         if im:
-            out.append(f'<img alt="{html.escape(im.group(1), quote=True)}" src="{html.escape(im.group(2), quote=True)}" loading="lazy">')
-            i += 1
+            caption = None
+            if i + 1 < n:
+                cm = re.match(
+                    r"^\s*(?:\*(?P<i1>[^*]+)\*|_(?P<i2>[^_]+)_"
+                    r"|Caption:\s*(?P<i3>.+))\s*$", lifted[i + 1])
+                if cm:
+                    caption = (cm.group("i1") or cm.group("i2")
+                               or cm.group("i3") or "").strip() \
+                        or None
+            img = (f'<img alt="{html.escape(im.group(1), quote=True)}" '
+                   f'src="{html.escape(im.group(2), quote=True)}" '
+                   f'loading="lazy">')
+            if caption:
+                out.append(
+                    f'<figure class="page-figure">{img}'
+                    f'<figcaption>{_inline(caption, wikilinks)}'
+                    f'</figcaption></figure>')
+                i += 2
+            else:
+                out.append(f'<figure class="page-figure">{img}</figure>')
+                i += 1
             continue
         # Paragraph: gather until blank or block start
         buf = [line]

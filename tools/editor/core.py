@@ -22,10 +22,11 @@ Safety model in brief (see README.md for the full statement):
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import re
 import tempfile
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 __all__ = [
@@ -35,8 +36,11 @@ __all__ = [
     "EditorError",
     "PageNotFoundError",
     "PathEscapeError",
+    "RecentLog",
     "build_skeleton",
     "create_page",
+    "create_page_from_template",
+    "list_page_templates",
     "list_pages",
     "parse_metadata",
     "read_page",
@@ -386,4 +390,241 @@ def create_page(
         "path": _relative_posix(root, resolved_again),
         "content": content,
         "token": sha256_token(content.encode("utf-8")),
+    }
+
+
+# ---------------------------------------------------------------------
+# Recent-pages log (Lane E): the server's own save/open record.
+#
+# In-memory, most-recent-first, de-duplicated by path, capped. When a
+# data directory is supplied the log also persists to a small state
+# file ``recent.json`` under it, written atomically, so the list
+# survives a server restart. A missing or corrupt state file is an
+# empty log, never an error. Actions are "open", "save", "create".
+# ---------------------------------------------------------------------
+
+RECENT_ACTIONS = ("open", "save", "create")
+RECENT_LIMIT = 50
+
+
+class RecentLog:
+    """Most-recent-first record of pages the editor opened/saved."""
+
+    def __init__(
+        self,
+        data_dir: str | Path | None = None,
+        *,
+        limit: int = RECENT_LIMIT,
+    ) -> None:
+        self.data_dir = Path(data_dir) if data_dir is not None else None
+        self.limit = limit
+        self._entries: list[dict[str, str]] = []
+        if self.data_dir is not None:
+            state = self.data_dir / "recent.json"
+            try:
+                raw = json.loads(state.read_text(encoding="utf-8"))
+                entries = raw.get("recent", [])
+                self._entries = [
+                    {
+                        "path": str(e["path"]),
+                        "action": str(e["action"]),
+                        "at": str(e["at"]),
+                    }
+                    for e in entries
+                    if isinstance(e, dict)
+                    and e.get("action") in RECENT_ACTIONS
+                    and e.get("path")
+                ][: self.limit]
+            except (OSError, ValueError, AttributeError):
+                self._entries = []
+
+    def record(
+        self,
+        action: str,
+        rel_path: str,
+        *,
+        at: str | None = None,
+    ) -> dict[str, str]:
+        """Record *action* on *rel_path*; returns the stored entry."""
+        if action not in RECENT_ACTIONS:
+            raise ValueError(f"unknown recent action: {action!r}")
+        if at is None:
+            at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        entry = {"path": str(rel_path), "action": action, "at": at}
+        self._entries = [e for e in self._entries if e["path"] != entry["path"]]
+        self._entries.insert(0, entry)
+        del self._entries[self.limit :]
+        self._persist()
+        return entry
+
+    def recent(self, limit: int = 10) -> list[dict[str, str]]:
+        """The newest *limit* entries, most recent first (copies)."""
+        return [dict(e) for e in self._entries[:limit]]
+
+    def _persist(self) -> None:
+        if self.data_dir is None:
+            return
+        self.data_dir.mkdir(parents=True, exist_ok=True)
+        state = self.data_dir / "recent.json"
+        payload = json.dumps({"recent": self._entries}, indent=2) + "\n"
+        fd, tmp_name = tempfile.mkstemp(
+            dir=str(self.data_dir), prefix=".recent-", suffix=".tmp"
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(payload)
+            os.replace(tmp_name, state)
+        except BaseException:
+            try:
+                os.unlink(tmp_name)
+            except OSError:
+                pass
+            raise
+
+
+# ---------------------------------------------------------------------
+# Create-page-from-template (Lane E): the new-page flow offers the
+# templates/ skeletons. A template is a .md file directly under the
+# templates directory (kind "page": templates/*.md) or under its
+# capture/ subdirectory (kind "capture": templates/capture/*.md).
+# Preset trees under templates/presets/ are NOT page templates and
+# are never offered. Template paths are resolved inside the
+# templates directory with the same escape discipline as pages.
+# ---------------------------------------------------------------------
+
+
+def list_page_templates(
+    templates_dir: str | Path | None,
+) -> list[dict[str, str]]:
+    """List the page templates on offer, sorted by relative name.
+
+    Each entry: ``name`` (path relative to the templates dir, posix),
+    ``kind`` (``page`` or ``capture``) and ``title`` (the template's
+    frontmatter title when it parses to one, else its file stem).
+    A missing templates dir is an empty offer, never an error.
+    """
+    if templates_dir is None:
+        return []
+    root = Path(templates_dir).resolve()
+    if not root.is_dir():
+        return []
+    found: list[dict[str, str]] = []
+    for kind, folder in (("page", root), ("capture", root / "capture")):
+        if not folder.is_dir():
+            continue
+        for path in sorted(folder.glob("*.md")):
+            try:
+                resolved = path.resolve()
+                resolved.relative_to(root)
+                content = resolved.read_text(encoding="utf-8")
+            except (OSError, ValueError, UnicodeDecodeError):
+                continue
+            metadata = parse_metadata(content)
+            found.append(
+                {
+                    "name": resolved.relative_to(root).as_posix(),
+                    "kind": kind,
+                    "title": metadata.get("title") or resolved.stem,
+                }
+            )
+    found.sort(key=lambda item: item["name"])
+    return found
+
+
+def _resolve_template(
+    templates_dir: str | Path, template_name: str
+) -> Path:
+    root = Path(templates_dir).resolve()
+    rel = Path(str(template_name))
+    if rel.is_absolute() or rel.suffix != ".md":
+        raise PathEscapeError(
+            f"not a template path: {template_name!r}"
+        )
+    candidate = (root / rel).resolve()
+    try:
+        candidate.relative_to(root)
+    except ValueError:
+        raise PathEscapeError(
+            f"template escapes the templates dir: {template_name!r}"
+        ) from None
+    if "presets" in candidate.relative_to(root).parts:
+        raise PathEscapeError("presets are not page templates")
+    if not candidate.is_file():
+        raise PageNotFoundError(f"no such template: {template_name!r}")
+    return candidate
+
+
+def create_page_from_template(
+    wiki_root: str | Path,
+    templates_dir: str | Path,
+    template_name: str,
+    rel_path: str | Path,
+    title: str,
+    page_type: str | None = None,
+    *,
+    today: str | None = None,
+    tags: list[str] | None = None,
+    sources: list[str] | None = None,
+) -> dict[str, str]:
+    """Create a page whose body starts from a templates/ skeleton.
+
+    The frontmatter is the standard AGENTS.md skeleton (as in
+    :func:`create_page`); ``page_type`` defaults to the template's
+    own ``type`` when that is an allowed type, else ``concept``.
+    In the template body: ``YYYY-MM-DD`` becomes *today*,
+    ``%:title`` becomes the title, and a heading placeholder of the
+    form ``# <...>`` takes the title. Creating never overwrites:
+    an existing target raises AlreadyExistsError.
+    """
+    if today is None:
+        today = date.today().isoformat()
+    template_path = _resolve_template(templates_dir, template_name)
+    template_text = template_path.read_text(encoding="utf-8")
+    _tpl_frontmatter, template_body = split_frontmatter(template_text)
+    template_meta = parse_metadata(template_text)
+    if page_type is None:
+        candidate_type = template_meta.get("type", "")
+        page_type = candidate_type if candidate_type in ALLOWED_TYPES else "concept"
+    skeleton = build_skeleton(
+        title, page_type, today=today, tags=tags, sources=sources
+    )
+    _skel_frontmatter, _skel_body = split_frontmatter(skeleton)
+    clean_title = title.strip()
+    body = template_body.replace("YYYY-MM-DD", today)
+    body = body.replace("%:title", clean_title)
+    body_lines = body.split("\n")
+    for idx, line in enumerate(body_lines):
+        match = re.match(r"^(#{1,6}\s+)<[^>]+>\s*$", line)
+        if match:
+            body_lines[idx] = f"{match.group(1)}{clean_title}"
+            break
+    body = "\n".join(body_lines)
+    if not body.strip():
+        body = f"\n# {clean_title}\n\n"
+    elif not body.startswith("\n"):
+        body = "\n" + body
+    content = (_skel_frontmatter or "") + body
+
+    root = Path(wiki_root).resolve()
+    candidate = resolve_safe_path(root, rel_path)
+    if os.path.lexists(candidate):
+        raise AlreadyExistsError(f"page already exists: {rel_path!r}")
+    candidate.parent.mkdir(parents=True, exist_ok=True)
+    resolved_again = candidate.resolve()
+    try:
+        resolved_again.relative_to(root)
+    except ValueError:
+        raise PathEscapeError(
+            f"path escapes the wiki root: {rel_path!r}"
+        ) from None
+    try:
+        with resolved_again.open("x", encoding="utf-8") as handle:
+            handle.write(content)
+    except FileExistsError:
+        raise AlreadyExistsError(f"page already exists: {rel_path!r}") from None
+    return {
+        "path": _relative_posix(root, resolved_again),
+        "content": content,
+        "token": sha256_token(content.encode("utf-8")),
+        "template": str(template_name),
     }

@@ -24,6 +24,11 @@ Then open <http://127.0.0.1:8765/>.
   path relative to the wiki root (required). Pick a directory
   outside the wiki tree so backups never show up as pages.
 - `--port` — default 8765.
+- `--templates-dir` — the `templates/` directory whose skeletons
+  the new-page flow offers (default: `templates/` at the repository
+  root, when run from a checkout).
+- `--data-dir` — directory holding the recent-pages state file
+  (default: `<backup-dir>/editor-state`).
 
 Stop it with Ctrl-C. Nothing runs when the server is not running;
 there is no daemon and no background state.
@@ -52,6 +57,37 @@ there is no daemon and no background state.
   `# <title>` heading). `type` must be one of `source`, `entity`,
   `concept`, `synthesis`, `query`. Creating over an existing
   page is refused — a create never overwrites.
+- **Create from a template** — the new-page form also offers the
+  skeletons under `templates/` (`templates/*.md` and
+  `templates/capture/*.md`; preset trees are not page templates).
+  Choosing one supplies the new page's body from that skeleton:
+  its frontmatter is replaced by the standard skeleton,
+  `YYYY-MM-DD` becomes today, `%:title` becomes the title, and a
+  `# <...>` heading placeholder takes the title. Any other
+  capture-style `%` prompts in a capture skeleton are left in
+  place for the author to resolve. With no template chosen the
+  page is the plain skeleton, exactly as before.
+- **Preview** — every edit page carries a rendered preview pane
+  of the saved body, a standalone preview lives at
+  `/preview?path=...`, and the edit form's "Preview unsaved body"
+  button POSTs to `/preview` to render a draft without writing
+  or recording anything. Rendering is server-side, stdlib only,
+  by `preview.py`: the input is HTML-escaped BEFORE any Markdown
+  rule runs and there is NO raw-HTML pass-through, so markup in a
+  page (a script tag, an event handler) previews as inert visible
+  text. Supported subset: ATX headings, paragraphs, unordered and
+  ordered lists, fenced code blocks, inline code, bold, italic,
+  links (scheme-checked: `http:`, `https:`, `mailto:`, fragments
+  and relative paths only — anything else renders as plain text),
+  `[[wikilinks]]` (shown as a span naming the target), pipe
+  tables, blockquotes and horizontal rules. Anything else renders
+  as plain text.
+- **Recent pages** — the index and `/recent` list the pages this
+  server most recently opened, saved or created, most recent
+  first. The log lives in memory and in a small state file
+  (`recent.json`) under the editor's data dir, capped at 50
+  entries; it is the server's own record, not a corpus artefact,
+  and a missing or corrupt state file simply starts empty.
 
 ## Safety model
 
@@ -102,8 +138,10 @@ This is deliberately **not** a grand editor:
   presence, no operational transform / CRDT merging — concurrent
   edits are handled by refusing the second save, not by merging.
 - **No rich text.** Editing is raw Markdown in a plain textarea:
-  no WYSIWYG, no preview, no syntax highlighting, no wikilink
-  completion.
+  no WYSIWYG, no syntax highlighting, no wikilink completion.
+  The preview is a reading aid for the documented subset only —
+  constructs outside it (images, nested lists, reference links,
+  raw HTML) render as plain text, never as live markup.
 - **No corpus machinery.** The editor does not update
   `wiki/index.md` or `wiki/log.md`, run the validator or lint
   lanes, stage writes through the gateway, or commit anything
