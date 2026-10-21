@@ -117,6 +117,7 @@ import wiki_convert as wc  # noqa: E402  (the pipeline being reused)
 import wiki_clip_templates as wct  # noqa: E402  (TA4: URL-pattern templates)
 import wiki_site_rules as wsr  # noqa: E402  (TA4: per-site extraction rules)
 import wiki_suggest_filing as wsf  # noqa: E402  (TA4: suggested filing)
+import wiki_url_normalise as wun  # noqa: E402  (R7 BA: tracking-strip at capture)
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -608,7 +609,14 @@ def clip_url(url, sensitivity=None, title=None, root=ROOT,
                         "bytes — refusing to stage an empty capture"
                         % url)
     suffix = _suffix_for_url(result.final_url or url, result)
-    origin = result.final_url or url
+    # Tracking-parameter stripping at capture (Marathon R7 lane BA):
+    # the recorded URL is normalised; the ORIGINAL is preserved
+    # verbatim in the sidecar's clip block (original_url) - the
+    # preserved source bytes and their record are never rewritten.
+    _norm_url, _orig_url, _url_changes = wun.normalise_url(url)
+    _norm_origin, _orig_origin, _origin_changes = wun.normalise_url(
+        result.final_url or url)
+    origin = _norm_origin
     if suffix in MEDIA_EXTS:
         return _finish_media(
             root, origin, data, suffix, sensitivity,
@@ -632,7 +640,10 @@ def clip_url(url, sensitivity=None, title=None, root=ROOT,
     extra = {
         "suffix": suffix,
         "tool": "wiki_clip.py", "kind": "web-clip",
-        "url": url, "final_url": origin,
+        "url": _norm_url, "original_url": _orig_url,
+        "url_normalisation": _url_changes,
+        "final_url": origin, "original_final_url": _orig_origin,
+        "final_url_normalisation": _origin_changes,
         "content_type": result.content_type,
         "captured": now.strftime("%Y-%m-%d %H:%M %Z"),
     }

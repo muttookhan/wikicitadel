@@ -56,6 +56,13 @@ def urllib_fetcher(url):
 
 
 def bundle(url, out_dir, fetcher, fetched_at=""):
+    # Tracking-parameter stripping at capture (Marathon R7 lane BA):
+    # the bundle is fetched and recorded under the NORMALISED url;
+    # the original is preserved verbatim in the manifest below as
+    # original_url - provenance is stated, never falsified.
+    import wiki_url_normalise as _wun
+    _normalised, _original, _url_changes = _wun.normalise_url(url)
+    url = _normalised
     data, headers = fetcher(url)
     dest = Path(out_dir) / slugify(url)
     dest.mkdir(parents=True, exist_ok=True)
@@ -65,6 +72,8 @@ def bundle(url, out_dir, fetcher, fetched_at=""):
         encoding="utf-8")
     manifest = {
         "url": url,
+        "original_url": _original,
+        "url_normalisation": _url_changes,
         "fetched_at": fetched_at,
         "content_type": headers.get("Content-Type")
         or headers.get("content-type") or "",

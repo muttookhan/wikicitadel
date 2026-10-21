@@ -652,6 +652,12 @@ def main():
     # below. A page (or claim) absent from the lockfile gets an
     # empty list and the reading view shows nothing for it.
     cite_lock_pages = L.load_citation_lockfile(repo)
+    # Citation augmentation + git provenance (Marathon R7 lane BA;
+    # CiteSee / Memoize patterns): per-citation standing from the
+    # lockfile/treatment/outcomes registers, and the ONE configured
+    # edit-link prefix. Data only - page content untouched.
+    lens_config = L.load_lens_config(repo)
+    cite_aug = L.citation_augmentation(repo)
     # TB4 Lens wiring points 2 + 3 (Marathon R4 lane A): per-page
     # History/Diff data and the scored related-pages rail, read
     # from the TB4 artefacts by page path. A page absent from an
@@ -742,7 +748,11 @@ def main():
             "attested_until": attested_until,
             "stage": pg["stage"], "planted": pg["planted"] or None,
             "tended": pg["tended"] or None,
-            "cite_passages": cite_lock_pages.get(pg["path"], []),
+            "cite_passages": [
+                {**cp, "standing": (cite_aug.get(pg["path"]) or {}).get(cp.get("cite_id"))}
+                for cp in cite_lock_pages.get(pg["path"], [])],
+            "provenance": L.git_provenance(repo, pg["path"]),
+            "edit_link": L.edit_link_for(pg["path"], lens_config),
             "page_history": page_history_by_path.get(pg["path"]) or
                             {"history": [], "latest_diff": "", "commits": 0},
             "related_pages": related_by_path.get(pg["path"], []),
@@ -2129,6 +2139,7 @@ def main():
                # evaluation/markdown-dialect.json): Markdown
                # served/exported from this wiki declares itself
                # with this media type.
+               "edit_link_prefix": lens_config.get("edit_link_prefix", ""),
                "markdown_media_type":
                    "text/markdown; variant=CommonMark",
                "markdown_dialect": "CommonMark 0.31.2",

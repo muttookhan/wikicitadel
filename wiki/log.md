@@ -126,3 +126,7 @@ The web-fetch contract, the BEIR task register + harness, the RO-Crate sidecar g
 ## [2026-10-21] ingest | Marathon Round 6 — seven queued builds
 
 The CommonMark dialect pin + conformance test (15/29 pass; 14 divergences recorded as findings, renderer unchanged), the RFC 7763 variant label, MTEB task definitions, the PosQ positional slice (no collapse; an end-position penalty pinned as a tripwire), the FAIR reuse statement, the ORKG quality track, and the domain-analysis preamble. Record: [[marathon-round-6-2026-10-21]].
+
+## [2026-10-21] ingest | Marathon Round 7 — eight queued builds
+
+The DocETL decomposition + gleaning pass for ingest compile, CiteSee-pattern Lens citation augmentation (the cited-text-changed date is a stated remainder — rendered dateless, never invented), Memoize-pattern git provenance with one configured edit-link prefix, tracking-parameter stripping at capture with the original preserved, the textlint starter check (config as data, our own runner, report-only), the Jotter pattern re-implemented (source records, cited-by, unconnected — report-only), the feed-clip identity + tri-state register (deliberately unwired seam), and the file-handed browser-bookmarks importer (staging only, manual-first). Record: [[marathon-round-7-2026-10-21]].

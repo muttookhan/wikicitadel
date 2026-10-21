@@ -2963,3 +2963,190 @@ def load_feedback_triage(repo):
         if isinstance(rec, dict) and not mod.validate(rec):
             records.append(rec)
     return mod.triage(records)
+
+
+# ---------------------------------------------------------------------------
+# Citation augmentation + git provenance (Marathon R7, lane BA).
+# CiteSee pattern (Chang et al., CHI 2023): a citation marker shows its
+# standing IN PLACE - reliance count, treatment, cited-text-changed
+# date - rendered from the existing citation lockfile, treatment
+# register and outcomes register. Data only: page content and the
+# answer contract are untouched.
+# Memoize pattern (MIT): each page shows last-modified + last author
+# from git, and links back to its canonical source via ONE
+# edit-link-prefix configuration (tools/lens/lens-config.json).
+# ---------------------------------------------------------------------------
+
+LENS_CONFIG_REL = "tools/lens/lens-config.json"
+TREATMENT_REGISTER_REL = "evaluation/treatment-register.jsonl"
+OUTCOMES_REGISTER_REL = "evaluation/outcomes.jsonl"
+_TREATMENT_RANK = {"followed": 1, "questioned": 2, "caution": 2, "negative": 3}
+_TREATMENT_LABEL = {"followed": "followed", "questioned": "questioned",
+                    "caution": "questioned", "negative": "negative"}
+
+
+def load_lens_config(repo):
+    """The Lens configuration as data. Absent/unreadable -> defaults
+    (empty edit-link prefix: pages then carry their repo-relative
+    canonical path and no external edit link is rendered)."""
+    path = Path(repo) / LENS_CONFIG_REL
+    cfg = {"edit_link_prefix": ""}
+    if path.is_file():
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(data, dict) and isinstance(
+                    data.get("edit_link_prefix"), str):
+                cfg["edit_link_prefix"] = data["edit_link_prefix"]
+        except (OSError, json.JSONDecodeError):
+            pass
+    return cfg
+
+
+def edit_link_for(page_path, config=None):
+    """The canonical-source link for a page: the ONE configured
+    prefix + the repo-relative path. With no prefix configured the
+    path itself is the link record (relative, never invented)."""
+    prefix = (config or {}).get("edit_link_prefix") or ""
+    return (prefix + page_path) if prefix else page_path
+
+
+def _read_jsonl_rows(repo, rel):
+    path = Path(repo) / rel
+    if not path.is_file():
+        return []
+    rows = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
+
+
+def _treatment_for_page(rows, page, claim=None):
+    """Strongest treatment for a page (or one claim on it) from the
+    treatment register: negative > questioned/caution > followed.
+    Returns {treatment, grade, date, id} or None."""
+    best = None
+    for row in rows:
+        if row.get("kind") != "treatment":
+            continue
+        subj = row.get("subject") or {}
+        if subj.get("page") != page:
+            continue
+        if claim is not None and subj.get("claim") not in (None, claim):
+            # claim-scoped rows match by containment either way
+            sc = str(subj.get("claim") or "")
+            if sc and sc not in claim and claim not in sc:
+                continue
+        grade = str(row.get("grade") or "").lower()
+        rank = _TREATMENT_RANK.get(grade, 0)
+        if rank and (best is None or rank > best[0]):
+            best = (rank, {"treatment": _TREATMENT_LABEL[grade],
+                           "grade": grade, "date": row.get("date"),
+                           "treatment_id": row.get("id")})
+    return best[1] if best else None
+
+
+def citation_augmentation(repo, changed_dates=None):
+    """{page_path: {cite_id: standing}} for every lockfile citation.
+
+    standing = {reliance_count, treatment, treatment_date,
+    cited_text_changed, cited_text_changed_date, outcome_counts}.
+    reliance_count counts DISTINCT pages in the lockfile citing the
+    same source (how much of the corpus rests on that source).
+    cited_text_changed recomputes the cited lines' content hash
+    against the lockfile (the lockfile's own semantics); its date
+    comes from `changed_dates` ({source: ISO date}) when the caller
+    supplies git dates, else None - never invented.
+    """
+    lock = load_citation_lockfile(repo)
+    treatment_rows = _read_jsonl_rows(repo, TREATMENT_REGISTER_REL)
+    outcome_rows = _read_jsonl_rows(repo, OUTCOMES_REGISTER_REL)
+    changed_dates = changed_dates or {}
+    # reliance: source -> set of citing pages (from the raw lockfile)
+    raw_lock_path = Path(repo) / CITATION_LOCKFILE_REL
+    raw_cites = []
+    if raw_lock_path.is_file():
+        try:
+            raw_cites = json.loads(raw_lock_path.read_text(
+                encoding="utf-8")).get("citations") or []
+        except (OSError, json.JSONDecodeError):
+            raw_cites = []
+    reliance = {}
+    for c in raw_cites:
+        if isinstance(c, dict) and c.get("source"):
+            reliance.setdefault(c["source"], set()).add(c.get("page"))
+    outcomes_by_page = {}
+    for row in outcome_rows:
+        pg = row.get("page")
+        if not pg:
+            continue
+        oc = outcomes_by_page.setdefault(
+            pg, {"n": 0, "supports": 0, "contradicts": 0})
+        oc["n"] += 1
+        if row.get("supports") is True or row.get("outcome") == "supports":
+            oc["supports"] += 1
+        if row.get("supports") is False or row.get("outcome") == "contradicts":
+            oc["contradicts"] += 1
+    out = {}
+    for c in raw_cites:
+        if not isinstance(c, dict) or not c.get("page") or not c.get("id"):
+            continue
+        page, source = c["page"], c.get("source")
+        changed = None
+        if source and c.get("range") and c.get("content_hash"):
+            src_path = Path(repo) / source
+            if src_path.is_file():
+                lines = src_path.read_text(
+                    encoding="utf-8", errors="replace").splitlines()
+                start, end = c["range"]
+                block = lines[start - 1:end]
+                if len(block) == end - start + 1:
+                    import hashlib as _hl
+                    digest = _hl.sha256(
+                        "\n".join(block).encode("utf-8")).hexdigest()
+                    changed = (digest != c["content_hash"])
+        treat = _treatment_for_page(treatment_rows, page, c.get("claim"))
+        out.setdefault(page, {})[c["id"]] = {
+            "reliance_count": len(reliance.get(source, set())),
+            "treatment": treat["treatment"] if treat else "none",
+            "treatment_grade": treat["grade"] if treat else None,
+            "treatment_date": treat["date"] if treat else None,
+            "cited_text_changed": changed,
+            "cited_text_changed_date": (changed_dates.get(source)
+                                        if changed else None),
+            "outcome_counts": outcomes_by_page.get(
+                page, {"n": 0, "supports": 0, "contradicts": 0}),
+        }
+    return out
+
+
+def git_provenance(repo, page_path, runner=None):
+    """{last_modified, last_author} for one page from git log -1.
+    `runner` is the injectable seam (tests pass a fake): it is
+    called as runner(repo, page_path) and returns the raw
+    "ISO-date<TAB>author" line, or "". A page with no git history
+    yields {None, None} - stated, never invented."""
+    if runner is not None:
+        raw = runner(repo, page_path)
+    else:
+        import subprocess as _sp
+        try:
+            raw = _sp.run(["git", "-C", str(repo), "log", "-1",
+                           "--format=%cI%x09%an", "--", page_path],
+                          capture_output=True, text=True,
+                          check=True).stdout
+        except Exception:
+            raw = ""
+    line = (raw or "").strip().splitlines()
+    if not line or "\t" not in line[0]:
+        return {"last_modified": None, "last_author": None}
+    date, author = line[0].split("\t", 1)
+    return {"last_modified": date[:10] if date else None,
+            "last_author": author or None}

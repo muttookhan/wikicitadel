@@ -1243,6 +1243,7 @@ function renderRead(id, anchor) {
       </div>
       ${p.stale ? `<div class="stale-banner">A source for this page changed. Treat claims as unverified until re-checked.</div>` : ""}
       ${p.attested_until ? `<p class="verified-line">Verified by owner until ${esc(p.attested_until)}</p>` : ""}
+      ${(p.provenance && (p.provenance.last_modified || p.provenance.last_author)) ? `<p class="caption page-provenance">Last modified ${esc(p.provenance.last_modified || "—")}${p.provenance.last_author ? ` by ${esc(p.provenance.last_author)}` : ""} · <a href="${esc(p.edit_link || p.path)}">canonical source</a></p>` : ""}
       ${tabsHtml}
       <div id="page-content-panel">
       ${toc}
@@ -1262,6 +1263,7 @@ function renderRead(id, anchor) {
         <p class="cite-claim">${esc(cp.claim || "")}</p>
         <blockquote class="cite-passage">${esc(cp.quote || "")}</blockquote>
         <p class="caption"><span class="mono">${esc(cp.source || "")}</span>${cp.range ? ` · lines ${cp.range[0]}–${cp.range[1]}` : ""}${cp.cite_id ? ` · lock ${esc(cp.cite_id)}` : ""}</p>
+        ${cp.standing ? `<p class="caption cite-standing">Standing: relied on by ${esc(cp.standing.reliance_count)} page${cp.standing.reliance_count === 1 ? "" : "s"} · treatment ${esc(cp.standing.treatment)}${cp.standing.treatment_date ? ` (${esc(cp.standing.treatment_date)})` : ""} · cited text ${cp.standing.cited_text_changed ? `changed${cp.standing.cited_text_changed_date ? ` (${esc(cp.standing.cited_text_changed_date)})` : ""}` : "unchanged"}</p>` : ""}
       </div>`).join("")}` : ""}
       <h2 style="font-family:var(--font-display)">Linked from</h2>
       ${p.backlinks.length ? `<ul>${p.backlinks.map(b => `<li>${pageLink(b.from)}</li>`).join("")}</ul>` : `<p class="caption">No page links here yet.</p>`}

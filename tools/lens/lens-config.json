@@ -1,0 +1,4 @@
+{
+  "edit_link_prefix": "https://github.com/muttookhan/wikicitadel/blob/main/",
+  "note": "ONE prefix for every Lens page's canonical-source (edit) link: edit_link = edit_link_prefix + repo-relative page path. Stated here as configuration, never hardcoded per page. (Memoize pattern, MIT; Marathon R7 lane BA.)"
+}

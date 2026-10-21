@@ -36,6 +36,7 @@ on the owner.
 - [[marathon-round-4-2026-10-21]] — the Marathon Round 4 record (2026-10-21): the fix round (citation lock 12/12, lifecycle warnings 19→0, ambiguous wikilinks 9→0, README corrected), memory-transparency views + TB4 Lens wiring, CJK segmentation, publish CLI, source catalogue, memo capture, schema extraction, memory distil, packing/MILU/reading-notes; suites 1456/274/91/52/56/31, validator PASS.
 - [[marathon-round-5-2026-10-21]] — the Marathon Round 5 record (2026-10-21): six queued builds — web-fetch contract, BEIR task register, RO-Crate sidecar, corpus-generated eval-question drafts (staging only), the FActScore atomic-claim check (report-only), reflexion post-failure notes; suites 1503/274/91/52/56/31, validator PASS.
 - [[marathon-round-6-2026-10-21]] — the Marathon Round 6 record (2026-10-21): seven queued builds — CommonMark pin + conformance test (15/29 pass; 14 divergences recorded, renderer unchanged), RFC 7763 variant label, MTEB task definitions, PosQ slice (no collapse; end-position penalty pinned), FAIR reuse statement, ORKG quality track, domain-analysis preamble; suites 1541/274/91/52/56/36, validator PASS.
+- [[marathon-round-7-2026-10-21]] — the Marathon Round 7 record (2026-10-21): eight queued builds — DocETL decompose+glean, CiteSee Lens citation augmentation, Memoize git provenance, tracking-strip at capture, textlint starter check, Jotter pattern, feed-clip tri-state register, bookmarks importer; suites 1586/274/91/52/56/42, validator PASS.
 
 ## Sources
 
