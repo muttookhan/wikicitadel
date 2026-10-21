@@ -1,0 +1,65 @@
+{
+  "tool": "wiki_kopia_pilot",
+  "steps": [
+    {
+      "step": "repository create filesystem",
+      "argv": [
+        "/tmp/kopia-dl/kopia-0.23.1-linux-x64/kopia",
+        "repository",
+        "create",
+        "filesystem",
+        "--path",
+        "/home/hatch/workspace/marathon-r9/lanes/BB/kopia-pilot/work/repo"
+      ],
+      "exit": 0,
+      "stdout_tail": "     24   (defined for this target)\n  Weekly snapshots:                 4   (defined for this target)\n  Daily snapshots:                  7   (defined for this target)\n  Hourly snapshots:                48   (defined for this target)\n  Latest snapshots:                10   (defined for this target)\n  Ignore identical snapshots:   false   (defined for this target)\nCompression disabled.\nNOTE: To validate that your provider is compatible with Kopia, please run:\n\n$ kopia repository validate-provider",
+      "stderr_tail": "yption:          AES256-GCM-HMAC-SHA256\n  key derivation:      scrypt-65536-8-1\n  splitter:            DYNAMIC-4M-BUZHASH\nConnected to repository.\n\nTo find more information about default policy run 'kopia policy get'.\nTo change the policy use 'kopia policy set' command.\n\nNOTE: Kopia will perform quick maintenance of the repository automatically every 1h0m0s\nand full maintenance every 24h0m0s when running as root@htch-runtime.\n\nSee https://kopia.io/docs/advanced/maintenance/ for more information."
+    },
+    {
+      "step": "snapshot create",
+      "argv": [
+        "/tmp/kopia-dl/kopia-0.23.1-linux-x64/kopia",
+        "snapshot",
+        "create",
+        "/home/hatch/workspace/marathon-r9/lanes/BB/kopia-pilot/src/wikicitadel-copy"
+      ],
+      "exit": 0,
+      "stdout_tail": "",
+      "stderr_tail": " full maintenance...\nGC found 0 unused contents (0 B)\nGC found 0 unused contents that are too recent to delete (0 B)\nGC found 2867 in-use contents (17.8 MB)\nGC found 2 in-use system-contents (1.2 KB)\nGC undeleted 0 contents (0 B)\nCompacting an eligible uncompacted epoch...\nAdvancing epoch markers...\nAttempting to compact a range of epoch indexes ...\nCleaning up unneeded epoch markers...\nCleaning up old index blobs which have already been compacted...\nCleaned up 0 logs.\nFinished full maintenance."
+    },
+    {
+      "step": "snapshot list",
+      "argv": [
+        "/tmp/kopia-dl/kopia-0.23.1-linux-x64/kopia",
+        "snapshot",
+        "list",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_tail": "dFiles\":0,\"nonCachedFiles\":2517,\"dirCount\":360,\"excludedFileCount\":0,\"excludedDirCount\":0,\"ignoredErrorCount\":0,\"errorCount\":0},\"rootEntry\":{\"name\":\"wikicitadel-copy\",\"type\":\"d\",\"mode\":\"020000700\",\"mtime\":\"2026-10-21T08:44:29.262009929Z\",\"gid\":65534,\"obj\":\"k527904d1f3cc5bf84691bbe1d3abc6ea\",\"summ\":{\"size\":17885578,\"files\":2517,\"symlinks\":0,\"dirs\":360,\"maxTime\":\"2026-10-21T08:44:29.262890698Z\",\"numFailed\":0}},\"retentionReason\":[\"latest-1\",\"hourly-1\",\"daily-1\",\"weekly-1\",\"monthly-1\",\"annual-1\"]}\n]",
+      "stderr_tail": ""
+    },
+    {
+      "step": "restore",
+      "argv": [
+        "/tmp/kopia-dl/kopia-0.23.1-linux-x64/kopia",
+        "restore",
+        "f1153bdb863974405976a9214e5a9e0b",
+        "/home/hatch/workspace/marathon-r9/lanes/BB/kopia-pilot/work/restore"
+      ],
+      "exit": 0,
+      "stdout_tail": "",
+      "stderr_tail": "Restoring to local filesystem (/home/hatch/workspace/marathon-r9/lanes/BB/kopia-pilot/work/restore) with parallelism=8...\nRestored 2517 files, 360 directories and 0 symbolic links (17.9 MB)."
+    }
+  ],
+  "verified": true,
+  "kopia": "/tmp/kopia-dl/kopia-0.23.1-linux-x64/kopia",
+  "snapshot_id": "f1153bdb863974405976a9214e5a9e0b",
+  "source_files": 1307,
+  "restored_files": 1307,
+  "hashes_match": true,
+  "kopia_version": "0.23.1 (build 72ec08fd8edb86c67ed27099bf1b955e1f308ffa)",
+  "kopia_binary_location": "outside the trees (downloaded release tarball; first guessed v0.19.0 URL returned HTTP 404, then the current release v0.23.1 was fetched via the GitHub releases API)",
+  "source_copy": "a cp -a COPY of the public scratch tree (wikicitadel-copy), snapshotted as a side-copy only \u2014 never a real tree, never the backup of record",
+  "hash_scope": ".git excluded from the hash comparison; kopia restored 2517 files incl. .git, 1307 non-.git files compared hash-for-hash"
+}

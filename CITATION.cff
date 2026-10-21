@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: WikiCitadel
+type: software
+version: 1.0.0
+date-released: 2026-10-21
+url: https://github.com/muttookhan/wikicitadel
+repository-code: https://github.com/muttookhan/wikicitadel
+license: MIT

@@ -502,7 +502,7 @@ def page_citations(rec) -> list:
     return out
 
 
-def render_marp(root: Path, page_ids) -> str:
+def render_marp(root: Path, page_ids, link_refs=False) -> str:
     pages, keys, _edges = build_graph(root)
     recs = []
     for pid in page_ids:
@@ -537,7 +537,16 @@ def render_marp(root: Path, page_ids) -> str:
         slides.append("\n".join(lines).rstrip())
     frontmatter = "---\nmarp: true\ntitle: %s\n---" % json.dumps(
         deck_title, ensure_ascii=False)
-    return frontmatter + "\n\n" + "\n\n---\n\n".join(slides) + "\n"
+    deck = frontmatter + "\n\n" + "\n\n---\n\n".join(slides) + "\n"
+    if link_refs:
+        # Foam link-reference option (Marathon R9 lane BB,
+        # default OFF): wikilinks become standard Markdown
+        # link references so the deck stays navigable without
+        # wikilink tooling. Conversion: scripts/wiki_link_refs.
+        refs = _load_module("wiki_link_refs",
+                            SCRIPTS / "wiki_link_refs.py")
+        deck, _defs = refs.convert(deck)
+    return deck
 
 
 # ------------------------------------------------------------------ CLI
@@ -578,6 +587,9 @@ def main(argv=None) -> int:
                        help="comma-separated page ids")
     p_marp.add_argument("--out", default=None,
                         help="output file (default: stdout)")
+    p_marp.add_argument("--link-refs", action="store_true",
+                        help="render wikilinks as Markdown link "
+                             "references (Foam option, default off)")
     p_marp.add_argument("--root", dest="root_sub", default=None)
 
     args = parser.parse_args(argv)
@@ -598,7 +610,8 @@ def main(argv=None) -> int:
         ids = [args.page] if args.page else \
             [s for s in args.pages.split(",") if s.strip()]
         try:
-            text = render_marp(root, ids)
+            text = render_marp(root, ids,
+                               link_refs=args.link_refs)
         except LookupError as exc:
             print("wiki_export: no such page: %s" % exc,
                   file=sys.stderr)
