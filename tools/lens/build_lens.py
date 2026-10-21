@@ -2124,6 +2124,14 @@ def main():
     dump_json(out / "build-manifest.json",
               {"builder": BUILDER_VERSION, "git_head": head,
                "git_head_short": head_short, "generated_at": generated_at,
+               # RFC 7763 variant label + the CommonMark dialect
+               # pin (Marathon R6, lane BA; pin as data in
+               # evaluation/markdown-dialect.json): Markdown
+               # served/exported from this wiki declares itself
+               # with this media type.
+               "markdown_media_type":
+                   "text/markdown; variant=CommonMark",
+               "markdown_dialect": "CommonMark 0.31.2",
                "file_count": len(manifest_files), "files": manifest_files})
     print(f"Build manifest: {len(manifest_files)} files hashed")
 

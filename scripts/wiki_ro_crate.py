@@ -58,6 +58,14 @@ import sys
 from pathlib import Path
 
 SIDECAR_NAME = "ro-crate-metadata.json"
+# RFC 7763 variant label for Markdown files (Marathon R6,
+# lane BA): the dialect pin lives in
+# evaluation/markdown-dialect.json and the canonical helper
+# in scripts/wiki_markdown_dialect.py; this module is loaded
+# standalone, so the string is carried here and
+# wiki_markdown_dialect.py's `check` cross-verifies the two
+# agree.
+MARKDOWN_ENCODING_FORMAT = "text/markdown; variant=CommonMark"
 CRATE_CONTEXT = "https://w3id.org/ro/crate/1.1/context"
 CRATE_SPEC = "https://w3id.org/ro/crate/1.1"
 DEFAULT_DESCRIPTION = "Wiki export bundle (self-described by a "\
@@ -124,7 +132,9 @@ def build_crate(bundle: Path, name=None, description=None,
             "@type": "File",
             "name": path.name,
             "contentSize": str(size),
-            "encodingFormat": mimetypes.guess_type(path.name)[0]
+            "encodingFormat": MARKDOWN_ENCODING_FORMAT
+                              if path.suffix.lower() == ".md"
+                              else mimetypes.guess_type(path.name)[0]
                               or "application/octet-stream",
             "sha256": digest,
         })

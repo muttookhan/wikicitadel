@@ -62,7 +62,10 @@ class BuildTest(unittest.TestCase):
         f = by_id["data/wiki/index.md"]
         self.assertEqual(f["@type"], "File")
         self.assertEqual(f["contentSize"], "8")
-        self.assertEqual(f["encodingFormat"], "text/markdown")
+        # RFC 7763 variant label (Marathon R6, lane BA): a
+        # .md file declares the CommonMark dialect pin.
+        self.assertEqual(f["encodingFormat"],
+                         "text/markdown; variant=CommonMark")
         import hashlib
         self.assertEqual(
             f["sha256"],

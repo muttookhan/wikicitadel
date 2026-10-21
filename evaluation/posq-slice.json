@@ -1,0 +1,31 @@
+{
+  "kind": "posq-positional-bias-slice",
+  "note": "A PosQ-style positional-bias slice for the ranker: ONE query whose relevant passage is placed at the START, MIDDLE and END of an otherwise identical long carrier page, over a small distractor set. The carrier texts are fixtures generated deterministically by scripts/wiki_posq_check.py from the passage/filler recorded here — no corpus page is used and the golden set is never touched. The check REPORTS the positional behaviour of the real ranker (scripts/wiki_search.py hybrid_rank, severance disabled for the fixture set); it never retunes the ranker — ranker changes are battery-gated and are not this slice's act.",
+  "pattern": "PosQ / 'Lost in the Middle' positional-bias probing (Liu et al.; the RAG-Retrieval Myopic Trap study's position-sensitivity shape, MIT) — re-implemented in our own code, no code copied",
+  "registered": "2026-10-21",
+  "query": "quixotic lantern protocol",
+  "relevant_passage": "The quixotic lantern protocol describes how a keeper signals ships when the harbour light fails.",
+  "carrier": {
+    "title": "Carrier page",
+    "filler_sentence": "The harbour office keeps ordinary records of tides, repairs, stores, weather and routine correspondence.",
+    "filler_repeats_per_block": 8,
+    "filler_blocks": 6,
+    "passage_repeats": 2,
+    "positions": [
+      "start",
+      "middle",
+      "end"
+    ]
+  },
+  "distractors": {
+    "count": 4,
+    "shape": "An ordinary page of the same filler carrying one partial query term (protocol) once, so the ranked list is not carriers-only."
+  },
+  "collapse_criteria": {
+    "max_rank": 5,
+    "min_score_ratio": 0.5,
+    "meaning": "The slice FAILS (rank collapse) if the carrier at any position ranks below max_rank, is absent from the results, or scores below min_score_ratio x the best-position carrier score. Anything short of collapse — including a real positional score delta — is reported as measured behaviour, not hidden."
+  },
+  "ranker": "scripts/wiki_search.py hybrid_rank (hybrid-current), severance=False over the fixture set",
+  "version": 1
+}

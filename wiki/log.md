@@ -122,3 +122,7 @@ The fix round: citation lockfile regenerated (12 OK / 0 UNLOCKED, pre-existing h
 ## [2026-10-21] ingest | Marathon Round 5 — six queued builds
 
 The web-fetch contract, the BEIR task register + harness, the RO-Crate sidecar generator, corpus-generated eval-question drafts (staging only, boundary enforced in code), the report-only FActScore atomic-claim check, and reflexion post-failure notes — with the three conventions recorded in AGENTS.md. Record: [[marathon-round-5-2026-10-21]].
+
+## [2026-10-21] ingest | Marathon Round 6 — seven queued builds
+
+The CommonMark dialect pin + conformance test (15/29 pass; 14 divergences recorded as findings, renderer unchanged), the RFC 7763 variant label, MTEB task definitions, the PosQ positional slice (no collapse; an end-position penalty pinned as a tripwire), the FAIR reuse statement, the ORKG quality track, and the domain-analysis preamble. Record: [[marathon-round-6-2026-10-21]].
