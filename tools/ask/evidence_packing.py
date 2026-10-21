@@ -47,6 +47,31 @@ pre-item-33 relevance order.
 Patterns: Kotaemon's budgeted context assembly and mlx-memo's
 fixed-window passage selection (survey, wave 1) — re-implemented.
 
+Lost-in-the-Middle packing order (Marathon R2 lane B1): models
+use evidence at the head and tail of a long context better than
+evidence buried in the middle (Liu et al., "Lost in the Middle").
+Once selection (which passages fit the budget) is settled in
+consideration order, the PACKED list of a pack of four or more
+is rearranged for composition: the strongest passages (by the
+pack's existing consideration order — relevance score, or
+standing tier then score when standings are supplied; ties in
+that ranking were already broken by the caller's original order)
+sit at the head and the tail, and the weakest sit in the middle.
+Selection, the dropped list and every other field are untouched:
+only the composition order of ``packed`` changes, and the result
+then carries ``lost_in_middle_applied``: true. Packs of three or
+fewer keep the consideration order exactly — every position in
+such a pack is already edge-adjacent, and rearranging them would
+only disturb the standing/tie order for no positional gain.
+
+Prompt Capsules (same lane): a passage dict carrying
+``"pinned": True`` (built by ``tools/ask/capsules.py`` from a
+named capsule's pinned pages) is considered BEFORE every
+unpinned passage, in its given (capsule) order, so a capsule's
+pages are packed first under the budget. Severance still runs
+before ordering, so a pinned passage from a severed page — or
+carrying a severed claim — is cut exactly like any other.
+
 Pure stdlib; importable without network access.
 """
 
@@ -67,6 +92,29 @@ def estimate_tokens(text) -> int:
     if not text:
         return 0
     return -(-len(str(text)) // CHARS_PER_TOKEN)
+
+
+# Packs at least this large get the Lost-in-the-Middle
+# composition rearrangement (see the module docstring).
+LOST_IN_MIDDLE_MIN_PACK = 4
+
+
+def arrange_lost_in_middle(packed: list) -> list:
+    """Rearrange *packed* (already in consideration order,
+    strongest first) so the strongest passages sit at the head
+    and the tail and the weakest in the middle.
+
+    The arrangement is deterministic: take the even-ranked
+    passages (ranks 0, 2, 4, …) in order, then the odd-ranked
+    passages in REVERSE order (…, 5, 3, 1). Rank 0 heads the
+    pack, rank 1 closes it, and the weakest passages meet in
+    the centre. Packs smaller than LOST_IN_MIDDLE_MIN_PACK are
+    returned unchanged (the same list object). The input list
+    is never mutated.
+    """
+    if len(packed) < LOST_IN_MIDDLE_MIN_PACK:
+        return packed
+    return list(packed[::2]) + list(packed[1::2][::-1])
 
 
 def _score(passage: dict) -> float:
@@ -140,8 +188,14 @@ def pack_evidence(passages, budget: int = DEFAULT_TOKEN_BUDGET,
 
     - ``budget``: the budget that was applied;
     - ``tokens_used``: approximate tokens of the packed passages;
-    - ``packed``: the selected passages, in relevance order, each
-      with its ``tokens`` count added;
+    - ``packed``: the selected passages, each with its ``tokens``
+      count added — in consideration (relevance) order for packs
+      of three or fewer, and in Lost-in-the-Middle composition
+      order (strongest at head and tail, weakest in the middle;
+      ``lost_in_middle_applied`` set) for packs of four or more.
+      Passages carrying ``"pinned": True`` (Prompt Capsules, see
+      ``tools/ask/capsules.py``) are considered before all
+      unpinned passages, in their given order;
     - ``dropped``: the passages that did not fit, in the order they
       were considered, each with ``tokens`` and
       ``reason: "over-budget"`` added.
@@ -220,20 +274,24 @@ true.
             def freshness_of(passage):
                 return table.get(_fresh_key(passage.get("page")))
 
-    if standing_of is not None:
-        ordered = sorted(
-            enumerate(passages),
-            key=lambda item: (
-                standing_of(item[1])["tier"],
-                -_score(item[1]),
-                item[0],
-            ),
+    def _consideration_key(item):
+        index, passage = item
+        pinned = 0 if passage.get("pinned") else 1
+        tier = standing_of(passage)["tier"] if standing_of else 0
+        # Pinned (capsule) passages come first, in their given
+        # order — the index decides among them, so their tier /
+        # score never reorders a capsule. Unpinned passages keep
+        # the pre-capsule order exactly: standing tier, then
+        # relevance, stable on ties.
+        return (
+            pinned,
+            index if pinned == 0 else 0,
+            tier,
+            -_score(passage),
+            index,
         )
-    else:
-        ordered = sorted(
-            enumerate(passages),
-            key=lambda item: (-_score(item[1]), item[0]),
-        )
+
+    ordered = sorted(enumerate(passages), key=_consideration_key)
     packed = []
     dropped = []
     used = 0
@@ -253,12 +311,18 @@ true.
         else:
             entry["reason"] = "over-budget"
             dropped.append(entry)
+    # Lost-in-the-Middle: selection above is final; only the
+    # composition order of the packed list changes (module
+    # docstring). Dropped passages keep consideration order.
+    rearranged = arrange_lost_in_middle(packed)
     result = {
         "budget": budget,
         "tokens_used": used,
-        "packed": packed,
+        "packed": rearranged,
         "dropped": dropped,
     }
+    if rearranged is not packed:
+        result["lost_in_middle_applied"] = True
     if standing_of is not None:
         result["standing_applied"] = True
     if freshness_of is not None:

@@ -109,7 +109,8 @@ def build_qa_record(question_entry: dict, answer_text: str,
                     mode: str = None,
                     citation_details: list = None,
                     trust_verdict: str = None,
-                    clarification: dict = None) -> dict:
+                    clarification: dict = None,
+                    coverage: dict = None) -> dict:
     """Build one Q&A record for ``wiki/access/qa-2026.jsonl``.
 
     The abstention contract (``answer_contract.py``) fields are added
@@ -134,6 +135,14 @@ def build_qa_record(question_entry: dict, answer_text: str,
     asker confirmed, the neutral stem, the asker's reply, the
     timing route; built by ``clarification.qa_clarification_field``)
     — is stamped only when the answer followed a clarification.
+
+    Marathon R2 lane B1 rides the same rule: ``coverage`` — the
+    computed coverage-gap record built by
+    ``tools/ask/coverage.py`` (searched facets with zero hits +
+    the newest packed evidence date + its one line) — is stamped
+    only when supplied. It lives on the RECORD and in the staged
+    proposal (the pickup report), never appended to the answer
+    text; see coverage.py for the placement decision.
     """
     record = {
         "id": question_entry["id"],
@@ -165,6 +174,8 @@ def build_qa_record(question_entry: dict, answer_text: str,
         record["trust_verdict"] = trust_verdict
     if clarification is not None:
         record["clarification"] = clarification
+    if coverage is not None:
+        record["coverage"] = coverage
     return record
 
 
@@ -175,6 +186,13 @@ def _build_citation_detail(detail: dict) -> dict:
         record["score"] = detail["score"]
     if detail.get("passage") is not None:
         record["passage"] = detail["passage"]
+    # Marathon R2 lane B1 (additive, only when supplied): the
+    # chunk's section anchor (read by tools/ask/show_chunks.py)
+    # and its evidence date (read by tools/ask/coverage.py).
+    if detail.get("anchor") is not None:
+        record["anchor"] = detail["anchor"]
+    if detail.get("date") is not None:
+        record["date"] = detail["date"]
     return record
 
 
@@ -260,6 +278,15 @@ def stage_proposal_markdown(record: dict) -> str:
             "Trust verdict: **" + str(record["trust_verdict"]) + "** "
             "(deterministic — see tools/ask/answer_contract.py)."
         )
+        lines.append("")
+    coverage = record.get("coverage")
+    if coverage:
+        lines.append("## Coverage")
+        lines.append("")
+        if isinstance(coverage, dict):
+            lines.append(str(coverage.get("line", "")))
+        else:
+            lines.append(str(coverage))
         lines.append("")
     clarification = record.get("clarification")
     if clarification:
@@ -436,6 +463,47 @@ def mark_answered(base_url: str, token: str, qid, answer_ref: str):
     return _request_json(request, "mark question %s answered" % qid)
 
 
+_COVERAGE_MODULE = None
+
+
+def _coverage_module():
+    """Load tools/ask/coverage.py by path (the lazy pattern
+    answer_contract uses), so this module stays importable on
+    its own and coverage stays an opt-in, additive field."""
+    global _COVERAGE_MODULE
+    if _COVERAGE_MODULE is None:
+        import importlib.util
+
+        path = Path(__file__).resolve().parent / "coverage.py"
+        spec = importlib.util.spec_from_file_location(
+            "ask_coverage", path
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _COVERAGE_MODULE = module
+    return _COVERAGE_MODULE
+
+
+def _payload_coverage(payload: dict):
+    """The coverage record for a record-answer payload, or None.
+
+    An explicit ``coverage`` dict in the payload is stamped
+    as-is; a payload carrying ``searched_facets`` (what the
+    pickup searched, with hit counts) gets its coverage
+    computed from its own citation details by coverage.py.
+    Anything else records no coverage — the field is additive
+    and its absence changes nothing.
+    """
+    coverage = payload.get("coverage")
+    if isinstance(coverage, dict):
+        return coverage
+    if payload.get("searched_facets") is not None:
+        return _coverage_module().coverage_for_record(
+            payload, payload.get("searched_facets")
+        )
+    return None
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -571,6 +639,7 @@ def main(argv=None) -> int:
             mode=payload.get("mode"),
             citation_details=payload.get("citation_details"),
             clarification=payload.get("clarification"),
+            coverage=_payload_coverage(payload),
         )
         # Every newly recorded answer carries its trust verdict,
         # computed deterministically from the finished record
