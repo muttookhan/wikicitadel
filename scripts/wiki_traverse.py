@@ -80,14 +80,24 @@ precedence the validator, the search and the Lens all use.
 --json switches any command to a JSON rendering of the same
 facts. Teaching file: tools/traverse/SKILL.md.
 
+Frozen reads: `--pin <commit>` (a global option, before the
+command) resolves EVERY read of the session against that
+commit's tree instead of the working tree — the tree is
+extracted read-only from `git archive` into a temporary
+directory and the working tree is never written, checked
+out, or moved. Output is stamped with the resolved commit.
+A page edited since the pin reads as its pinned text.
+
 Exit codes: 0 ok · 1 refusal (unadmitted identity, gated raw,
-no such page) · 2 usage error.
+no such page, unresolvable pin) · 2 usage error.
 """
 import argparse
+import atexit
 import importlib.util
 import json
 import subprocess
 import sys
+import tempfile
 from collections import Counter, defaultdict, deque
 from pathlib import Path
 
@@ -134,6 +144,39 @@ def _load_module(name, path):
     spec.loader.exec_module(mod)
     return mod
 
+
+def resolve_pinned_root(root, pin):
+    """Resolve a frozen read: extract the tree at commit `pin`
+    into a fresh temporary directory with `git archive` and
+    return (pinned_root, commit). The working tree is only ever
+    READ (rev-parse + archive); nothing in it is written,
+    checked out, or moved. The extraction lives in the OS temp
+    area and is removed at exit. An unresolvable pin is a
+    Refusal, raised before any page is read."""
+    proc = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "--verify",
+         pin + "^{commit}"], capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise Refusal(f"pin '{pin}' does not resolve to a commit "
+                      f"in this tree")
+    commit = proc.stdout.strip()
+    dest = Path(tempfile.mkdtemp(prefix="wiki-traverse-pin-"))
+    tar_path = dest.parent / (dest.name + ".tar")
+    proc = subprocess.run(
+        ["git", "-C", str(root), "archive", "--output",
+         str(tar_path), commit], capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise Refusal(f"could not archive pin '{pin}' "
+                      f"({commit}) for a frozen read")
+    proc = subprocess.run(
+        ["tar", "-xf", str(tar_path), "-C", str(dest)],
+        capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise Refusal(f"could not extract pin '{pin}' "
+                      f"({commit}) for a frozen read")
+    atexit.register(subprocess.run,
+                    ["rm", "-rf", str(dest), str(tar_path)])
+    return dest, commit
 
 def validate_mod(root):
     return _load_module("wiki_validate", root / "scripts" / "wiki_validate.py")
@@ -557,6 +600,11 @@ def main(argv):
                     help="admitted identity (see module docstring)")
     ap.add_argument("--root", type=Path, default=ROOT,
                     help="repo root (default: this tool's repo)")
+    ap.add_argument("--pin", default=None,
+                    help="freeze the session at this commit: all "
+                         "reads resolve against its tree (via a "
+                         "read-only git archive extraction); the "
+                         "working tree is never written")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     pp = sub.add_parser("page", help="print a compiled page")
@@ -600,8 +648,11 @@ def main(argv):
 
     args = ap.parse_args(argv)
     root = args.root
+    pin_commit = None
     try:
         require_admitted(args.identity)
+        if args.pin:
+            root, pin_commit = resolve_pinned_root(root, args.pin)
         if args.cmd == "page":
             out = cmd_page(root, args.identity, args.name, args.json)
         elif args.cmd == "source":
@@ -631,6 +682,12 @@ def main(argv):
     except Refusal as exc:
         print(f"refused: {exc}", file=sys.stderr)
         return 1
+    if pin_commit:
+        stamp = f"[pinned read: commit {pin_commit}]"
+        if isinstance(out, dict):
+            out = {"pin": pin_commit, **out}
+        else:
+            out = stamp + "\n" + out
     if isinstance(out, dict):
         print(json.dumps(out, indent=1))
     else:

@@ -64,6 +64,28 @@ not explicitly baselinable is carved out by default, so a class
 added to the gateway scanner later cannot be silenced by an old
 baseline.
 
+Path shapes (added in the B3 governance round): two further
+pattern classes are detected locally in this script (not by the
+gateway scanner, whose classes guard the door IN):
+
+  absolute-home-path — an absolute home-directory path:
+    /home/<user>/…, /Users/<user>/…, or a Windows drive home path… —
+    it names a person's machine layout and account name, and
+    an export surface has no business carrying one.
+  bare-username-in-path — the same leak without the absolute
+    root: ~<user>/…, a relative home/<user>/… or
+    Users/<user>/… path segment.
+
+A path-shape hit is reported exactly like every other hit —
+pattern class + file + count, with the matched line's number
+and sha256 in the line findings — and the matched text itself
+is NEVER quoted, printed, or stored. Both classes are
+baselinable through the same baseline mechanism as
+credit-card (see BASELINABLE_PATTERNS below): they are shapes,
+not credentials, and an audited example path in documentation
+may be baselined by an audited run — a real home path is
+scrubbed, never baselined to silence the lane.
+
 Output: a human summary to stdout listing only new findings;
 with --json <path>, the same result machine-readable (findings
 carry new_count / baselined_count alongside count). Exit codes:
@@ -81,6 +103,7 @@ import argparse
 import glob
 import hashlib
 import json
+import re
 import sys
 import zipfile
 from datetime import date
@@ -97,7 +120,8 @@ BASELINE_PATH = Path(__file__).resolve().parent / "leak-baseline.json"
 # Only these classes may ever enter the baseline (see docstring).
 # Every other class — including any the gateway scanner gains
 # later — is carved out by default and surfaces on every run.
-BASELINABLE_PATTERNS = {"credit-card", "mirrored-memory-marker"}
+BASELINABLE_PATTERNS = {"credit-card", "mirrored-memory-marker",
+                        "absolute-home-path", "bare-username-in-path"}
 NEVER_BASELINE_PATTERNS = {
     "private-key", "aws-access-key-id", "github-token",
     "slack-token", "provider-api-key", "jwt", "bearer-token",
@@ -108,12 +132,49 @@ sys.path.insert(0, str(ROOT / "tools" / "gateway"))
 from gateway.defense import scan_secrets  # noqa: E402
 
 
+# -- Path / username shapes (local classes; see docstring) ----------------
+# Absolute home paths: /home/<user>/, /Users/<user>/,
+# C:\Users\<user>\. The lookarounds keep the bare-username
+# class from double-counting the tail of an absolute path.
+ABS_HOME_RES = (
+    re.compile(r"/home/[A-Za-z0-9._-]+/"),
+    re.compile(r"/Users/[A-Za-z0-9._-]+/"),
+    re.compile(r"\b[A-Za-z]:\\Users\\[A-Za-z0-9._\- ]+\\"),
+)
+BARE_USERNAME_RES = (
+    re.compile(r"(?<![\w/.-])~[A-Za-z0-9._-]+/"),
+    re.compile(r"(?<![\w/.-])home/[A-Za-z0-9._-]+/"),
+    re.compile(r"(?<![\w/.\\-])Users/[A-Za-z0-9._-]+/"),
+)
+PATH_SHAPE_RES = (("absolute-home-path", ABS_HOME_RES),
+                  ("bare-username-in-path", BARE_USERNAME_RES))
+
+
+def scan_path_shapes(text):
+    """-> [{pattern, count}] for the path/username shape
+    classes only (class+count; the matched text is never
+    returned, here or anywhere else in this script)."""
+    out = []
+    for pattern, regexes in PATH_SHAPE_RES:
+        n = sum(len(rx.findall(text)) for rx in regexes)
+        if n:
+            out.append({"pattern": pattern, "count": n})
+    return out
+
+
 def scan_text(text):
     """-> [{pattern, count}] sorted by pattern class (class+count
-    only; scan_secrets never returns the matched value)."""
+    only; scan_secrets never returns the matched value). Merges
+    the gateway scanner's classes with this script's local
+    path/username shape classes."""
     result = scan_secrets(text)
-    return [{"pattern": f["pattern"], "count": f["count"]}
-            for f in result["findings"]]
+    merged = {}
+    for f in result["findings"]:
+        merged[f["pattern"]] = merged.get(f["pattern"], 0) + f["count"]
+    for f in scan_path_shapes(text):
+        merged[f["pattern"]] = merged.get(f["pattern"], 0) + f["count"]
+    return [{"pattern": k, "count": v}
+            for k, v in sorted(merged.items())]
 
 
 def _line_findings(text, wanted):
@@ -123,7 +184,8 @@ def _line_findings(text, wanted):
     the sha256 of a matched line is kept — never the line, never
     the matched value."""
     groups = {}
-    for line in text.splitlines():
+    first_line = {}
+    for lineno, line in enumerate(text.splitlines(), 1):
         if not line.strip():
             continue
         pats = {}
@@ -140,7 +202,9 @@ def _line_findings(text, wanted):
         for pattern, n in pats.items():
             key = (pattern, digest)
             groups[key] = groups.get(key, 0) + n
+            first_line.setdefault(key, lineno)
     return [{"pattern": pattern, "line_sha256": digest,
+             "line": first_line[(pattern, digest)],
              "matches": matches}
             for (pattern, digest), matches in sorted(groups.items())]
 

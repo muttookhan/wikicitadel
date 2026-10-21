@@ -701,6 +701,98 @@ def editorial_markers(root=None):
             "locations": locations}
 
 
+# -- Rating-table legend check (Lane 5 companion) ---------------------------
+# Pattern: weijing143/llm-wiki-notes, via the feature survey —
+# tables carrying rating marks must include a legend, checked
+# with line numbers. A table whose cells carry rating marks
+# (the glyph set below: stars, ticks, crosses, filled/empty
+# circles — the marks this corpus's rating and scorecard
+# tables use) is unreadable without a key, so a table with
+# marks and NO legend line in its surrounding section is a
+# finding. A legend line is a non-table line in the same
+# section (between the nearest headings around the table)
+# carrying the word "legend". Detection is deliberately
+# narrow: prose mentions of the marks are not tables, and a
+# legend in a DIFFERENT section does not clear the table.
+
+RATING_MARKS = "★☆✓✗✔✘●○◐⬤"
+RATING_MARK_RE = re.compile("[" + re.escape(RATING_MARKS) + "]")
+LEGEND_RE = re.compile(r"\blegend\b", re.IGNORECASE)
+HEADING_LINE_RE = re.compile(r"^#{1,6}\s")
+
+
+def _table_blocks(lines):
+    """Yield (start_index, [lines]) per contiguous pipe-table
+    block (0-based start index into `lines`)."""
+    block = []
+    start = 0
+    for i, line in enumerate(lines):
+        if line.lstrip().startswith("|"):
+            if not block:
+                start = i
+            block.append(line)
+        else:
+            if block:
+                yield start, block
+                block = []
+    if block:
+        yield start, block
+
+
+def rating_table_findings(root=None):
+    """Rating tables without a legend, over the compiled layer.
+
+    Returns {"findings": [{"page", "line", "marks",
+    "table_lines"}], "count": n, "tables_checked": n,
+    "tables_with_marks": n} — findings in deterministic
+    (page, line) order; `line` is the 1-based line number of
+    the table's first row."""
+    root = Path(root) if root is not None else ROOT
+    wiki_dir = root / "wiki"
+    findings = []
+    tables_checked = 0
+    tables_with_marks = 0
+    if wiki_dir.is_dir():
+        for path in sorted(wiki_dir.rglob("*.md")):
+            rel = path.relative_to(root).as_posix()
+            if rel in EXCLUDED_FILES \
+                    or rel.startswith(EXCLUDED_DIRS):
+                continue
+            lines = path.read_text(encoding="utf-8",
+                                   errors="ignore").splitlines()
+            headings = [i for i, ln in enumerate(lines)
+                        if HEADING_LINE_RE.match(ln)]
+            for start, block in _table_blocks(lines):
+                tables_checked += 1
+                marks = sorted({ch for ln in block
+                                for ch in RATING_MARK_RE.findall(ln)})
+                if not marks:
+                    continue
+                tables_with_marks += 1
+                sec_lo = max([h for h in headings if h < start],
+                             default=-1)
+                sec_hi = min([h for h in headings if h > start],
+                             default=len(lines))
+                section = lines[sec_lo + 1:sec_hi]
+                has_legend = any(
+                    LEGEND_RE.search(ln)
+                    for ln in section
+                    if not ln.lstrip().startswith("|"))
+                if not has_legend:
+                    findings.append({
+                        "page": rel, "line": start + 1,
+                        "marks": marks,
+                        "table_lines": len(block)})
+    findings.sort(key=lambda f: (f["page"], f["line"]))
+    return {"findings": findings, "count": len(findings),
+            "tables_checked": tables_checked,
+            "tables_with_marks": tables_with_marks}
+
+
+def lane_rating_tables():
+    return rating_table_findings()
+
+
 # -- Lane 6: superseded decisions ------------------------------------------
 
 def lane_decision_gate():
@@ -1279,6 +1371,42 @@ def render(lanes, run_date, lens_note):
     else:
         lines += ["No editorial markers on the compiled layer"
                   " this run.", ""]
+    rt = lanes.get("rating_tables") or {"count": 0,
+                                         "findings": [],
+                                         "tables_checked": 0,
+                                         "tables_with_marks": 0}
+    lines += [
+        "### Rating-table legends (Lane 5, continued)",
+        "",
+        f"Tables carrying rating marks (stars, ticks, crosses,"
+        f" circles) must carry a legend in their section"
+        f" (pattern: weijing143/llm-wiki-notes, via the"
+        f" survey): **{rt['count']}** of"
+        f" {rt['tables_with_marks']} rating table(s) (of"
+        f" {rt['tables_checked']} table(s) checked) have no"
+        f" legend line in their surrounding section. A rating"
+        f" mark without its key is a score a reader cannot"
+        f" interpret.",
+        "",
+    ]
+    if rt["findings"]:
+        lines += ["Rating tables without a legend (page line"
+                  " — marks):", ""]
+        for f in rt["findings"]:
+            lines.append(f"- `{f['page']}` line {f['line']} —"
+                         f" {' '.join(f['marks'])}")
+        lines.append("")
+        lines += [
+            "**To clear this:** add a legend line in the"
+            " table's own section naming what each mark"
+            " means — the marks a table uses, in the order"
+            " it uses them. A legend in another section does"
+            " not travel with the table when the section is"
+            " read or excerpted alone.",
+            "",
+        ]
+    else:
+        lines += ["No rating table lacks a legend this run.", ""]
     lines += [
         "## Lane 6 — Superseded decisions",
         "",
@@ -1410,6 +1538,7 @@ def main(argv):
         "quotes": lane_quotes(),
         "decision_gate": lane_decision_gate(),
         "annotations": lane_annotations(),
+        "rating_tables": lane_rating_tables(),
     }
     out = WIKI / "filings" / f"lint-lanes-{run_date}.md"
     out.write_text(render(lanes, run_date, lens_note), encoding="utf-8")
@@ -1439,7 +1568,11 @@ def main(argv):
           f" live ({lanes['decision_gate']['historical_count']}"
           f" historical)"
           f"   owner marks: {lanes['annotations']['count']}"
-          f" unaddressed")
+          f" unaddressed"
+          f"   rating tables: {lanes['rating_tables']['count']}"
+          f" without a legend (of"
+          f" {lanes['rating_tables']['tables_with_marks']}"
+          f" with marks)")
     return 0
 
 
