@@ -286,5 +286,73 @@ class WatchTests(IngestQueueFixture):
         self.assertEqual(len(self.items()), 2)
 
 
+class PiopChecklistTests(IngestQueueFixture):
+    """PIOP stage checklist (Marathon R13, Round 11 RA find 9;
+    Oh 2019 — Simmons): the six stages are the register
+    header's checklist and every item shows its stage."""
+
+    STAGES = ["initiation", "identification",
+              "temporary-categorisation", "examination-comparison",
+              "selection-modification-creation", "categorisation"]
+
+    def _json_doc(self):
+        proc = self.run_cli("list", "--json")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        return json.loads(proc.stdout)
+
+    def test_header_carries_the_six_stage_checklist(self):
+        a = self.write_source("a.md", "# A\n")
+        self.enqueue(a)
+        events = [json.loads(l) for l in
+                  self.register.read_text(encoding="utf-8").splitlines()
+                  if l.strip()]
+        header = events[0]
+        self.assertEqual(header["kind"], "header")
+        self.assertEqual([c["stage"] for c in header["piop_checklist"]],
+                         self.STAGES)
+        doc = self._json_doc()
+        self.assertEqual([c["stage"] for c in doc["piop_checklist"]],
+                         self.STAGES)
+
+    def test_new_item_stands_at_initiation(self):
+        a = self.write_source("a.md", "# A\n")
+        self.enqueue(a)
+        item = self.items()[0]
+        self.assertEqual(item["piop_stage"], "initiation")
+        reached = [c["stage"] for c in item["piop_checklist"] if c["reached"]]
+        self.assertEqual(reached, ["initiation"])
+
+    def test_stage_event_moves_item_and_checklist(self):
+        a = self.write_source("a.md", "# A\n")
+        self.enqueue(a)
+        item_id = self.items()[0]["id"]
+        proc = self.run_cli("stage", item_id, "--stage",
+                            "temporary-categorisation")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("temporary-categorisation", proc.stdout)
+        item = self.items()[0]
+        self.assertEqual(item["piop_stage"], "temporary-categorisation")
+        reached = [c["stage"] for c in item["piop_checklist"] if c["reached"]]
+        self.assertEqual(reached, self.STAGES[:3])
+        # plain list shows the checklist header and the item's stage
+        proc = self.run_cli("list")
+        self.assertIn("PIOP checklist:", proc.stdout)
+        self.assertIn("piop=temporary-categorisation", proc.stdout)
+
+    def test_stage_refused_for_unknown_and_terminal_items(self):
+        a = self.write_source("a.md", "# A\n")
+        self.enqueue(a)
+        proc = self.run_cli("stage", "no-such-id", "--stage", "identification")
+        self.assertEqual(proc.returncode, 2)
+        claimed_id, _ = self.claim("--worker", "w1")
+        proc = self.run_cli("complete", claimed_id)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        proc = self.run_cli("stage", claimed_id, "--stage", "categorisation")
+        self.assertEqual(proc.returncode, 2)
+        # a bogus stage name is a usage error, never recorded
+        proc = self.run_cli("stage", claimed_id, "--stage", "Bogus")
+        self.assertEqual(proc.returncode, 2)
+
+
 if __name__ == "__main__":
     unittest.main()

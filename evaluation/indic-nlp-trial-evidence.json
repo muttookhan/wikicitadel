@@ -1,0 +1,15 @@
+{
+  "tool": "indic-nlp-trial",
+  "library": "indic-nlp-library",
+  "licence": "MIT",
+  "ran": true,
+  "sample": "trials/indic/sample-hi.txt",
+  "sample_sha256": "04a0b8cdb8237964f16bc1298df7e424d0d0578defb9489606be8d6d20030bf4",
+  "tool_version": "0.92",
+  "result": "trials/indic/result.json",
+  "result_sha256": "422ef29cc89edd72c34b4a24ad16ccaab4dc8095ba08dc8379b72b08cb3f37ff",
+  "sentences": 5,
+  "wrapper": "scripts/wiki_indic_nlp_trial.py run",
+  "install": "pip install indic-nlp-library -> 0.92 in trials/indic/venv (outside the trees)",
+  "narrowing": "sentence_split returned 5 segments; the 5th is a lone closing-quote fragment from the quoted final sentence — recorded, not hidden. First runner attempt failed on the 0.92 factory rename (create_normalizer -> get_normalizer); the runner now accepts either spelling."
+}

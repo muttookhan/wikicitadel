@@ -51,11 +51,37 @@ exit 2 is a usage error (no wiki layer, bad arguments).
 `--strict` makes report exit 1 when any page is unhealthy,
 for callers that want a gate.
 
+Link-type tally (Marathon R12 lane BA, ideas board line
+182): the `tally` command extends this machinery with a
+corpus-wide count by link TYPE, recomputed from the files
+on every run (nothing is stored or carried forward):
+
+  * internal-wikilink — a [[...]] wikilink occurrence in an
+    in-scope page (the extraction above), with resolved /
+    broken occurrence subcounts under this tool's own
+    resolution semantics;
+  * external-dereferenceable — an external URL occurrence
+    (a Markdown [text](url) target or a bare URL) that is
+    dereferenceable AS WRITTEN: an absolute http(s) URL
+    whose parse yields a plausible host. This is a
+    syntactic judgement only — no network is touched, and
+    dereferenceable does not claim the target is alive;
+  * external-unresolved — an external reference that cannot
+    be dereferenced as written: a malformed or hostless
+    http(s) reference, a protocol-relative //host reference,
+    or a Markdown link target in the external shape (carries
+    "://" or starts "www.") that fails the parse above.
+
+`tally` is a report in the same idiom: exit 0 whenever the
+tally is produced, exit 2 on usage error.
+
 Usage:
   python3 scripts/wiki_link_health.py [--root PATH] report
       [--page <name-or-path>] [--json]
   python3 scripts/wiki_link_health.py [--root PATH] emit
       [--out DIR]
+  python3 scripts/wiki_link_health.py [--root PATH] tally
+      [--json]
 Stdlib only.
 """
 import argparse
@@ -218,6 +244,126 @@ def compute(root):
     return records, summary
 
 
+# ------------------------------------------------------------ link-type tally
+
+MD_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
+BARE_URL_RE = re.compile(r"https?://[^\s<>\)\]\"']+")
+HOST_RE = re.compile(r"^[A-Za-z0-9.-]+(?::\d+)?$")
+
+
+def classify_external(url):
+    """-> 'external-dereferenceable' | 'external-unresolved'.
+
+    Syntactic only (no network): dereferenceable means an
+    absolute http(s) URL whose parse yields a host that
+    could be resolved — a dotted host name, localhost, or
+    an IPv4 literal. Anything else external-shaped (no
+    scheme, no host, a host with no dot, stray characters)
+    is unresolved as written."""
+    from urllib.parse import urlparse
+    u = url.strip().strip("<>")
+    if not u or any(ch.isspace() for ch in u):
+        return "external-unresolved"
+    parsed = urlparse(u)
+    if parsed.scheme not in ("http", "https"):
+        return "external-unresolved"
+    host = parsed.hostname or ""
+    if not host or not HOST_RE.match(parsed.netloc.split("@")[-1]):
+        return "external-unresolved"
+    if host == "localhost" or "." in host:
+        return "external-dereferenceable"
+    return "external-unresolved"
+
+
+def extract_external(text):
+    """External URL occurrences in a page body (code stripped
+    by the house convention, as for wikilinks). Markdown link
+    targets are taken first and their spans removed, so a
+    Markdown-linked URL is counted once, never again as a
+    bare URL. A Markdown target counts as external when it
+    carries '://', starts 'www.', or starts '//'; a bare
+    occurrence counts when it is an http(s) URL or a
+    protocol-relative //host reference."""
+    body = strip_code(body_of(text))
+    found = []
+    spans = []
+    for m in MD_LINK_RE.finditer(body):
+        target = m.group(1).strip()
+        if "://" in target or target.startswith("www.") \
+                or target.startswith("//"):
+            found.append(target)
+            spans.append(m.span(1))
+    chars = list(body)
+    for a, b in spans:
+        chars[a:b] = " " * (b - a)
+    rest = "".join(chars)
+    for m in BARE_URL_RE.finditer(rest):
+        found.append(m.group(0).rstrip(".,;:!?"))
+    for m in re.finditer(r"(?<![\w/:])//[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+                         r"(?:/[^\s<>\)\]\"']*)?", rest):
+        found.append(m.group(0))
+    return found
+
+
+def compute_tally(root):
+    """The link-type tally, recomputed from the files.
+    Returns (tally, per_page): tally holds the three type
+    counts plus internal resolved/broken subcounts and the
+    pages scanned; per_page is a list of per-page dicts in
+    path order (in-scope pages only, as in compute())."""
+    root = Path(root)
+    all_pages = iter_all_pages(root)
+    keys = {}
+    texts = {}
+    for p in all_pages:
+        rel = p.relative_to(root).as_posix()
+        text = p.read_text(encoding="utf-8", errors="ignore")
+        texts[rel] = text
+        keys.setdefault(rel, rel)
+        keys.setdefault(str(Path(rel).with_suffix("")), rel)
+        keys.setdefault(Path(rel).stem, rel)
+        title = frontmatter_title(text)
+        if title:
+            keys.setdefault(title, rel)
+
+    def resolve(target):
+        t = target.strip()
+        for cand in (t, t[:-3] if t.endswith(".md") else t,
+                     Path(t).name, Path(t).stem):
+            if cand in keys:
+                return keys[cand]
+        if (root / t).is_file():
+            return f"disk:{t}"
+        return None
+
+    scoped = [p.relative_to(root).as_posix() for p in all_pages
+              if in_scope(p.relative_to(root).as_posix())]
+    tally = {"internal-wikilink": 0,
+             "internal-wikilink-resolved": 0,
+             "internal-wikilink-broken": 0,
+             "external-dereferenceable": 0,
+             "external-unresolved": 0,
+             "pages_scanned": len(scoped)}
+    per_page = []
+    for rel in scoped:
+        page = {"page": rel, "internal-wikilink": 0,
+                "external-dereferenceable": 0,
+                "external-unresolved": 0}
+        for t in extract_targets(texts[rel]):
+            tally["internal-wikilink"] += 1
+            page["internal-wikilink"] += 1
+            if resolve(t):
+                tally["internal-wikilink-resolved"] += 1
+            else:
+                tally["internal-wikilink-broken"] += 1
+        for u in extract_external(texts[rel]):
+            kind = classify_external(u)
+            tally[kind] += 1
+            page[kind] += 1
+        per_page.append(page)
+    return tally, per_page
+
+
 # ------------------------------------------------------------ commands
 
 def cmd_report(root, args):
@@ -279,6 +425,25 @@ def cmd_emit(root, args):
     return 0
 
 
+def cmd_tally(root, args):
+    tally, per_page = compute_tally(root)
+    if args.json:
+        print(json.dumps({"tally": tally, "pages": per_page},
+                         indent=2, ensure_ascii=False))
+    else:
+        print(f"Link-type tally — {tally['pages_scanned']} "
+              f"in-scope page(s), recomputed from files:")
+        print(f"  internal-wikilink: "
+              f"{tally['internal-wikilink']} "
+              f"(resolved {tally['internal-wikilink-resolved']}, "
+              f"broken {tally['internal-wikilink-broken']})")
+        print(f"  external-dereferenceable: "
+              f"{tally['external-dereferenceable']}")
+        print(f"  external-unresolved: "
+              f"{tally['external-unresolved']}")
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Per-page link-health report + Lens "
@@ -287,6 +452,9 @@ def main(argv=None):
                     help="repo root (default: the checkout "
                          "holding this script)")
     sub = ap.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("tally")
+    p.add_argument("--json", action="store_true")
+    p.add_argument("--root", default=argparse.SUPPRESS)
     p = sub.add_parser("report")
     p.add_argument("--page", default=None)
     p.add_argument("--json", action="store_true")
@@ -305,6 +473,8 @@ def main(argv=None):
             return cmd_report(root, args)
         if args.cmd == "emit":
             return cmd_emit(root, args)
+        if args.cmd == "tally":
+            return cmd_tally(root, args)
     except HealthError as exc:
         print(f"wiki_link_health: {exc}", file=sys.stderr)
         return 2

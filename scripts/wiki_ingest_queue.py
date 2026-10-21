@@ -30,6 +30,16 @@ JSON object per line: a header, then events:
     {"kind": "recovered", "id": ..., "ts": ...,
      "worker": <the worker whose lease expired>,
      "reason": "lease expired"}
+    {"kind": "piop", "id": ..., "ts": ...,
+     "stage": <one of PIOP_STAGES>, "by": <actor or null>}
+
+PIOP checklist (Marathon R13, Round 11 RA find 9; Oh 2019 —
+Simmons): the header carries the six personal-information-
+organisation stages as a checklist, and a `piop` event records
+the stage an item currently stands at (an enqueued item stands
+at initiation). The queue state and the PIOP stage are
+different axes: state says who holds the item, stage says how
+far its organisation has got — and where it is stuck.
 
 Item states are COMPUTED by folding the events in order —
 the events are the record; the fold is a view. The log is
@@ -86,6 +96,8 @@ Usage:
   python3 scripts/wiki_ingest_queue.py [--root PATH]
       recover
   python3 scripts/wiki_ingest_queue.py [--root PATH]
+      stage <id> --stage <piop-stage> [--by ACTOR]
+  python3 scripts/wiki_ingest_queue.py [--root PATH]
       watch --dir <dir> [--kind ingest|convert|compile]
             [--once] [--interval N]
 
@@ -116,6 +128,41 @@ STATES = ("pending", "claimed", "done", "failed")
 DEFAULT_LEASE_SECONDS = 900
 DEFAULT_INTERVAL = 5.0
 
+# PIOP stage checklist (Marathon R13 lane BA, ideas board
+# line 197, Round 11 RA find 9; Oh 2019, Journal of
+# Documentation 75(3) — Simmons; pattern only, stage names
+# restated as ids): the six personal-information-organisation
+# stages an item passes through between arriving and being
+# filed. The checklist is the register's HEADER and every
+# item carries its current stage, so an in-flight item shows
+# the stage it is stuck at — temporary categorisation above
+# all, the stage where real collections silently stall.
+PIOP_STAGES = ("initiation", "identification",
+               "temporary-categorisation",
+               "examination-comparison",
+               "selection-modification-creation",
+               "categorisation")
+PIOP_LABELS = {
+    "initiation": "Initiation",
+    "identification": "Identification",
+    "temporary-categorisation": "Temporary categorisation",
+    "examination-comparison": "Examination / comparison",
+    "selection-modification-creation":
+        "Selection / modification / creation",
+    "categorisation": "Categorisation",
+}
+
+
+def piop_checklist(item):
+    """The six PIOP stages as a checklist for one item:
+    every stage up to and including the item's current stage
+    is marked reached, the rest unreached."""
+    current = PIOP_STAGES.index(item.get("piop_stage")
+                                or PIOP_STAGES[0])
+    return [{"stage": s, "label": PIOP_LABELS[s],
+             "reached": i <= current}
+            for i, s in enumerate(PIOP_STAGES)]
+
 HEADER = {
     "kind": "header",
     "register": "ingest-queue",
@@ -136,6 +183,14 @@ HEADER = {
                    "watch append events; nothing is rewritten "
                    "or deleted). Item states are computed by "
                    "folding the events in order.",
+    "piop_checklist": [
+        {"stage": s, "label": PIOP_LABELS[s]} for s in PIOP_STAGES],
+    "piop_note": "PIOP stage checklist (Oh 2019, Simmons; "
+                 "Round 11 RA find 9, added Marathon R13): "
+                 "every item stands at one of these six "
+                 "stages; `stage` events move it, and the "
+                 "checklist header is how an in-flight item "
+                 "shows the stage it is stuck at.",
 }
 
 
@@ -254,6 +309,7 @@ def fold(events):
                 "content_hash": ev.get("content_hash"),
                 "size": ev.get("size"),
                 "state": "pending",
+                "piop_stage": PIOP_STAGES[0],
                 "enqueued_at": ev.get("ts"), "seq": seq,
                 "worker": None, "claimed_at": None,
                 "lease_expires": None,
@@ -262,6 +318,12 @@ def fold(events):
             }
             items.append(item)
             by_id[item["id"]] = item
+        elif kind == "piop":
+            item = by_id.get(ev.get("id") or "")
+            if item is None:
+                continue
+            if ev.get("stage") in PIOP_STAGES:
+                item["piop_stage"] = ev["stage"]
         elif kind in ("claimed", "completed", "failed",
                       "recovered"):
             item = by_id.get(ev.get("id") or "")
@@ -366,7 +428,9 @@ def cmd_enqueue(root, args):
 
 def _item_line(item):
     parts = [item["id"], item["state"],
-             f"kind={item['job_kind']}", str(item["path"])]
+             f"kind={item['job_kind']}",
+             f"piop={item.get('piop_stage') or PIOP_STAGES[0]}",
+             str(item["path"])]
     if item["state"] == "claimed":
         parts.append(f"worker={item['worker']}")
         parts.append(f"lease_expires={item['lease_expires']}")
@@ -387,11 +451,19 @@ def cmd_list(root, args):
                 "claimed_at", "lease_expires", "completed_at",
                 "failed_at", "fail_reason", "recoveries")
         print(json.dumps(
-            {"items": [{k: i[k] for k in keys} for i in items]},
+            {"piop_checklist": [
+                {"stage": s, "label": PIOP_LABELS[s]}
+                for s in PIOP_STAGES],
+             "items": [{**{k: i[k] for k in keys},
+                        "piop_stage": i.get("piop_stage"),
+                        "piop_checklist": piop_checklist(i)}
+                       for i in items]},
             indent=2, ensure_ascii=False))
         return 0
     print(f"Ingest queue — {len(items)} item(s)"
           + (f" in state {args.state}" if args.state else ""))
+    print("  PIOP checklist: "
+          + " -> ".join(PIOP_STAGES))
     if not items:
         print("  (nothing queued)")
     for item in items:
@@ -481,6 +553,32 @@ def cmd_fail(root, args):
             "reason": args.reason})
     print(f"failed {args.id}: {item['path']}"
           + (f" — {args.reason}" if args.reason else ""))
+    return 0
+
+
+def cmd_stage(root, args):
+    """Record the PIOP stage an in-flight item stands at.
+    Refused for an unknown item and for a terminal item
+    (done / failed): a stuck stage is a fact about work in
+    flight, and a finished item's stage is its history, not
+    a current position to move."""
+    with _locked(root):
+        items = fold(read_events(root))
+        item = next((i for i in items if i["id"] == args.id),
+                    None)
+        if item is None:
+            raise QueueError(f"no queue item {args.id!r}")
+        if item["state"] in ("done", "failed"):
+            raise QueueError(
+                f"cannot set a PIOP stage for item {args.id}: "
+                f"it is already {item['state']} — the stage "
+                f"checklist tracks in-flight items")
+        _append_event(root, {
+            "kind": "piop", "id": args.id,
+            "ts": _ts(_now()), "stage": args.stage,
+            "by": args.by})
+    print(f"stage {args.id}: piop={args.stage} "
+          f"({PIOP_LABELS[args.stage]})")
     return 0
 
 
@@ -598,6 +696,13 @@ def main(argv):
     p = sub.add_parser("recover")
     root_arg(p)
 
+    p = sub.add_parser("stage")
+    p.add_argument("id")
+    p.add_argument("--stage", required=True,
+                   choices=PIOP_STAGES)
+    p.add_argument("--by", default=None)
+    root_arg(p)
+
     p = sub.add_parser("watch")
     p.add_argument("--dir", required=True)
     p.add_argument("--kind", default="ingest",
@@ -622,6 +727,8 @@ def main(argv):
             return cmd_fail(root, args)
         if args.cmd == "recover":
             return cmd_recover(root, args)
+        if args.cmd == "stage":
+            return cmd_stage(root, args)
         if args.cmd == "watch":
             return cmd_watch(root, args)
     except QueueError as exc:

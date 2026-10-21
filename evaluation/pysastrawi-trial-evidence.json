@@ -1,0 +1,15 @@
+{
+  "tool": "pysastrawi-trial",
+  "library": "PySastrawi",
+  "licence_code": "MIT",
+  "licence_dictionary": "CC-BY-NC-SA 3.0 — dictionary NOT copied into either tree; it remains in the lane-workspace venv only",
+  "ran": true,
+  "sample": "trials/pysastrawi/sample-id.txt",
+  "sample_sha256": "9c6b8156af273a371b13804a572b30e9e0b7f9d830f01dab0043d9c24b2b95fa",
+  "result": "trials/pysastrawi/result.json",
+  "result_sha256": "e8a68cccbf0b17aa194fa4053f57e86e0e41743ffbf9d62b8daedc9e15eb4a27",
+  "words": 15,
+  "wrapper": "scripts/wiki_pysastrawi_trial.py run",
+  "install": "pip install PySastrawi -> 1.2.1 in trials/pysastrawi/venv (outside the trees)",
+  "licence_note": "code MIT; bundled dictionary CC-BY-NC-SA 3.0 — dictionary NOT copied into either tree; only outputs + this evidence entered the trees."
+}

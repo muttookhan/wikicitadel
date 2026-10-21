@@ -154,3 +154,35 @@ register holds no citekeys), the Crossmark updates manifest, and
 the CiteProof checker-accuracy ledger (3/3 seeded-bad fixtures
 caught, controls clean, the real lockfile untouched). Record:
 [[marathon-round-10-2026-10-21]].
+
+## [2026-10-21] ingest | Marathon Round 11 — nine queued items closed
+
+The appraisal register, the RiC-style typed relation register,
+the occasional-actions register, and the use / knowledge-
+enhancement log; the Indic NLP, PyThaiNLP and PySastrawi trials
+(all ran with evidence; the Sastrawi dictionary was not
+redistributed — outputs only); the mdBook print artefact for
+the declared page set; and the per-run export loss inventory.
+This tree's Round 10 record page gained its missing `sources`
+field (a validator error at the Round 10 base). Record:
+[[marathon-round-11-2026-10-21]].
+
+## [2026-10-21] ingest | Marathon Round 12 — eight queued items closed
+
+The Zaveri coverage register, the link-type tally, the
+cited-source availability probe, the Automerge / Loro / TinyBase
+pattern halves, integration-path merge hygiene, and the
+advisory reservation register. Rounds 11 and 12 are published
+together as sync entry 26 after the publish-service outage
+during Round 11. Record: [[marathon-round-12-2026-10-21]].
+
+## [2026-10-21] ingest | Marathon Round 13 — programme close
+
+Round 11's ten queued items closed (curation register,
+keeping-motivation field, share/publish vocabulary, PIOP
+checklist, Janome + Kiwi trials ran, CJK rule set, ontology page
+type, annotation contract with no labels created, link-graph
+evaluation harness). The Rounds 4–13 programme closes here;
+Rounds 11–13 stand complete locally, unpublished while the
+publish service is down. Record:
+[[marathon-round-13-2026-10-21]].

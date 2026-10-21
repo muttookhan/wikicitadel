@@ -5,6 +5,7 @@ status: current
 created: 2026-10-21
 updated: 2026-10-21
 tags: [marathon, round-10, record]
+sources: []
 ---
 
 # Marathon Round 10 — record (2026-10-21)

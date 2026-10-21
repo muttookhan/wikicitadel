@@ -1,0 +1,115 @@
+{
+  "note": "Report only, never a gate: an export run files this inventory beside its artefact.",
+  "pages_with_loss": [
+    {
+      "callouts": 0,
+      "claim_markers": 1,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 0,
+      "page": "wiki/entities/owner.md",
+      "unresolved_wikilinks": []
+    },
+    {
+      "callouts": 0,
+      "claim_markers": 1,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 0,
+      "page": "wiki/i18n/de/overview.md",
+      "unresolved_wikilinks": []
+    },
+    {
+      "callouts": 0,
+      "claim_markers": 2,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 0,
+      "page": "wiki/i18n/ja/decision-register.md",
+      "unresolved_wikilinks": []
+    },
+    {
+      "callouts": 0,
+      "claim_markers": 1,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 0,
+      "page": "wiki/i18n/ja/overview.md",
+      "unresolved_wikilinks": []
+    },
+    {
+      "callouts": 0,
+      "claim_markers": 2,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 0,
+      "page": "wiki/i18n/ko/decision-register.md",
+      "unresolved_wikilinks": []
+    },
+    {
+      "callouts": 0,
+      "claim_markers": 1,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 0,
+      "page": "wiki/i18n/ko/overview.md",
+      "unresolved_wikilinks": []
+    },
+    {
+      "callouts": 0,
+      "claim_markers": 1,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 0,
+      "page": "wiki/i18n/zh/overview.md",
+      "unresolved_wikilinks": []
+    },
+    {
+      "callouts": 0,
+      "claim_markers": 1,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 0,
+      "page": "wiki/overview.md",
+      "unresolved_wikilinks": []
+    },
+    {
+      "callouts": 0,
+      "claim_markers": 0,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 1,
+      "page": "wiki/rules/evidence-ttl.md",
+      "unresolved_wikilinks": []
+    },
+    {
+      "callouts": 0,
+      "claim_markers": 2,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 0,
+      "page": "wiki/syntheses/decision-register.md",
+      "unresolved_wikilinks": []
+    },
+    {
+      "callouts": 0,
+      "claim_markers": 0,
+      "editorial_markers": 0,
+      "embeds": [],
+      "html_lines": 2,
+      "page": "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+      "unresolved_wikilinks": []
+    }
+  ],
+  "tool": "export-loss-inventory",
+  "totals": {
+    "callouts": 0,
+    "claim_markers": 12,
+    "editorial_markers": 0,
+    "embeds": 0,
+    "html_lines": 3,
+    "pages": 35,
+    "unresolved_wikilinks": 0
+  },
+  "unresolved_targets": {}
+}
