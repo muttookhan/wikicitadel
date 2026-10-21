@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Owner rulings from the Lens — the applier (WikiCitadel v1).
+"""Owner rulings in chat — the applier (WikiCitadel v1).
 
-The Lens is a static, read-only portal: its Approve / Reject
-buttons on the Briefing's "Waiting on you" items decide nothing
-themselves. A tap sends the owner's ruling through the Ask door,
-and the Ask pickup runs this tool to apply the ruling to
-wiki/ideas.md. The path is: button -> Ask door -> pickup ->
-this tool -> ideas.md move + log line + queue confirmation
-(schema: AGENTS.md, "Owner rulings from the Lens").
+Rulings are the owner's replies in chat: the agent records the
+ruling and runs this tool to apply it to wiki/ideas.md. The Lens
+Briefing's "Waiting on you" list is read-only and sends nothing —
+the Approve / Reject buttons it briefly carried were retired by
+the owner's direction (schema: AGENTS.md, "Owner rulings in
+chat"). The path is: owner's chat reply -> agent records it ->
+this tool -> ideas.md move + log line.
 
 Usage:
   python3 scripts/wiki_ruling.py apply --decision approved|rejected \
@@ -20,8 +20,12 @@ your call" section of wiki/ideas.md whose bold lead equals
 section (rejected), appending the ruling marker to the moved
 line:
 
-  " — **APPROVED by the owner via the Lens ruling button, <date>**"
-  " — **REJECTED by the owner via the Lens ruling button, <date>**"
+  " — **APPROVED by the owner in chat, <date>**"
+  " — **REJECTED by the owner in chat, <date>**"
+
+  (Rulings applied while the buttons lived carry the retired
+  "via the Lens ruling button" marker; that marker is history
+  and is still recognised for idempotency — see below.)
 
 --date defaults to today in the owner's timezone
 (OWNER_TZ below — set it for your deployment).
@@ -29,7 +33,8 @@ Every other byte of the file is preserved.
 
 Fail-closed rules — a ruling is never guessed:
   * No exact match in Waiting, but the title stands in Approved
-    or Disapproved already carrying a Lens ruling marker:
+    or Disapproved already carrying a ruling marker (either
+    the current chat marker or the retired Lens marker):
     print "ALREADY-APPLIED", exit 0, change nothing
     (re-delivery of a ruling is idempotent).
   * Title not found: print "NOT-FOUND", exit 2, file untouched.
@@ -42,8 +47,8 @@ Fail-closed rules — a ruling is never guessed:
 On success the tool prints exactly one log line, which the
 pickup appends to wiki/log.md:
 
-  Owner ruling via Lens: <title> — APPROVED (Ideas board: Waiting → Approved).
-  Owner ruling via Lens: <title> — REJECTED (Ideas board: Waiting → Disapproved).
+  Owner ruling in chat: <title> — APPROVED (Ideas board: Waiting → Approved).
+  Owner ruling in chat: <title> — REJECTED (Ideas board: Waiting → Disapproved).
 
 --dry-run computes and prints the same outcome but writes
 nothing.
@@ -64,7 +69,9 @@ DEFAULT_FILE = Path(__file__).resolve().parent.parent / "wiki" / "ideas.md"
 WAITING_HEADING = "## Waiting for your call"
 APPROVED_HEADING = "## Approved"
 DISAPPROVED_HEADING = "## Disapproved"
-LENS_MARKER = "via the Lens ruling button"
+CHAT_MARKER = "by the owner in chat"
+LENS_MARKER = "via the Lens ruling button"  # retired; history only
+RULING_MARKERS = (CHAT_MARKER, LENS_MARKER)
 
 BOLD_LEAD = re.compile(r"^- \*\*(.+?)\*\*")
 
@@ -141,7 +148,7 @@ def apply_ruling(lines: list[str], decision: str, title: str,
                 continue
             s, e = section_range(lines, h_idx)
             for i in range(s, e):
-                if bold_lead(lines[i]) == title and LENS_MARKER in lines[i]:
+                if bold_lead(lines[i]) == title and any(m in lines[i] for m in RULING_MARKERS):
                     return None, "already", "ALREADY-APPLIED"
         return None, "not-found", "NOT-FOUND"
 
@@ -153,7 +160,7 @@ def apply_ruling(lines: list[str], decision: str, title: str,
         return None, "refused", f"REFUSED: no '{target_heading}' section"
 
     moved = (lines[match].rstrip("\r\n").rstrip()
-             + f" — **{word} by the owner via the Lens ruling button, {date}**\n")
+             + f" — **{word} by the owner in chat, {date}**\n")
 
     new_lines = lines[:match] + lines[match + 1:]
     # The target section follows Waiting, so its indices shifted
@@ -167,14 +174,14 @@ def apply_ruling(lines: list[str], decision: str, title: str,
     new_lines = (new_lines[:insert_after + 1] + [moved]
                  + new_lines[insert_after + 1:])
 
-    log_line = (f"Owner ruling via Lens: {title} — {word} "
+    log_line = (f"Owner ruling in chat: {title} — {word} "
                 f"(Ideas board: Waiting → {target_name}).")
     return new_lines, "applied", log_line
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Apply an owner's Lens ruling to wiki/ideas.md.")
+        description="Apply an owner's chat ruling to wiki/ideas.md.")
     sub = parser.add_subparsers(dest="command", required=True)
     ap = sub.add_parser("apply", help="apply one ruling")
     ap.add_argument("--decision", required=True,

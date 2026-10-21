@@ -48,23 +48,15 @@ Default service base URL (the Lens):
    "Ask modes" below). An entry without `mode` is an `answer`
    question. If the list is empty, there is nothing to do — stop cleanly.
 
-1b. **Owner rulings from the Lens are not questions.** A pending
-   entry whose question text starts with `Owner ruling via Lens
-   (ideas board)` is a ruling the owner sent from the Briefing's
-   Approve / Reject buttons — the button decides nothing itself;
-   it only delivers the ruling through this door. The pickup does
-   not search, pack evidence, or compose for it: it parses the
-   entry's `DECISION:` and `ITEM:` lines and runs
-   `scripts/wiki_ruling.py apply`, which moves the item on
-   `wiki/ideas.md` by exact bold-title match (fail-closed;
-   re-applying a ruling that already stands is an idempotent
-   no-op). On success the tool's printed log line is appended to
-   `wiki/log.md` under a `ruling` heading and the entry is closed
-   through the normal record path with a one-line confirmation
-   citing the Ideas board; on any refusal nothing in the wiki
-   changes and the entry is closed with the refusal's reason.
-   The full mechanics are step 2b of `pickup-instructions.md`;
-   the schema is AGENTS.md, "Owner rulings from the Lens".
+1b. **Rulings are not questions, and they no longer arrive here.**
+   Owner rulings on Ideas-board items are made in chat (owner's
+   direction, 2026-10-20): the agent records the owner's chat
+   reply and applies it with `scripts/wiki_ruling.py` in the main
+   session. The Lens Briefing's "Waiting on you" list is read-only
+   and sends nothing. A stale entry in the retired Lens format is
+   closed unapplied, with the retirement noted (mechanics: step 2b
+   of `pickup-instructions.md`; schema: AGENTS.md, "Owner rulings
+   in chat").
 
 2. **Open a gateway session as `agent`.**
 

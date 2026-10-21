@@ -49,58 +49,19 @@ document is `tools/ask/pickup.md`; the helper is `tools/ask/pickup.py`.
    If the list is empty, stop and report "no pending questions" — that
    is a successful run.
 
-2b. **Owner rulings from the Lens are not questions.** A pending
-   entry whose question text starts with `Owner ruling via Lens
-   (ideas board)` is the owner's ruling on an Ideas-board item,
-   sent by the Approve / Reject buttons in the Lens (schema:
-   AGENTS.md, "Owner rulings from the Lens"). Do NOT open a
-   gateway session for it, do not evidence-pack it, and do not
-   treat it under the answer contract's question types. Handle it
-   mechanically:
-
-   1. Parse the entry's `DECISION:` line (`approved` or
-      `rejected`) and its `ITEM:` line (the item's exact bold
-      title on the Ideas board).
-   2. Run the applier from the repo root:
-
-      ```sh
-      python3 scripts/wiki_ruling.py apply --decision <d> --title "<item>"
-      ```
-
-      Add `--date <YYYY-MM-DD>` with the entry's received date
-      (the date part of its `asked_at`) when the entry carries
-      one; otherwise the tool dates the ruling today in the
-      owner's timezone.
-   3. Act on the tool's outcome:
-      - **Success** (it prints one log line): append that line to
-        `wiki/log.md` under a heading
-        `## [YYYY-MM-DD] ruling | Lens button: <title>` (the
-        ruling's date), then close the queue entry through the
-        normal record path (steps 5–8 mechanics: answer file,
-        `record-answer`, `mark`) with the one-line answer
-        `Ruling applied: <title> — APPROVED. It now stands under
-        Approved on the Ideas board.` and the single citation
-        `ideas` (the wiki/ideas.md page). For a rejection the
-        wording mirrors: `— REJECTED. It now stands under
-        Disapproved on the Ideas board.`
-      - **`ALREADY-APPLIED`** (exit 0): the ruling already stands
-        on the board — change nothing in the wiki, and close the
-        entry the same way with the answer `Ruling already
-        applied: <title> — APPROVED. It already stands under
-        Approved on the Ideas board.` (REJECTED / Disapproved
-        mirrored to the decision the entry carries).
-      - **Any refusal** (`NOT-FOUND`, `REFUSED: ...`, any
-        non-zero exit): change nothing in the wiki — no ideas.md
-        edit, no log line — and close the entry with the answer
-        `Ruling NOT applied: <the tool's printed reason>. The
-        item was left exactly as it stood.` Never retry a ruling
-        with a guessed or edited title: an exact-match failure is
-        the fail-closed rule working, and the refusal itself is
-        reported in step 12.
-   4. The commit/push/verify steps (10–11) cover `wiki/ideas.md`
-      and `wiki/log.md` for a ruling entry exactly as they cover
-      the Q&A record for a question — both files join the run's
-      scoped adds when a ruling was applied.
+2b. **Rulings are not questions, and they no longer arrive here.**
+   Owner rulings on Ideas-board items are made in chat (owner's
+   direction, 2026-10-20): the agent records the owner's chat
+   reply and applies it with `scripts/wiki_ruling.py` in the main
+   session, the way the Lens buttons used to. The Lens Briefing's
+   "Waiting on you" list is read-only and sends nothing. If a stale
+   entry in the retired format (question text starting `Owner
+   ruling via Lens (ideas board)`) is ever found pending, do NOT
+   apply it as a ruling and do not open a gateway session for it:
+   close it through the normal record path with the one-line
+   answer `Not applied: Lens rulings were retired on 2026-10-20;
+   rulings are recorded from the owner's chat replies.` and report
+   it in step 12 as a stale-format finding.
 
 3. For each pending question, open a session on the wiki gateway
    (`tools/gateway/`, stdio MCP transport) as the identity `agent`

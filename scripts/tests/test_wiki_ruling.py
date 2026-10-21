@@ -85,13 +85,13 @@ class WikiRulingTests(unittest.TestCase):
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertEqual(
             res.stdout.strip(),
-            "Owner ruling via Lens: First waiting idea — APPROVED "
+            "Owner ruling in chat: First waiting idea — APPROVED "
             "(Ideas board: Waiting → Approved).")
         out = self.page.read_text(encoding="utf-8")
         moved = ("- **First waiting idea** — do the first thing "
                  "(Agent, 2030-10-20) — awaiting the owner's call"
-                 " — **APPROVED by the owner via the Lens ruling "
-                 f"button, {DATE}**")
+                 " — **APPROVED by the owner in chat, "
+                 f"{DATE}**")
         # The moved line is the LAST bullet of the Approved section.
         approved = out.split("## Approved")[1].split("## Disapproved")[0]
         self.assertEqual(approved.strip().splitlines()[-1], moved)
@@ -110,13 +110,13 @@ class WikiRulingTests(unittest.TestCase):
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertEqual(
             res.stdout.strip(),
-            "Owner ruling via Lens: Second waiting idea — REJECTED "
+            "Owner ruling in chat: Second waiting idea — REJECTED "
             "(Ideas board: Waiting → Disapproved).")
         out = self.page.read_text(encoding="utf-8")
         moved = ("- **Second waiting idea** — do the second thing"
                  " — awaiting the owner's call"
-                 " — **REJECTED by the owner via the Lens ruling "
-                 f"button, {DATE}**")
+                 " — **REJECTED by the owner in chat, "
+                 f"{DATE}**")
         disapproved = out.split("## Disapproved")[1]
         self.assertEqual(disapproved.strip().splitlines()[-1], moved)
         waiting = out.split("## Waiting for your call")[1].split("## Approved")[0]
@@ -146,6 +146,24 @@ class WikiRulingTests(unittest.TestCase):
         self.assertEqual(res.stdout.strip(), "NOT-FOUND")
         self.assertEqual(self.page.read_bytes(), before)
 
+    def test_retired_lens_marker_still_counts_as_applied(self):
+        # History compatibility: an item moved while the Lens
+        # buttons lived carries the retired marker; a re-delivered
+        # ruling must still read ALREADY-APPLIED.
+        fixture = FIXTURE.replace(
+            "- **An old approved idea** — built already",
+            "- **An old approved idea** — built already"
+            " — **APPROVED by the owner via the Lens ruling "
+            "button, 2026-10-20**")
+        self.write(fixture)
+        before = self.page.read_bytes()
+        res = self.run_tool("--decision", "approved",
+                            "--title", "An old approved idea",
+                            "--date", DATE)
+        self.assertEqual(res.returncode, 0, res.stderr)
+        self.assertEqual(res.stdout.strip(), "ALREADY-APPLIED")
+        self.assertEqual(self.page.read_bytes(), before)
+
     def test_title_in_approved_without_lens_marker_is_not_applied(self):
         # A title that stands in Approved for another reason was
         # never ruled on through the Lens: not "already applied",
@@ -168,7 +186,7 @@ class WikiRulingTests(unittest.TestCase):
         self.assertEqual(res.returncode, 0, res.stderr)
         self.assertEqual(
             res.stdout.strip(),
-            "Owner ruling via Lens: First waiting idea — APPROVED "
+            "Owner ruling in chat: First waiting idea — APPROVED "
             "(Ideas board: Waiting → Approved).")
         self.assertEqual(self.page.read_bytes(), before)
 
