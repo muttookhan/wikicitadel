@@ -1552,10 +1552,10 @@ def main():
     # plain-text item per bullet, markdown stripped, capped at 8.
     # Each item also carries "title": the bullet's bold lead (the
     # text inside the first **...**, stripped the same way) — the
-    # exact string the Lens ruling buttons quote back through the
-    # Ask door and scripts/wiki_ruling.py matches on ideas.md.
-    # A bullet with no bold lead gets title "" and renders no
-    # buttons.
+    # exact string scripts/wiki_ruling.py matches on ideas.md when
+    # the agent records the owner's chat ruling. The Briefing list
+    # is READ-ONLY: no ruling buttons render here; rulings are the
+    # owner's replies in chat.
     waiting_items = []
     ideas_md_path = wiki / "ideas.md"
     if ideas_md_path.exists():

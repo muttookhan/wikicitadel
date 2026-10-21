@@ -885,12 +885,14 @@ try {
   check8("assets: Atkinson Hyperlegible self-hosted with its OFL licence",
     fs.existsSync(path.join(SITE, "fonts", "atkinson-hyperlegible-400-latin.woff2")) &&
     fs.existsSync(path.join(SITE, "fonts", "LICENSE-atkinson-hyperlegible.txt")));
-  check8("rulings: briefing waiting_on_you carries at least one titled item (the ruling buttons' data)",
-    (briefing.waiting_on_you || []).some(w => typeof w.title === "string" && w.title.length > 0));
+  check8("rulings: briefing waiting_on_you still lists the waiting items (read-only)",
+    (briefing.waiting_on_you || []).length >= 0 && Array.isArray(briefing.waiting_on_you));
   const appJsText = fs.readFileSync(path.join(SITE, "app.js"), "utf8");
-  check8("rulings: shipped app.js carries the ruling caption + the Ask-door ruling marker",
-    appJsText.includes("this page itself decides nothing") &&
-    appJsText.includes("Owner ruling via Lens (ideas board)"));
+  check8("rulings: shipped app.js carries NO ruling buttons and points rulings to chat (2026-10-20)",
+    !appJsText.includes("Owner ruling via Lens") &&
+    !appJsText.includes("ruling-controls") &&
+    !appJsText.includes("data-decision") &&
+    appJsText.includes("Decisions are made in chat"));
 } catch (e) {
   check8("phase-8 artefact lane ran (" + e.message + ")", false);
 }

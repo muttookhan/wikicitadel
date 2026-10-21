@@ -836,81 +836,6 @@ function askAgentWith(q) {
   location.hash = "#/ask";
 }
 
-/* ----- Owner rulings from the Lens (Ideas board, 2026-10-20) -----
-   The Approve / Reject buttons on the Briefing's "Waiting on you"
-   items. The Lens is a static, read-only portal: a button here
-   DECIDES NOTHING and writes nothing itself. It sends the owner's
-   ruling through the Ask door (the same door as the
-   watch-this-search request above); the Ask pickup then applies
-   the ruling to wiki/ideas.md with scripts/wiki_ruling.py, and
-   the item moves on the board — visible here only after the next
-   build. The item is never rendered as moved or approved locally:
-   no fake instant state. Schema: AGENTS.md, "Owner rulings from
-   the Lens". */
-function wireRulingButtons() {
-  for (const span of document.querySelectorAll(".ruling-controls")) {
-    if (span.__rulingWired) continue;
-    span.__rulingWired = true;
-    span.addEventListener("click", ev => {
-      const btn = ev.target && ev.target.closest ? ev.target.closest("button") : null;
-      if (!btn || btn.disabled) return;
-      const idx = Number(span.getAttribute("data-ruling-idx"));
-      const item = (BRIEFING.waiting_on_you || [])[idx];
-      if (!item || !item.title) return;
-      if (btn.hasAttribute("data-decision")) showRulingConfirm(span, item, btn.getAttribute("data-decision"));
-      else if (btn.hasAttribute("data-send")) sendRuling(span, item, btn.getAttribute("data-send"));
-      else if (btn.hasAttribute("data-cancel")) resetRulingControls(span);
-    });
-  }
-}
-function rulingButtonsHtml(disabled) {
-  const dis = disabled ? " disabled" : "";
-  return `<button type="button" class="btn btn-small ruling-btn" data-decision="approved"${dis}>Approve</button> <button type="button" class="btn btn-small ruling-btn" data-decision="rejected"${dis}>Reject</button>`;
-}
-function resetRulingControls(span) {
-  span.innerHTML = rulingButtonsHtml(false);
-}
-function showRulingConfirm(span, item, decision) {
-  const word = decision === "approved" ? "APPROVED" : "REJECTED";
-  span.innerHTML = `<span class="ruling-confirm">Send ${word} for &lsquo;${esc(item.title)}&rsquo;?</span> <button type="button" class="btn btn-small btn-primary" data-send="${decision}">Send ruling</button> <button type="button" class="btn btn-small" data-cancel="1">Cancel</button>`;
-}
-function rulingStatusEl(span) {
-  const li = span.closest ? span.closest("li") : null;
-  return li ? li.querySelector(".ruling-status") : null;
-}
-function sendRuling(span, item, decision) {
-  const status = rulingStatusEl(span);
-  const note = t => { if (status) status.textContent = t; };
-  for (const b of span.querySelectorAll("button")) b.disabled = true;
-  note("Sending your ruling to the agent through the Ask door…");
-  const fail = () => {
-    note("Could not reach the Ask door — nothing was sent.");
-    resetRulingControls(span);
-  };
-  if (typeof fetch !== "function") { fail(); return; }
-  let pending;
-  try {
-    pending = fetch("/api/ask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        question: `Owner ruling via Lens (ideas board)\nDECISION: ${decision}\nITEM: ${item.title}`,
-        mode: "answer",
-      }),
-    });
-  } catch (e) { fail(); return; }
-  if (!pending || typeof pending.then !== "function") { fail(); return; }
-  pending
-    .then(res => (res && typeof res.json === "function") ? res.json().then(() => res.status) : (res ? res.status : 0))
-    .then(statusCode => {
-      if (statusCode === 201) {
-        span.innerHTML = rulingButtonsHtml(true);
-        note("Ruling sent — it will show as moved here once the agent applies it.");
-      } else fail();
-    })
-    .catch(fail);
-}
-
 /* ----- ⌘K command palette (item 60, find 19) -----
    A keyboard-first overlay over the existing merged search:
    results ARE the merged search's (page-name matches + the
@@ -1062,8 +987,7 @@ function renderBriefing() {
   for (const t of (BRIEFING.lint_items.thin || [])) gaps.push(`<li>${pageLink(t.id)} — source page citing no raw source</li>`);
   const waiting = (BRIEFING.waiting_on_you || []).map((w, i) => {
     if (!w.text) return `<li>${pageLink(w.id)} — ${esc(w.summary || "")}</li>`;
-    const controls = w.title ? ` <span class="ruling-controls" data-ruling-idx="${i}"><button type="button" class="btn btn-small ruling-btn" data-decision="approved">Approve</button> <button type="button" class="btn btn-small ruling-btn" data-decision="rejected">Reject</button></span> <span class="ruling-status caption"></span>` : "";
-    return `<li>${esc(w.text)}${controls}</li>`;
+    return `<li>${esc(w.text)}</li>`;
   }).join("");
   const latest = BRIEFING.latest_log;
   canvas.innerHTML = `
@@ -1095,7 +1019,7 @@ function renderBriefing() {
       <p class="caption">Standing queries are re-run at every Lens build against the whole wiki. A query's last-looked stamp advances only in a build that reports something new for it, and the advance is written back to the register (evaluation/standing-queries.jsonl) — never silently.</p>`
       : `<p>No standing queries yet. When a search finds nothing, its results page offers &ldquo;Watch this search&rdquo;: The agent files it, and from then on this section reports what is new since you last looked.</p>`}</section>
     <section class="brief-section"><h2>Waiting on you</h2>
-      ${waiting ? `<ul>${waiting}</ul><p class="caption">Your ruling is sent to the agent through the Ask door and applied to the Ideas board within about 15 minutes — this page itself decides nothing. The item moves once it is applied.</p>` : `<p>Nothing is waiting on you.</p>`}</section>
+      ${waiting ? `<ul>${waiting}</ul><p class="caption">Decisions are made in chat: tell the agent there and the ruling is recorded on the Ideas board — this list is read-only and decides nothing.</p>` : `<p>Nothing is waiting on you.</p>`}</section>
     <section class="brief-section"><h2>System health</h2>
       <ul>
         <li>Canonical anchor — ${esc(BRIEFING.health.canonical_anchor || "")}</li>
@@ -1106,7 +1030,6 @@ function renderBriefing() {
     <section class="brief-section"><h2>Latest activity</h2>
       ${latest ? `<p>${esc(latest.date)} — ${esc(latest.title)} · <a href="#/timeline">Open the timeline</a></p>` : `<p>Nothing recorded yet.</p>`}</section>`;
   defaultInspector(`<p class="caption">Every briefing bullet links to its page or record. Numbers are computed at build from the canonical repository.</p>`);
-  wireRulingButtons();
 }
 
 /* ---------------- Mode: Reading ---------------- */

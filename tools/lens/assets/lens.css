@@ -382,8 +382,6 @@ body.inspector-open #inspector { transform: none; }
 .btn-ghost { background: transparent; }
 .btn[disabled] { color: var(--ink-3); cursor: not-allowed; }
 .btn-small { padding: 5px 12px; font-size: 13px; }
-.ruling-controls { white-space: nowrap; }
-.ruling-status { margin-left: 6px; }
 
 /* ---------- Reading ---------- */
 /* The reading profile (item 64) drives these variables from
