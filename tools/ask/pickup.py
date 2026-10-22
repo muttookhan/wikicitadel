@@ -47,6 +47,15 @@ The pure functions (``build_qa_record``, ``append_record``,
 ``read_records``, ``stage_proposal_markdown``, ``load_service_token``)
 are importable and testable without any network access. The network
 surface is deliberately thin: ``list_pending`` and ``mark_answered``.
+
+The staged proposal also renders, when the record carries the
+structure for it, a claim-grouped citation section (W3):
+citations attached per claim above the flat "Sources used"
+list, grouped from the record's own provenance sentence links
+or sub-answer decomposition by ``tools/ask/claim_grouping.py``
+— presentation only, read from the record, never re-derived
+from the prose. Records without that structure render
+byte-identically to before.
 """
 
 from __future__ import annotations
@@ -112,7 +121,9 @@ def build_qa_record(question_entry: dict, answer_text: str,
                     clarification: dict = None,
                     coverage: dict = None,
                     two_phase: dict = None,
-                    trace: dict = None) -> dict:
+                    trace: dict = None,
+                    provenance: dict = None,
+                    depth=None) -> dict:
     """Build one Q&A record for ``wiki/access/qa-2026.jsonl``.
 
     The abstention contract (``answer_contract.py``) fields are added
@@ -155,6 +166,28 @@ def build_qa_record(question_entry: dict, answer_text: str,
     ``tools/ask/trace.py`` (EU6a), which is ALSO appended as a
     JSONL record beside the Q&A file by the record-answer flow.
     Both are stamped only when supplied.
+
+    W3 (2026-10-22) rides the same rule once more:
+    ``provenance`` — the answer provenance pack built by
+    ``tools/ask/provenance.py`` (per-citation document hashes
+    and retrieval/scoring paths, per-sentence support, the
+    policy snapshot, absent terms on a zero result, the
+    source-type label and a verify block) — is stamped only
+    when supplied. It is recorded from answer-time pipeline
+    state, never reconstructed afterwards; see provenance.py.
+
+    W6 (2026-10-22) adds ``depth`` — the query depth ladder
+    (``tools/ask/depth_ladder.py``: quick / standard / deep).
+    Depth is DECLARED state, known before the answer is
+    composed, so it is resolved here — from the explicit
+    ``depth`` argument or the question entry's own ``depth``
+    field — and stamped as the level's full bundle whenever
+    a declaration exists. No declaration stamps nothing: the
+    record is the default (standard) depth and keeps the
+    pre-ladder shape byte for byte. An invalid declaration
+    stamps nothing here; the record-answer CLI refuses it
+    by name before a record is built (see
+    ``depth_declaration_error``).
     """
     record = {
         "id": question_entry["id"],
@@ -178,6 +211,12 @@ def build_qa_record(question_entry: dict, answer_text: str,
     resolved_mode = mode if mode is not None else question_entry.get("mode")
     if resolved_mode in answer_contract.ASK_MODES:
         record["mode"] = resolved_mode
+    ladder = _depth_ladder_module()
+    resolved_depth, depth_basis = ladder.resolve_depth(
+        depth, question_entry.get("depth"))
+    if resolved_depth is not None and depth_basis == "declared":
+        record["depth"] = ladder.depth_block(
+            resolved_depth, depth_basis)
     if citation_details:
         record["citation_details"] = [
             _build_citation_detail(detail) for detail in citation_details
@@ -192,6 +231,8 @@ def build_qa_record(question_entry: dict, answer_text: str,
         record["two_phase"] = two_phase
     if trace is not None:
         record["trace"] = trace
+    if provenance is not None:
+        record["provenance"] = provenance
     return record
 
 
@@ -289,6 +330,21 @@ def stage_proposal_markdown(record: dict) -> str:
             "Asked in **" + str(record["mode"]) + "** mode."
         )
         lines.append("")
+    depth = record.get("depth")
+    if isinstance(depth, dict) and depth.get("level"):
+        lines.append(
+            "Answered at **" + str(depth.get("label") or depth["level"])
+            + "** depth (" + str(depth.get("basis") or "declared")
+            + ") — candidate pool "
+            + str(depth.get("candidate_pool"))
+            + ", evidence budget "
+            + str(depth.get("pack_budget_tokens"))
+            + " tokens; sentence scoring "
+            + str(depth.get("sentence_scoring")) + ". Cost: "
+            + str(depth.get("cost") or "") + " "
+            + str(depth.get("abstention_invariant") or "")
+        )
+        lines.append("")
     if record.get("trust_verdict"):
         lines.append(
             "Trust verdict: **" + str(record["trust_verdict"]) + "** "
@@ -323,6 +379,77 @@ def stage_proposal_markdown(record: dict) -> str:
             "Q&A record (tools/ask/trace.py, EU6a)."
         )
         lines.append("")
+    provenance = record.get("provenance")
+    if provenance:
+        lines.append("## Provenance")
+        lines.append("")
+        source_type = provenance.get("source_type") or {}
+        if source_type.get("label"):
+            lines.append(str(source_type["label"]))
+            lines.append("")
+        snapshot = provenance.get("policy_snapshot") or {}
+        if snapshot:
+            bits = []
+            if snapshot.get("git_head"):
+                bits.append("git " + str(snapshot["git_head"])[:12])
+            if snapshot.get("governance_state_hash"):
+                bits.append(
+                    "governance state "
+                    + str(snapshot["governance_state_hash"])[:12]
+                )
+            if snapshot.get("abstain_threshold") is not None:
+                bits.append(
+                    "abstention threshold "
+                    + str(snapshot["abstain_threshold"])
+                )
+            if bits:
+                lines.append(
+                    "Assembled against: " + "; ".join(bits) + "."
+                )
+                lines.append("")
+        for citation in provenance.get("citations") or []:
+            if not isinstance(citation, dict):
+                continue
+            bits = []
+            document = citation.get("document") or {}
+            if document.get("sha256"):
+                bits.append("sha256 " + str(document["sha256"])[:12])
+            path = citation.get("path") or {}
+            packing = path.get("packing") or {}
+            if packing.get("decision"):
+                bits.append("packing: " + str(packing["decision"]))
+            governance = path.get("governance") or {}
+            if governance.get("state"):
+                bits.append("governance: " + str(governance["state"]))
+            summary = citation.get("support_summary") or {}
+            if summary.get("sentences"):
+                bits.append(
+                    "supports %d sentence(s), %d fully"
+                    % (summary["sentences"], summary.get("supported", 0))
+                )
+            lines.append(
+                "- [[" + str(citation.get("page")) + "]]"
+                + (" — " + "; ".join(bits) if bits else "")
+            )
+        lines.append("")
+        if provenance.get("absent_terms"):
+            lines.append(
+                "Absent terms (in no document): "
+                + ", ".join(
+                    str(t) for t in provenance["absent_terms"]
+                )
+                + "."
+            )
+            lines.append("")
+        verify = provenance.get("verify") or {}
+        checks = verify.get("checks") or []
+        if checks:
+            lines.append("Verify (do not trust — check):")
+            lines.append("")
+            for check in checks:
+                if isinstance(check, dict) and check.get("command"):
+                    lines.append("- `" + str(check["command"]) + "`")
+            lines.append("")
     clarification = record.get("clarification")
     if clarification:
         lines.append("## Clarification")
@@ -367,6 +494,14 @@ def stage_proposal_markdown(record: dict) -> str:
                     + str(sub.get("abstention_reason", ""))
                 )
                 lines.append("")
+
+    claim_lines = _claim_group_lines(record)
+    if claim_lines:
+        lines.extend(claim_lines)
+
+    lesson_lines = _lesson_lines(record)
+    if lesson_lines:
+        lines.extend(lesson_lines)
 
     lines.append("## Sources used")
     lines.append("")
@@ -576,6 +711,191 @@ def _payload_trace(payload: dict, record: dict, qa_file):
     return None
 
 
+_CLAIM_GROUPING_MODULE = None
+
+
+def _claim_grouping_module():
+    """Load tools/ask/claim_grouping.py by path (the lazy
+    pattern used for coverage, trace and provenance), so the
+    claim-grouped presentation stays opt-in and additive:
+    records carrying no claim structure render exactly as
+    before."""
+    global _CLAIM_GROUPING_MODULE
+    if _CLAIM_GROUPING_MODULE is None:
+        import importlib.util
+
+        path = Path(__file__).resolve().parent / "claim_grouping.py"
+        spec = importlib.util.spec_from_file_location(
+            "ask_claim_grouping", path
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _CLAIM_GROUPING_MODULE = module
+    return _CLAIM_GROUPING_MODULE
+
+
+def _claim_group_lines(record: dict):
+    """The claim-grouped citation section lines for a staged
+    proposal, or None when the record carries no recorded
+    claim structure (see claim_grouping.py)."""
+    return _claim_grouping_module().render_claim_groups(record)
+
+
+_LESSONS_MODULE = None
+
+
+def _lessons_module():
+    """Load tools/ask/lessons.py by path (the lazy pattern
+    used for claim grouping and provenance), so the lessons
+    seam stays opt-in and additive."""
+    global _LESSONS_MODULE
+    if _LESSONS_MODULE is None:
+        import importlib.util
+
+        path = Path(__file__).resolve().parent / "lessons.py"
+        spec = importlib.util.spec_from_file_location(
+            "ask_lessons", path
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _LESSONS_MODULE = module
+    return _LESSONS_MODULE
+
+
+def _lesson_lines(record: dict):
+    """The lessons section lines for a staged proposal, or
+    None when the record carries no matched lessons (see
+    lessons.py)."""
+    return _lessons_module().render_lessons(record)
+
+
+def _payload_lessons(payload: dict, record: dict):
+    """The lessons block for a finished record, or None.
+
+    An explicit ``lessons`` dict in the payload is stamped
+    as-is. A payload carrying ``emit_lessons: true`` (or a
+    ``lessons_inputs`` dict, whose question/pages override
+    the record's own) gets its block built from the finished
+    record against the corrections ledger. Anything else
+    records no lessons — the field is additive and its
+    absence changes nothing. The block is computed HERE,
+    after the answer exists and its trust verdict is
+    stamped, from the record alone: it cannot have
+    influenced retrieval, scoring or the abstention
+    decision (see lessons.py). A failure in the seam drops
+    the block, never the answer: lessons are advisory
+    presentation, and no answer loses its record to them.
+    """
+    lessons = payload.get("lessons")
+    if isinstance(lessons, dict):
+        return lessons
+    inputs = payload.get("lessons_inputs")
+    if isinstance(inputs, dict) or payload.get("emit_lessons"):
+        inputs = inputs if isinstance(inputs, dict) else {}
+        probe = dict(record)
+        if inputs.get("question") is not None:
+            probe["question"] = inputs["question"]
+        if inputs.get("pages") is not None:
+            probe["citations"] = list(inputs["pages"])
+            probe.pop("citation_details", None)
+            probe.pop("provenance", None)
+        try:
+            return _lessons_module().build_lessons_block(
+                probe, repo_root())
+        except Exception:
+            return None
+    return None
+
+
+_DEPTH_LADDER_MODULE = None
+
+
+def _depth_ladder_module():
+    """Load tools/ask/depth_ladder.py by path (the lazy
+    pattern used for lessons and provenance), so the ladder
+    stays a declared, additive seam."""
+    global _DEPTH_LADDER_MODULE
+    if _DEPTH_LADDER_MODULE is None:
+        import importlib.util
+
+        path = Path(__file__).resolve().parent / "depth_ladder.py"
+        spec = importlib.util.spec_from_file_location(
+            "ask_depth_ladder", path
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _DEPTH_LADDER_MODULE = module
+    return _DEPTH_LADDER_MODULE
+
+
+def depth_declaration_error(payload: dict):
+    """The named error for a payload's depth declaration, or
+    None. A declaration is the payload's own ``depth`` (a
+    level name or a full block dict) or its question entry's
+    ``depth`` field; anything else that is not a ladder level
+    is refused by name — a door never silently answers at a
+    different depth than the one declared."""
+    ladder = _depth_ladder_module()
+    error = ladder.declaration_error(payload.get("depth"))
+    if error:
+        return error
+    entry = payload.get("question_entry") or {}
+    return ladder.declaration_error(
+        entry.get("depth"), where="question depth")
+
+
+_PROVENANCE_MODULE = None
+
+
+def _provenance_module():
+    """Load tools/ask/provenance.py by path (the lazy pattern
+    used for coverage and trace), so the provenance seam stays
+    opt-in and additive."""
+    global _PROVENANCE_MODULE
+    if _PROVENANCE_MODULE is None:
+        import importlib.util
+
+        path = Path(__file__).resolve().parent / "provenance.py"
+        spec = importlib.util.spec_from_file_location(
+            "ask_provenance", path
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _PROVENANCE_MODULE = module
+    return _PROVENANCE_MODULE
+
+
+def _payload_provenance(payload: dict, record: dict):
+    """The provenance envelope for a finished record, or None.
+
+    An explicit ``provenance`` dict in the payload is stamped
+    as-is. A payload carrying ``provenance_inputs`` — the
+    answer-time pipeline state (``pack_result`` from
+    evidence_packing and ``retrieval`` diagnostics from the
+    search stages) — gets its envelope built from the finished
+    record against the real wiki tree; ``emit_provenance:
+    true`` builds it from the record alone. Anything else
+    records no provenance — the field is additive and its
+    absence changes nothing. Provenance is built HERE, at
+    record time, from the state the answer was actually made
+    with — never reconstructed later (see provenance.py).
+    """
+    provenance = payload.get("provenance")
+    if isinstance(provenance, dict):
+        return provenance
+    inputs = payload.get("provenance_inputs")
+    if isinstance(inputs, dict) or payload.get("emit_provenance"):
+        inputs = inputs if isinstance(inputs, dict) else {}
+        return _provenance_module().build_provenance(
+            record,
+            pack_result=inputs.get("pack_result"),
+            retrieval=inputs.get("retrieval"),
+            wiki_dir=repo_root() / "wiki",
+            root=repo_root(),
+        )
+    return None
+
+
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
@@ -626,7 +946,13 @@ def main(argv=None) -> int:
         help="JSON file with {question_entry, answer, citations} plus "
              "the optional contract fields question_type, "
              "abstention_reason, sub_answers, mode and "
-             "citation_details (see answer_contract.py).",
+             "citation_details (see answer_contract.py), the "
+             "optional provenance / provenance_inputs / "
+             "emit_provenance fields (see provenance.py), "
+             "the optional lessons / emit_lessons fields "
+             "(see lessons.py), and the optional depth "
+             "declaration (a ladder level name or block; "
+             "see depth_ladder.py).",
     )
 
     subparsers.add_parser(
@@ -699,6 +1025,11 @@ def main(argv=None) -> int:
             for error in errors:
                 print("record-answer refused: %s" % error, file=sys.stderr)
             return 1
+        depth_error = depth_declaration_error(payload)
+        if depth_error:
+            print("record-answer refused: %s" % depth_error,
+                  file=sys.stderr)
+            return 1
         question_entry = payload["question_entry"]
         record = build_qa_record(
             question_entry,
@@ -709,6 +1040,9 @@ def main(argv=None) -> int:
             abstention_reason=payload.get("abstention_reason"),
             sub_answers=payload.get("sub_answers"),
             mode=payload.get("mode"),
+            depth=(payload.get("depth")
+                   if isinstance(payload.get("depth"), str)
+                   else None),
             citation_details=payload.get("citation_details"),
             clarification=payload.get("clarification"),
             coverage=_payload_coverage(payload),
@@ -730,6 +1064,29 @@ def main(argv=None) -> int:
         record["trust_verdict"] = answer_contract.compute_trust_verdict(
             record, repo_root() / "wiki"
         )
+        # An explicit depth block dict in the payload is
+        # stamped as-is (the lessons/provenance rule for
+        # explicit blocks); a level-name declaration was
+        # already resolved into its block by build_qa_record.
+        if isinstance(payload.get("depth"), dict):
+            record["depth"] = payload["depth"]
+        # The lessons block (W5) rides the same additive rule,
+        # one step earlier than provenance so the envelope can
+        # name it: matched from the finished record against
+        # the corrections ledger, stamped before the record is
+        # appended. It is computed after the answer and its
+        # trust verdict exist, so it cannot have influenced
+        # either (see lessons.py).
+        lessons = _payload_lessons(payload, record)
+        if lessons is not None:
+            record["lessons"] = lessons
+        # The provenance pack (W3) rides the same additive rule:
+        # built from the answer-time state the payload carries,
+        # stamped on the record before it is appended — never
+        # reconstructed afterwards.
+        provenance = _payload_provenance(payload, record)
+        if provenance is not None:
+            record["provenance"] = provenance
         append_record(qa_file, record)
         _payload_trace(payload, record, qa_file)
         staging_dir.mkdir(parents=True, exist_ok=True)
