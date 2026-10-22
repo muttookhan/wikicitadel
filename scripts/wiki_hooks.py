@@ -24,6 +24,14 @@ Check kinds (all deterministic, all local):
   json-field    {"kind": "json-field", "path": rel,
                  "field": name, "equals": value}
 
+A command check may carry "surface_output": true — the
+first and last lines of the command's output then ride
+in the result detail, so a guard's explanation (what
+fired, where, what to do instead) reaches the report
+instead of dying in a captured pipe (session guards,
+2026-10-22: scripts/wiki_session_guards.py). Absent,
+the detail is the bare exit line, exactly as before.
+
 The runner executes a step's hooks in register order —
 pre hooks, then the step itself, then post hooks — and
 HALTS on the first failing hook: the step does not run
@@ -71,7 +79,19 @@ def run_check(root: Path, check: dict):
             return False, "empty argv"
         r = subprocess.run(argv, cwd=str(root), capture_output=True,
                            text=True, timeout=600)
-        return r.returncode == 0, f"exit {r.returncode}"
+        detail = f"exit {r.returncode}"
+        if check.get("surface_output"):
+            lines = [ln for ln in
+                     (r.stdout + r.stderr).splitlines() if ln.strip()]
+            if lines:
+                picked = lines if len(lines) <= 4 else \
+                    [lines[0]] + lines[-3:]
+                seen = []
+                for ln in picked:
+                    if ln not in seen:
+                        seen.append(ln)
+                detail += ": " + " | ".join(seen)[:700]
+        return r.returncode == 0, detail
     if kind in ("file-exists", "file-absent", "sha256", "json-field"):
         p = root / check.get("path", "")
         if kind == "file-exists":

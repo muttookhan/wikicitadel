@@ -475,5 +475,147 @@ class PdfClipTests(Fixture):
         self.assertFalse((self.root / "raw").exists())
 
 
+PAGE2 = (
+    "<html><head><title>Planting Notes, Revised</title></head>"
+    "<body><h1>Planting Notes</h1>"
+    "<p>Revised visible notes.</p></body></html>"
+).encode("utf-8")
+
+LATER = datetime(2026, 10, 21, 9, 30, tzinfo=timezone.utc)
+
+
+class SnapshotDefaultTests(Fixture):
+    """W1.10: a URL clip carries a wiki_snapshot bundle BY
+    DEFAULT, built from the fetched bytes; the opt-out and
+    any failure are recorded states in the sidecar, and a
+    snapshot failure never loses the clip."""
+
+    def _sidecar(self, res):
+        return json.loads(
+            (self.root / res["sidecar"]).read_text(
+                encoding="utf-8"))
+
+    def test_bundles_by_default_unclassified_in_staging(self):
+        res = clip.clip_url(URL, root=self.root,
+                             fetcher=fake_fetcher, now=NOW)
+        snap = res["snapshot"]
+        self.assertEqual(snap["state"], "bundled")
+        self.assertTrue(snap["bundle"].startswith(
+            "staging/captures/snapshots/"), snap["bundle"])
+        bundle_dir = self.root / snap["bundle"]
+        self.assertEqual(
+            (bundle_dir / "original.bin").read_bytes(), PAGE)
+        self.assertEqual(clip.wsnap.verify(bundle_dir), [])
+        self.assertEqual(snap["manifest_sha256"],
+                         clip.wsnap.sha256_bytes(PAGE))
+        # The record rides in the sidecar's clip block.
+        sidecar = self._sidecar(res)
+        self.assertEqual(sidecar["clip"]["snapshot"]["state"],
+                         "bundled")
+        self.assertEqual(sidecar["clip"]["snapshot"]["bundle"],
+                         snap["bundle"])
+        # Custody: nothing entered raw/.
+        self.assertFalse((self.root / "raw").exists())
+
+    def test_bundles_by_default_classified_in_raw(self):
+        res = clip.clip_url(URL, sensitivity="public",
+                             root=self.root, fetcher=fake_fetcher,
+                             now=NOW)
+        snap = res["snapshot"]
+        self.assertEqual(snap["state"], "bundled")
+        self.assertTrue(snap["bundle"].startswith(
+            "raw/captures/web/snapshots/"), snap["bundle"])
+        self.assertEqual(clip.wsnap.verify(
+            self.root / snap["bundle"]), [])
+        # Staging still holds ONLY the draft.
+        staged = [p.name for p in
+                  (self.root / "staging/captures").iterdir()]
+        self.assertEqual(staged, [Path(res["draft"]).name])
+
+    def test_opt_out_recorded_no_bundle(self):
+        res = clip.clip_url(URL, root=self.root,
+                            fetcher=fake_fetcher, now=NOW,
+                            snapshot=False)
+        self.assertEqual(res["snapshot"]["state"], "opted-out")
+        self.assertFalse(any(
+            "snapshots" in p.parts for p in self.all_files()))
+        sidecar = self._sidecar(res)
+        self.assertEqual(
+            sidecar["clip"]["snapshot"]["state"], "opted-out")
+        self.assertIn("--no-snapshot",
+                      sidecar["clip"]["snapshot"]["note"])
+
+    def test_snapshot_failure_never_loses_the_clip(self):
+        def boom(*a, **kw):
+            raise RuntimeError("disk exploded")
+        orig = clip.wsnap.bundle
+        clip.wsnap.bundle = boom
+        try:
+            res = clip.clip_url(URL, root=self.root,
+                                fetcher=fake_fetcher, now=NOW)
+        finally:
+            clip.wsnap.bundle = orig
+        # The clip landed whole; the failure is a named state.
+        for key in ("preserved", "sidecar", "draft"):
+            self.assertTrue((self.root / res[key]).exists(), key)
+        self.assertEqual(res["snapshot"]["state"], "failed")
+        self.assertIn("disk exploded", res["snapshot"]["error"])
+        sidecar = self._sidecar(res)
+        self.assertEqual(sidecar["clip"]["snapshot"]["state"],
+                         "failed")
+
+    def test_media_url_clip_bundles_in_capture_block(self):
+        media_url = "https://example.com/photo.png"
+
+        def media_fetcher(url):
+            assert url == media_url
+            return clip.FetchResult(PNG_BYTES,
+                                    content_type="image/png")
+        res = clip.clip_url(media_url, root=self.root,
+                             fetcher=media_fetcher, now=NOW)
+        self.assertEqual(res["format"], "PNG")
+        self.assertEqual(res["snapshot"]["state"], "bundled")
+        bundle_dir = self.root / res["snapshot"]["bundle"]
+        self.assertEqual(
+            (bundle_dir / "original.bin").read_bytes(), PNG_BYTES)
+        sidecar = self._sidecar(res)
+        self.assertEqual(
+            sidecar["capture"]["snapshot"]["state"], "bundled")
+
+    def test_reclip_with_changed_bytes_keeps_both_bundles(self):
+        clip.clip_url(URL, root=self.root, fetcher=fake_fetcher,
+                      now=NOW)
+        res2 = clip.clip_url(URL, root=self.root,
+                             fetcher=lambda url: PAGE2, now=LATER)
+        self.assertEqual(res2["snapshot"]["state"], "bundled")
+        slug = clip.wsnap.slugify(URL)
+        first = (self.root / "staging/captures/snapshots" / slug)
+        second = self.root / res2["snapshot"]["bundle"]
+        self.assertNotEqual(first, second)
+        # The first bundle still records the FIRST fetch's bytes.
+        self.assertEqual(
+            (first / "original.bin").read_bytes(), PAGE)
+        self.assertEqual(
+            (second / "original.bin").read_bytes(), PAGE2)
+        self.assertEqual(clip.wsnap.verify(first), [])
+        self.assertEqual(clip.wsnap.verify(second), [])
+
+    def test_cli_no_snapshot_flag_records_opt_out(self):
+        out = io.StringIO()
+        with redirect_stdout(out):
+            rc = clip.main(["--root", str(self.root), "clip", URL,
+                            "--no-snapshot"],
+                           fetcher=fake_fetcher, now=NOW)
+        self.assertEqual(rc, 0)
+        self.assertIn("snapshot bundle: opted out", out.getvalue())
+        sidecars = [p for p in self.all_files()
+                    if p.name.endswith(".ingest.json")]
+        self.assertEqual(len(sidecars), 1)
+        sidecar = json.loads(sidecars[0].read_text(
+            encoding="utf-8"))
+        self.assertEqual(
+            sidecar["clip"]["snapshot"]["state"], "opted-out")
+
+
 if __name__ == "__main__":
     unittest.main()

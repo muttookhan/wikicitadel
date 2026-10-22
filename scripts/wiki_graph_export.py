@@ -65,6 +65,23 @@ silently inflate the page graph's own counts. The HTML
 renders the distinction: extracted edges are solid grey,
 inferred edges are dashed teal and named in the legend.
 
+Edge confidence labels (build wave 1, item W1.8 — the
+legal-graphify three-way tag, generalised; rules in
+tools/lens/lenslib.py's edge-label section): each emitted
+edge ALSO carries a `confidence` in [0, 1] and a `polarity`,
+and its `provenance` is the three-way label of the edge's
+TYPE: EXTRACTED when the author declared the relation
+(frontmatter) or the edge makes no type claim (a verbatim
+"mentions" link), INFERRED when the type came from the
+heading rule, and AMBIGUOUS when one directed pair asserts
+two distinct specific relations at once (neither governs;
+confidence 0.5). Co-citation edges carry a signal-derived
+`confidence` beside their INFERRED provenance. AMBIGUOUS
+edges render rust-dotted and are named in the legend; the
+per-label tally rides in counts["edge_provenance"]. Labels
+are additive: a consumer that reads only the fields it knew
+before sees the same graph as before.
+
 Graph analytics (Marathon Round 2, Lane G): the export graph
 also carries, computed in pure stdlib Python at build time —
 
@@ -102,6 +119,7 @@ import argparse
 import importlib.util
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -125,6 +143,43 @@ def _load_traverse(root: Path):
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod
+
+
+def _load_lenslib(root: Path):
+    """lenslib (tools/lens/lenslib.py under `root`) — the edge
+    provenance label model lives there (build wave 1, W1.8).
+    Returns None when the file is absent, so an older tree
+    still exports (edges then carry no W1.8 labels beyond the
+    standing two-way `provenance`)."""
+    path = Path(root) / "tools" / "lens" / "lenslib.py"
+    if not path.is_file():
+        return None
+    spec = importlib.util.spec_from_file_location(
+        "lenslib_for_graph_export", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _door_edge_label(lens, edge):
+    """The W1.8 label of one door edge: the label the door
+    itself emitted (wiki_traverse attaches lenslib.edge_label's
+    fields at creation) when present, else the same rules
+    computed here — so an unlabeled door edge is labelled by
+    rule, never left half-labelled. Returns a dict with
+    provenance / confidence / polarity, or None when no
+    lenslib is available to state the rules."""
+    if edge.get("provenance") in ("EXTRACTED", "INFERRED",
+                                  "AMBIGUOUS") \
+            and isinstance(edge.get("confidence"), (int, float)):
+        return {"provenance": edge["provenance"],
+                "confidence": edge["confidence"],
+                "polarity": edge.get("polarity")
+                or ("negative" if edge.get("relation") in
+                    ("contradicts", "supersedes") else "positive")}
+    if lens is None:
+        return None
+    return lens.edge_label(edge.get("kind"), edge.get("relation"))
 
 
 def load_severance(root: Path):
@@ -365,6 +420,7 @@ def build_graph(root: Path) -> dict:
     excluded because their targets are not pages."""
     root = Path(root)
     traverse = _load_traverse(root)
+    lens = _load_lenslib(root)
     pages, _keys, all_edges = traverse.page_graph(root)
     severed_pages, claim_pages = load_severance(root)
     page_set = set(pages)
@@ -375,11 +431,27 @@ def build_graph(root: Path) -> dict:
             continue
         if e["src"] not in page_set or e["dst"] not in page_set:
             continue
-        edges.append({"source": e["src"], "target": e["dst"],
-                      "relation": e["relation"], "kind": e["kind"],
-                      "provenance": edge_provenance(e)})
+        # W1.8: beside the standing `provenance`, each edge
+        # carries the full label (provenance / confidence /
+        # polarity) — the door's own label when it emitted one,
+        # else lenslib's rules applied here.
+        label = _door_edge_label(lens, e)
+        row = {"source": e["src"], "target": e["dst"],
+               "relation": e["relation"], "kind": e["kind"],
+               "provenance": label["provenance"] if label
+               else edge_provenance(e)}
+        if label:
+            row["confidence"] = label["confidence"]
+            row["polarity"] = label["polarity"]
+        edges.append(row)
     edges.sort(key=lambda e: (e["source"], e["target"],
                               e["relation"], e["kind"]))
+    if lens is not None:
+        # W1.8: a directed pair asserting two distinct specific
+        # relations is AMBIGUOUS on every specific edge in it.
+        lens.apply_directed_pair_conflicts(
+            edges, src_key="source", dst_key="target",
+            type_key="relation")
 
     out_deg = {rel: 0 for rel in page_set}
     in_deg = {rel: 0 for rel in page_set}
@@ -412,11 +484,22 @@ def build_graph(root: Path) -> dict:
         n["community"] = assignment[n["id"]]
     god_nodes = compute_god_nodes(nodes)
     inferred_edges = compute_inferred_edges(pages)
+    if lens is not None:
+        # W1.8: a co-citation edge's confidence comes from the
+        # signals that derived it (its shared sources).
+        for ie in inferred_edges:
+            ie["confidence"] = lens.derived_edge_confidence(
+                shared_sources=len(ie.get("evidence") or []))
     counts = {
         "pages": len(nodes),
         "edges": len(edges),
         "extracted_edges": len(edges),
         "inferred_edges": len(inferred_edges),
+        # W1.8: the three-way provenance tally over the emitted
+        # edges (additive; the standing counts above are
+        # unchanged in meaning).
+        "edge_provenance": dict(sorted(Counter(
+            e["provenance"] for e in edges).items())),
         "tombstoned": sum(1 for n in nodes if n["tombstoned"]),
         "severed": sum(1 for n in nodes if n["severed"]),
         "orphans": sum(1 for n in nodes
@@ -743,9 +826,12 @@ function draw() {
     var hot = selectedId !== null &&
       (e.source === selectedId || e.target === selectedId);
     ctx.globalAlpha = highlighted === null ? 0.55 : (hot ? 0.95 : 0.07);
-    ctx.strokeStyle = hot ? "#33302a" : "#b9b2a4";
+    ctx.strokeStyle = hot ? "#33302a" :
+      (e.provenance === "AMBIGUOUS" ? "#b3541e" : "#b9b2a4");
     ctx.lineWidth = hot ? 1.6 : 1;
+    if (e.provenance === "AMBIGUOUS") { ctx.setLineDash([2, 3]); }
     ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.setLineDash([]);
   });
   ctx.globalAlpha = 1;
   inferredEdges.forEach(function (e) {
@@ -884,18 +970,24 @@ function showDetails(node) {
   pane.appendChild(el("h3", "Neighbours (" + neighboursOf(node.id).length + ")"));
   var ul = el("ul");
   var seen = {};
-  function addItem(otherId, arrow, relation) {
+  function addItem(otherId, arrow, relation, edge) {
     var key = otherId + "|" + arrow + "|" + relation;
     if (seen[key]) { return; } seen[key] = true;
     var li = el("li");
-    var btn = el("button", arrow + " " + byId[otherId].title + " (" + relation + ")");
+    var relTxt = relation;
+    if (edge && edge.provenance) {
+      relTxt += ", " + edge.provenance.toLowerCase() +
+        (typeof edge.confidence === "number" ?
+          " · conf " + edge.confidence : "");
+    }
+    var btn = el("button", arrow + " " + byId[otherId].title + " (" + relTxt + ")");
     btn.type = "button";
     btn.addEventListener("click", function () { focusNode(otherId); });
     li.appendChild(btn);
     ul.appendChild(li);
   }
-  outAdj[node.id].forEach(function (e) { addItem(e.target, "→", e.relation); });
-  inAdj[node.id].forEach(function (e) { addItem(e.source, "←", e.relation); });
+  outAdj[node.id].forEach(function (e) { addItem(e.target, "→", e.relation, e); });
+  inAdj[node.id].forEach(function (e) { addItem(e.source, "←", e.relation, e); });
   if (!ul.children.length) {
     ul.appendChild(el("li", "No neighbours — this page is an orphan in the graph."));
   }
@@ -962,6 +1054,8 @@ function buildChrome() {
   document.getElementById("stats").textContent =
     c.pages + " pages · " + c.edges + " extracted edges · " +
     (c.inferred_edges || 0) + " inferred edges · " +
+    ((c.edge_provenance && c.edge_provenance.AMBIGUOUS) ?
+      c.edge_provenance.AMBIGUOUS + " ambiguous edges · " : "") +
     c.tombstoned + " tombstoned · " + c.severed + " severed · " +
     c.orphans + " orphans — standalone export, works offline.";
   var dl = document.getElementById("title-list");
@@ -981,6 +1075,10 @@ function buildChrome() {
   });
   var t0 = el("span", "┄ teal dashed — INFERRED edge (co-cited, derived by the export; solid grey edges are EXTRACTED from a page)");
   legend.appendChild(t0);
+  if (edges.some(function (e) { return e.provenance === "AMBIGUOUS"; })) {
+    var tAmb = el("span", "┄ rust dotted — AMBIGUOUS edge (one directed pair asserting two typed relations; neither governs — W1.8 label, confidence 0.5 in the data)");
+    legend.appendChild(tAmb);
+  }
   var t1 = el("span", "○ dashed ring + cross — tombstoned");
   var t2 = el("span", "◎ red ring — severed");
   legend.appendChild(t1); legend.appendChild(t2);

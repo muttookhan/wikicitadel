@@ -1,0 +1,16 @@
+{
+  "tool": "wiki_scholar_check quote grades",
+  "generated": "2026-10-22",
+  "coverage": {
+    "quotes_checked": 0,
+    "pages": 0,
+    "pairing": "the cite-lock quote lane's pairing (a quotation carrying a ^[cite:] marker on its own or the adjacent line), graded exact / close / distorted / not_found against the cited range of the local corpus"
+  },
+  "summary": {
+    "exact": 0,
+    "close": 0,
+    "distorted": 0,
+    "not_found": 0
+  },
+  "results": []
+}

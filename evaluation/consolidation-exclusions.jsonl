@@ -1,0 +1,1 @@
+{"established":"2026-10-22","format":"one JSON object per line; a pair is excluded while BOTH sides' git blob OID and semantic fingerprint equal the recorded states; any change re-opens the pair. Append-only.","kind":"header","registry":"consolidation-exclusions","tool":"scripts/wiki_dedupe.py exclusions (build-list W1.9)"}

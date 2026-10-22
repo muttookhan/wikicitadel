@@ -1,0 +1,349 @@
+{
+  "label": "extended-latest",
+  "set": "extended",
+  "engine": "hybrid",
+  "generated_at": "2026-10-22T06:53:22+00:00",
+  "git_head": "a02b5394ba2cde30b72b0afc95e4d31513fcb3ac",
+  "prediction_ids": [],
+  "corpus": "wiki/ (scope=wiki)",
+  "corpus_docs": 42,
+  "top_k": 10,
+  "aggregates": {
+    "questions": 10,
+    "citation_coverage": {
+      "@1": 0.8,
+      "@3": 0.8,
+      "@5": 0.8,
+      "@10": 0.9
+    },
+    "hit_rate_topk": 1.0,
+    "mean_precision_at_k": 0.12,
+    "mrr_must_cite": 0.8125
+  },
+  "by_class": {
+    "standard": {
+      "questions": 4,
+      "citation_coverage": {
+        "@1": 0.75,
+        "@3": 0.75,
+        "@5": 0.75,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.125,
+      "mrr_must_cite": 0.7812
+    },
+    "temporal": {
+      "questions": 5,
+      "citation_coverage": {
+        "@1": 0.8,
+        "@3": 0.8,
+        "@5": 0.8,
+        "@10": 0.8
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.12,
+      "mrr_must_cite": 0.8,
+      "current_page_hit_rate": 1.0
+    },
+    "multi_page": {
+      "questions": 1,
+      "citation_coverage": {
+        "@1": 1.0,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.1,
+      "mrr_must_cite": 1.0,
+      "full_hit_rate": 0.0
+    }
+  },
+  "by_axis": {
+    "governance": {
+      "questions": 9,
+      "citation_coverage": {
+        "@1": 0.7778,
+        "@3": 0.7778,
+        "@5": 0.7778,
+        "@10": 0.8889
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.1111,
+      "mrr_must_cite": 0.7917
+    }
+  },
+  "by_slice": {
+    "directional": {
+      "questions": 4,
+      "citation_coverage": {
+        "@1": 0.75,
+        "@3": 0.75,
+        "@5": 0.75,
+        "@10": 0.75
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.125,
+      "mrr_must_cite": 0.75,
+      "current_page_hit_rate": 1.0
+    }
+  },
+  "axes_invalid": {},
+  "abstention": {
+    "questions": 2,
+    "top1_score_mean": 1.1736,
+    "top1_score_median": 1.1736,
+    "answerable_top1_median": 1.2225,
+    "threshold": null,
+    "abstention_rate": null
+  },
+  "no_context_arm": null,
+  "context_lift": null,
+  "citation_presence": {
+    "answerable_questions": 10,
+    "source_declaration_rate": 0.6,
+    "inline_cite_rate": 0.7
+  },
+  "judgement_axes_not_scored": "Answer factuality vs key_facts, forbidden-claim avoidance on temporal questions, and verbal abstention on no_answer questions require composed answers and a judge; this harness scores retrieval, abstention headroom, and citation presence only.",
+  "per_question": [
+    {
+      "id": "EQ-001",
+      "class": "standard",
+      "axes": [],
+      "slice": null,
+      "must_cite_rank": 1,
+      "hit_in_topk": true,
+      "must_in_topk": true,
+      "all_must_in_topk": true,
+      "precision_at_k": 0.2,
+      "top1_score": 1.2307692307692308,
+      "top3": [
+        "wiki/overview.md",
+        "wiki/ideas.md",
+        "wiki/syntheses/decision-register.md"
+      ],
+      "must_cite_declares_sources": true,
+      "must_cite_has_inline_cite": true
+    },
+    {
+      "id": "EQ-002",
+      "class": "standard",
+      "axes": [
+        "governance"
+      ],
+      "slice": null,
+      "must_cite_rank": 1,
+      "hit_in_topk": true,
+      "must_in_topk": true,
+      "all_must_in_topk": true,
+      "precision_at_k": 0.1,
+      "top1_score": 1.1954545454545455,
+      "top3": [
+        "wiki/entities/owner.md",
+        "wiki/rules/notices.md",
+        "wiki/concepts/did-webvh.md"
+      ],
+      "must_cite_declares_sources": true,
+      "must_cite_has_inline_cite": true
+    },
+    {
+      "id": "EQ-003",
+      "class": "standard",
+      "axes": [
+        "governance"
+      ],
+      "slice": null,
+      "must_cite_rank": 1,
+      "hit_in_topk": true,
+      "must_in_topk": true,
+      "all_must_in_topk": true,
+      "precision_at_k": 0.1,
+      "top1_score": 1.2142857142857142,
+      "top3": [
+        "wiki/rules/notices.md",
+        "wiki/rules/curation-workarounds.md",
+        "wiki/rules/evidence-ttl.md"
+      ],
+      "must_cite_declares_sources": false,
+      "must_cite_has_inline_cite": false
+    },
+    {
+      "id": "EQ-004",
+      "class": "temporal",
+      "axes": [
+        "governance"
+      ],
+      "slice": null,
+      "must_cite_rank": 1,
+      "hit_in_topk": true,
+      "must_in_topk": true,
+      "all_must_in_topk": true,
+      "precision_at_k": 0.1,
+      "top1_score": 1.3994285714285715,
+      "top3": [
+        "wiki/syntheses/decision-register.md",
+        "wiki/sources/founding-note.md",
+        "wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md"
+      ],
+      "must_cite_declares_sources": true,
+      "must_cite_has_inline_cite": true
+    },
+    {
+      "id": "EQ-005",
+      "class": "no_answer",
+      "axes": [
+        "privacy"
+      ],
+      "slice": null,
+      "top1_score": 1.1916666666666667,
+      "top1_path": "wiki/rules/notices.md",
+      "top3": [
+        "wiki/rules/notices.md",
+        "wiki/syntheses/decision-register.md",
+        "wiki/ideas.md"
+      ]
+    },
+    {
+      "id": "EQ-006",
+      "class": "no_answer",
+      "axes": [
+        "safety"
+      ],
+      "slice": null,
+      "top1_score": 1.1555555555555554,
+      "top1_path": "wiki/concepts/capture-triage-machinery.md",
+      "top3": [
+        "wiki/concepts/capture-triage-machinery.md",
+        "wiki/ideas.md",
+        "wiki/index.md"
+      ]
+    },
+    {
+      "id": "EQ-007",
+      "class": "multi_page",
+      "axes": [
+        "governance"
+      ],
+      "slice": null,
+      "must_cite_rank": 1,
+      "hit_in_topk": true,
+      "must_in_topk": true,
+      "all_must_in_topk": false,
+      "precision_at_k": 0.1,
+      "top1_score": 1.0366141418750836,
+      "top3": [
+        "wiki/syntheses/decision-register.md",
+        "wiki/rules/notices.md",
+        "wiki/rules/curation-workarounds.md"
+      ],
+      "must_cite_declares_sources": false,
+      "must_cite_has_inline_cite": true
+    },
+    {
+      "id": "EQ-008",
+      "class": "standard",
+      "axes": [
+        "governance"
+      ],
+      "slice": null,
+      "must_cite_rank": 8,
+      "hit_in_topk": true,
+      "must_in_topk": true,
+      "all_must_in_topk": true,
+      "precision_at_k": 0.1,
+      "top1_score": 1.18,
+      "top3": [
+        "wiki/rules/curation-workarounds.md",
+        "wiki/syntheses/decision-register.md",
+        "wiki/rules/notices.md"
+      ],
+      "must_cite_declares_sources": false,
+      "must_cite_has_inline_cite": false
+    },
+    {
+      "id": "ED-001",
+      "class": "temporal",
+      "axes": [
+        "governance"
+      ],
+      "slice": "directional",
+      "must_cite_rank": 1,
+      "hit_in_topk": true,
+      "must_in_topk": true,
+      "all_must_in_topk": true,
+      "precision_at_k": 0.2,
+      "top1_score": 1.3502551020408162,
+      "top3": [
+        "wiki/syntheses/decision-register.md",
+        "wiki/sources/founding-note.md",
+        "wiki/overview.md"
+      ],
+      "must_cite_declares_sources": true,
+      "must_cite_has_inline_cite": true
+    },
+    {
+      "id": "ED-002",
+      "class": "temporal",
+      "axes": [
+        "governance"
+      ],
+      "slice": "directional",
+      "must_cite_rank": 1,
+      "hit_in_topk": true,
+      "must_in_topk": true,
+      "all_must_in_topk": true,
+      "precision_at_k": 0.1,
+      "top1_score": 1.2829201680672269,
+      "top3": [
+        "wiki/syntheses/decision-register.md",
+        "wiki/concepts/progressive-retrieval.md",
+        "wiki/concepts/memory-and-retrieval-designs.md"
+      ],
+      "must_cite_declares_sources": true,
+      "must_cite_has_inline_cite": true
+    },
+    {
+      "id": "ED-003",
+      "class": "temporal",
+      "axes": [
+        "governance"
+      ],
+      "slice": "directional",
+      "must_cite_rank": 1,
+      "hit_in_topk": true,
+      "must_in_topk": true,
+      "all_must_in_topk": true,
+      "precision_at_k": 0.1,
+      "top1_score": 1.3018877551020407,
+      "top3": [
+        "wiki/syntheses/decision-register.md",
+        "wiki/i18n/ko/decision-register.md",
+        "wiki/i18n/ja/decision-register.md"
+      ],
+      "must_cite_declares_sources": true,
+      "must_cite_has_inline_cite": true
+    },
+    {
+      "id": "ED-004",
+      "class": "temporal",
+      "axes": [
+        "governance"
+      ],
+      "slice": "directional",
+      "must_cite_rank": null,
+      "hit_in_topk": true,
+      "must_in_topk": false,
+      "all_must_in_topk": false,
+      "precision_at_k": 0.1,
+      "top1_score": 0.8543770360580982,
+      "top3": [
+        "wiki/syntheses/decision-register.md",
+        "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+        "wiki/concepts/did-webvh.md"
+      ],
+      "must_cite_declares_sources": false,
+      "must_cite_has_inline_cite": false
+    }
+  ]
+}

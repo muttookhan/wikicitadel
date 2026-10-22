@@ -1,0 +1,25 @@
+{
+  "tool": "wiki_scholar_check verification report",
+  "generated": "2026-10-22",
+  "mode": "corpus scan (wiki/ pages)",
+  "coverage": {
+    "citations_checked": 0,
+    "with_doi": 0,
+    "title_only": 0,
+    "pages_scanned": 42,
+    "extraction": "scan mode: heuristic extraction of DOI-bearing lines; fields are only what the citing line states",
+    "registries": [
+      "crossref",
+      "openalex"
+    ],
+    "honesty": "verdicts are data in this report, never a gate; cannot_determine is a first-class verdict; a failed registry door is recorded as a door failure, never as a negative finding; retraction coverage is claimed only for registries named in each entry's `queried` list"
+  },
+  "summary": {
+    "verified": 0,
+    "field-mismatch": 0,
+    "not_found": 0,
+    "cannot_determine": 0,
+    "alerts": 0
+  },
+  "results": []
+}

@@ -1,0 +1,191 @@
+{
+  "kind": "reranker-comparison",
+  "generated_at": "2026-10-22T06:37:44+00:00",
+  "command": "python3 scripts/wiki_rerank.py compare --rerankers coverage,colbert,cross-encoder",
+  "corpus": "wiki/ (scope=wiki)",
+  "corpus_docs": 42,
+  "questions_file": "/home/hatch/workspace/wikicitadel/evaluation/golden-questions.jsonl",
+  "questions": 3,
+  "models": {
+    "coverage": {
+      "scorer": "the shipped reranker",
+      "questions_scored": 3,
+      "citation_coverage": {
+        "@1": 0.6667,
+        "@3": 0.6667,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.1667,
+      "mrr_must_cite": 0.75,
+      "mean_top1_relevance": 0.5361,
+      "invocation_errors": [],
+      "per_question": [
+        {
+          "id": "SQ-001",
+          "route": "decision",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/syntheses/decision-register.md",
+            "wiki/overview.md",
+            "wiki/sources/founding-note.md"
+          ]
+        },
+        {
+          "id": "SQ-002",
+          "route": "entity",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/entities/owner.md",
+            "wiki/rules/curation-workarounds.md",
+            "wiki/syntheses/decision-register.md"
+          ]
+        },
+        {
+          "id": "SQ-003",
+          "route": "source",
+          "must_cite_rank": 4,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/concepts/did-webvh.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/overview.md"
+          ]
+        }
+      ]
+    },
+    "colbert": {
+      "scorer": "hashing-stand-in embedder (no model installed); mechanics measured, not a model",
+      "questions_scored": 3,
+      "citation_coverage": {
+        "@1": 0.6667,
+        "@3": 0.6667,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.1667,
+      "mrr_must_cite": 0.75,
+      "mean_top1_relevance": 0.8866,
+      "invocation_errors": [],
+      "per_question": [
+        {
+          "id": "SQ-001",
+          "route": "decision",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/syntheses/decision-register.md",
+            "wiki/overview.md",
+            "wiki/sources/founding-note.md"
+          ]
+        },
+        {
+          "id": "SQ-002",
+          "route": "entity",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/entities/owner.md",
+            "wiki/rules/curation-workarounds.md",
+            "wiki/syntheses/decision-register.md"
+          ]
+        },
+        {
+          "id": "SQ-003",
+          "route": "source",
+          "must_cite_rank": 4,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/concepts/did-webvh.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/overview.md"
+          ]
+        }
+      ]
+    },
+    "cross-encoder": {
+      "scorer": "lexical-reference-stand-in scorer (no model installed); mechanics measured, not a model",
+      "questions_scored": 3,
+      "citation_coverage": {
+        "@1": 0.6667,
+        "@3": 0.6667,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.1667,
+      "mrr_must_cite": 0.75,
+      "mean_top1_relevance": 0.8224,
+      "invocation_errors": [],
+      "per_question": [
+        {
+          "id": "SQ-001",
+          "route": "decision",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/syntheses/decision-register.md",
+            "wiki/overview.md",
+            "wiki/sources/founding-note.md"
+          ]
+        },
+        {
+          "id": "SQ-002",
+          "route": "entity",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/entities/owner.md",
+            "wiki/rules/curation-workarounds.md",
+            "wiki/syntheses/decision-register.md"
+          ]
+        },
+        {
+          "id": "SQ-003",
+          "route": "source",
+          "must_cite_rank": 4,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/concepts/did-webvh.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/overview.md"
+          ]
+        }
+      ]
+    }
+  },
+  "deltas_vs_default": {
+    "colbert": {
+      "mrr_must_cite": 0.0,
+      "citation_coverage@10": 0.0,
+      "hit_rate_topk": 0.0
+    },
+    "cross-encoder": {
+      "mrr_must_cite": 0.0,
+      "citation_coverage@10": 0.0,
+      "hit_rate_topk": 0.0
+    }
+  }
+}

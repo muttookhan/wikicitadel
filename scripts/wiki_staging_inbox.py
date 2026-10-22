@@ -26,12 +26,27 @@ register. The item file itself is never edited by a move.
 
 CLI: --root defaults to the tree root; --staging-dir overrides.
 Exit 0 ok, 1 refused transition, 2 missing input.
+
+Dedupe (W1.9, scripts/wiki_dedupe.py — the shared design):
+an add whose body shares a semantic fingerprint with an
+existing item's body is the SAME capture arriving again.
+An exact duplicate (or one poorer in commentary) creates
+no new item: the existing item is returned flagged
+`duplicate`, and the decision is logged to
+dedupe-log.jsonl beside the register. A comment-bearing
+re-send SUPERSEDES the bare item file — backup first, to
+dedupe-backups/ beside the register, the item keeping its
+id and state — and a collision (both annotated, differently)
+keeps both items. Nothing is dropped silently: every
+dedupe outcome is in the log with its survivor named.
 """
 import argparse
 import json
 import re
 import sys
 from pathlib import Path
+
+import wiki_dedupe  # W1.9 shared dedupe design
 
 STATES = ("new", "triaged", "filed", "parked")
 TRANSITIONS = {
@@ -60,15 +75,66 @@ def slugify(text):
     return s[:60] or "item"
 
 
+def _dedupe_log(staging, record):
+    wiki_dedupe.log_decision(
+        staging, record,
+        log_path=Path(staging) / "dedupe-log.jsonl")
+
+
 def add_item(staging, title, body, at="", by="mehmed"):
     data = load_register(staging)
+    items_dir = Path(staging) / "items"
+    # W1.9 dedupe: text-as-identity over the bodies already
+    # in the inbox — the same capture admitted twice is one
+    # item, decided by the shared rules, never silently.
+    collision = None
+    if items_dir.is_dir():
+        for item in data["items"]:
+            ipath = items_dir / f"{item['id']}.md"
+            if not ipath.is_file():
+                continue
+            existing_body = wiki_dedupe.strip_frontmatter(
+                ipath.read_text(encoding="utf-8"))
+            verdict = wiki_dedupe.decide(existing_body, body)
+            if verdict["outcome"] == "distinct":
+                continue
+            if verdict["outcome"] in ("exact-duplicate",
+                                       "existing-wins"):
+                _dedupe_log(staging, {
+                    "door": "staging-inbox",
+                    "outcome": verdict["outcome"],
+                    "action": "duplicate-kept-existing",
+                    "survivor": item["id"],
+                    "incoming": "add %r" % title,
+                    "fingerprint": verdict["fingerprint"],
+                    "backup": None, "at": at or None})
+                return {**item, "duplicate": True,
+                        "dedupe": verdict["outcome"]}
+            if verdict["outcome"] == "incoming-wins":
+                backup = wiki_dedupe.backup_before_rewrite(
+                    staging, ipath, door="staging-inbox",
+                    backup_dir=Path(staging) / "dedupe-backups")
+                ipath.write_text(
+                    f"---\ntitle: \"{item['title']}\"\n"
+                    f"state: {item['state']}\n---\n\n{body}\n",
+                    encoding="utf-8")
+                _dedupe_log(staging, {
+                    "door": "staging-inbox",
+                    "outcome": "incoming-wins",
+                    "action": "superseded",
+                    "survivor": item["id"],
+                    "incoming": "add %r" % title,
+                    "fingerprint": verdict["fingerprint"],
+                    "backup": backup, "at": at or None})
+                return {**item, "dedupe": "incoming-wins",
+                        "backup": backup}
+            collision = (item, verdict)  # keep both; log after
     base = slugify(title)
     existing = {i["id"] for i in data["items"]}
     ident, n = base, 2
     while ident in existing:
         ident = f"{base}-{n}"
         n += 1
-    items_dir = Path(staging) / "items"
     items_dir.mkdir(parents=True, exist_ok=True)
     (items_dir / f"{ident}.md").write_text(
         f"---\ntitle: \"{title}\"\nstate: new\n---\n\n{body}\n",
@@ -77,6 +143,17 @@ def add_item(staging, title, body, at="", by="mehmed"):
             "history": [{"state": "new", "at": at, "by": by}]}
     data["items"].append(item)
     save_register(staging, data)
+    if collision is not None:
+        other, verdict = collision
+        _dedupe_log(staging, {
+            "door": "staging-inbox",
+            "outcome": "collision-keep-both",
+            "action": "collision-kept-both",
+            "survivor": "both: %s + %s" % (other["id"], ident),
+            "incoming": "add %r" % title,
+            "fingerprint": verdict["fingerprint"],
+            "backup": None, "at": at or None})
+        return {**item, "dedupe": "collision-keep-both"}
     return item
 
 

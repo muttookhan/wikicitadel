@@ -89,6 +89,11 @@ from datetime import date as _date
 from datetime import datetime
 from pathlib import Path
 
+import wiki_dedupe  # W1.9: the shared capture-time dedupe
+# design — a re-render of a capture whose text already
+# stands in staging/captures/ is refused with the surviving
+# draft named, and the decision logged (see new_capture).
+
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = Path("templates/capture")
 CAPTURE_DIR = Path("staging/captures")
@@ -294,6 +299,45 @@ def new_capture(kind, title, by="agent", provenance=None,
     text = render(kind, title, tags=tags, by=by,
                   provenance=provenance, decided=decided,
                   now=now, root=root)
+    # W1.9 dedupe (text-as-identity): the filename guard
+    # below only catches a same-day re-render under the same
+    # name. A re-capture of the same text on another day —
+    # or under another --file — is the same capture: refuse
+    # it with the surviving draft named, and log the
+    # decision. A collision (same fingerprint, different
+    # commentary on both sides) is logged and the write
+    # proceeds: both copies kept, nothing lost.
+    out_dir = root / CAPTURE_DIR
+    if out_dir.is_dir():
+        new_payload = wiki_dedupe.strip_frontmatter(text)
+        for prior in sorted(out_dir.glob("*.md")):
+            verdict = wiki_dedupe.decide(
+                wiki_dedupe.strip_frontmatter(
+                    prior.read_text(encoding="utf-8")),
+                new_payload)
+            if verdict["outcome"] == "distinct":
+                continue
+            survivor = str(CAPTURE_DIR / prior.name)
+            wiki_dedupe.log_decision(root, {
+                "door": "capture",
+                "outcome": verdict["outcome"],
+                "action": ("duplicate-refused"
+                           if verdict["outcome"] in
+                           ("exact-duplicate", "existing-wins")
+                           else "collision-kept-both"),
+                "survivor": survivor,
+                "incoming": "capture %s %r" % (kind, title),
+                "fingerprint": verdict["fingerprint"],
+                "backup": None,
+                "at": now.strftime("%Y-%m-%d")})
+            if verdict["outcome"] in ("exact-duplicate",
+                                       "existing-wins"):
+                raise CaptureError(
+                    "duplicate capture: this text already "
+                    "stands staged at %s (dedupe: "
+                    "text-as-identity — the earlier draft "
+                    "stands; the decision is logged)" % survivor)
+            break  # collision logged; the write proceeds
     if file:
         if Path(file).is_absolute() or "/" in file \
                 or "\\" in file or ".." in file:

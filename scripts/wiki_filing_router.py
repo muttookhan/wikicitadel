@@ -91,6 +91,23 @@ def route_item(path, root=None):
 
     dest = max(DESTINATIONS, key=lambda d: scores[d])
     confidence = round(min(0.99, scores[dest]), 2)
+    # W1.9 vocabulary-constrained filing: the proposal
+    # carries the item's declared-vocabulary check — tags
+    # must resolve in the tag registry, declared relations
+    # must be adopted spellings of the closed relation
+    # vocabulary. Reporting only, like everything here: the
+    # router proposes, the check names what a filing may
+    # not declare; nothing is edited or registered.
+    try:
+        import wiki_dedupe
+        vocab = wiki_dedupe.vocabulary_check(
+            fm, Path(root) if root else
+            Path(__file__).resolve().parent.parent)
+    except Exception as exc:  # registry unreadable: say so
+        vocab = {"ok": False,
+                 "violations": ["vocabulary check "
+                                "unavailable: %s" % exc],
+                 "tags": [], "relations": []}
     return {
         "file": str(path),
         "destination": dest,
@@ -99,6 +116,7 @@ def route_item(path, root=None):
         "scores": {d: round(s, 2) for d, s in scores.items()},
         "declared": fm.get("destination") or None,
         "proposal_only": True,
+        "vocabulary": vocab,
     }
 
 

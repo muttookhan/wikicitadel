@@ -1,0 +1,1410 @@
+{
+  "trial": "W1.2 dense retrieval trial lane (2026-10-22)",
+  "generated_at": "2026-10-22T06:37:19+00:00",
+  "git_head": "a02b5394ba2cde30b72b0afc95e4d31513fcb3ac",
+  "corpus": "wiki/ (scope=wiki)",
+  "corpus_docs": 42,
+  "projection_db": "/home/hatch/workspace/wikicitadel/evaluation/dense-trial/projection.sqlite",
+  "projection_meta": {
+    "embedder": "svd",
+    "embedder_kind": "lexical (LSA / truncated SVD over TF-IDF) — NOT a neural embedding",
+    "dims": "41",
+    "corpus_docs": "42",
+    "corpus_hash": "cdba45c92e694ff27a087c06deb957f4a50e2a8ee5e304ef040a4d1d9b27bbdf",
+    "vocab_size": "1538",
+    "vector_store": "float32 BLOB + python cosine (sqlite-vec extension not installed; see module docstring)",
+    "built_at": "2026-10-22T06:37:12+00:00"
+  },
+  "serving_path": {
+    "wiki_search_sha256": "1e2b95c91f883de3ef9c11810c8e5a54d2934b350d0d1f2c522a6d9afcc3e224",
+    "note": "wiki_search.py is imported read-only; the trial changes no default and no serving code. Golden + extended question files are measured against, never edited."
+  },
+  "embedders": {
+    "svd": "lexical (LSA / truncated SVD over TF-IDF) — NOT a neural embedding",
+    "hashing": "lexical (signed feature hashing) — NOT a neural embedding",
+    "note": "No neural embedding model exists on this machine; both embedders are lexical. The production engine choice remains the owner's."
+  },
+  "fusion": "Reciprocal Rank Fusion, k=60",
+  "reproduce": [
+    "python3 scripts/wiki_dense_trial.py build",
+    "python3 scripts/wiki_dense_trial.py measure",
+    "python3 -m unittest scripts.tests.test_wiki_dense_trial"
+  ],
+  "instruments": {
+    "golden": {
+      "production_bm25": {
+        "aggregates": {
+          "questions": 3,
+          "citation_coverage": {
+            "@1": 0.6667,
+            "@3": 0.6667,
+            "@5": 0.6667,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.1667,
+          "mrr_must_cite": 0.7143
+        },
+        "per_question": [
+          {
+            "id": "SQ-001",
+            "route": "decision",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/concepts/standing-approval.md",
+              "wiki/overview.md"
+            ]
+          },
+          {
+            "id": "SQ-002",
+            "route": "entity",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top3": [
+              "wiki/entities/owner.md",
+              "wiki/rules/curation-workarounds.md",
+              "wiki/ideas.md"
+            ]
+          },
+          {
+            "id": "SQ-003",
+            "route": "source",
+            "must_cite_rank": 7,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/concepts/did-webvh.md",
+              "wiki/overview.md",
+              "wiki/syntheses/decision-register.md"
+            ]
+          }
+        ]
+      },
+      "production_hybrid": {
+        "aggregates": {
+          "questions": 3,
+          "citation_coverage": {
+            "@1": 0.6667,
+            "@3": 0.6667,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.1667,
+          "mrr_must_cite": 0.75
+        },
+        "per_question": [
+          {
+            "id": "SQ-001",
+            "route": "decision",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/overview.md",
+              "wiki/sources/founding-note.md"
+            ]
+          },
+          {
+            "id": "SQ-002",
+            "route": "entity",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top3": [
+              "wiki/entities/owner.md",
+              "wiki/rules/curation-workarounds.md",
+              "wiki/syntheses/decision-register.md"
+            ]
+          },
+          {
+            "id": "SQ-003",
+            "route": "source",
+            "must_cite_rank": 4,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/concepts/did-webvh.md",
+              "wiki/syntheses/decision-register.md",
+              "wiki/overview.md"
+            ]
+          }
+        ]
+      },
+      "projection_fts5": {
+        "aggregates": {
+          "questions": 3,
+          "citation_coverage": {
+            "@1": 0.6667,
+            "@3": 0.6667,
+            "@5": 0.6667,
+            "@10": 0.6667
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.1333,
+          "mrr_must_cite": 0.6923
+        },
+        "per_question": [
+          {
+            "id": "SQ-001",
+            "route": "decision",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/concepts/standing-approval.md",
+              "wiki/overview.md"
+            ]
+          },
+          {
+            "id": "SQ-002",
+            "route": "entity",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top3": [
+              "wiki/entities/owner.md",
+              "wiki/rules/curation-workarounds.md",
+              "wiki/ideas.md"
+            ]
+          },
+          {
+            "id": "SQ-003",
+            "route": "source",
+            "must_cite_rank": 13,
+            "hit_in_topk": true,
+            "must_in_topk": false,
+            "precision_at_k": 0.1,
+            "top3": [
+              "wiki/concepts/did-webvh.md",
+              "wiki/syntheses/marathon-round-10-2026-10-21.md",
+              "wiki/index.md"
+            ]
+          }
+        ]
+      },
+      "dense_svd": {
+        "aggregates": {
+          "questions": 3,
+          "citation_coverage": {
+            "@1": 0.6667,
+            "@3": 0.6667,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.1667,
+          "mrr_must_cite": 0.75
+        },
+        "per_question": [
+          {
+            "id": "SQ-001",
+            "route": "decision",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/concepts/standing-approval.md"
+            ]
+          },
+          {
+            "id": "SQ-002",
+            "route": "entity",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top3": [
+              "wiki/entities/owner.md",
+              "wiki/rules/curation-workarounds.md",
+              "wiki/i18n/de/overview.md"
+            ]
+          },
+          {
+            "id": "SQ-003",
+            "route": "source",
+            "must_cite_rank": 4,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/concepts/did-webvh.md",
+              "wiki/i18n/de/overview.md",
+              "wiki/overview.md"
+            ]
+          }
+        ]
+      },
+      "dense_hashing": {
+        "aggregates": {
+          "questions": 3,
+          "citation_coverage": {
+            "@1": 0.6667,
+            "@3": 1.0,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.1667,
+          "mrr_must_cite": 0.8333
+        },
+        "per_question": [
+          {
+            "id": "SQ-001",
+            "route": "decision",
+            "must_cite_rank": 2,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/sources/founding-note.md",
+              "wiki/syntheses/decision-register.md",
+              "wiki/rules/notices.md"
+            ]
+          },
+          {
+            "id": "SQ-002",
+            "route": "entity",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top3": [
+              "wiki/entities/owner.md",
+              "wiki/ideas.md",
+              "wiki/rules/notices.md"
+            ]
+          },
+          {
+            "id": "SQ-003",
+            "route": "source",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/sources/founding-note.md",
+              "wiki/concepts/did-webvh.md",
+              "wiki/overview.md"
+            ]
+          }
+        ]
+      },
+      "rrf_bm25+dense_svd": {
+        "aggregates": {
+          "questions": 3,
+          "citation_coverage": {
+            "@1": 0.6667,
+            "@3": 0.6667,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.1667,
+          "mrr_must_cite": 0.7333
+        },
+        "per_question": [
+          {
+            "id": "SQ-001",
+            "route": "decision",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/concepts/standing-approval.md",
+              "wiki/sources/founding-note.md"
+            ]
+          },
+          {
+            "id": "SQ-002",
+            "route": "entity",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top3": [
+              "wiki/entities/owner.md",
+              "wiki/rules/curation-workarounds.md",
+              "wiki/ideas.md"
+            ]
+          },
+          {
+            "id": "SQ-003",
+            "route": "source",
+            "must_cite_rank": 5,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/concepts/did-webvh.md",
+              "wiki/overview.md",
+              "wiki/syntheses/decision-register.md"
+            ]
+          }
+        ]
+      },
+      "rrf_hybrid+dense_svd": {
+        "aggregates": {
+          "questions": 3,
+          "citation_coverage": {
+            "@1": 0.6667,
+            "@3": 0.6667,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.1667,
+          "mrr_must_cite": 0.75
+        },
+        "per_question": [
+          {
+            "id": "SQ-001",
+            "route": "decision",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/overview.md"
+            ]
+          },
+          {
+            "id": "SQ-002",
+            "route": "entity",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top3": [
+              "wiki/entities/owner.md",
+              "wiki/rules/curation-workarounds.md",
+              "wiki/syntheses/decision-register.md"
+            ]
+          },
+          {
+            "id": "SQ-003",
+            "route": "source",
+            "must_cite_rank": 4,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/concepts/did-webvh.md",
+              "wiki/overview.md",
+              "wiki/syntheses/decision-register.md"
+            ]
+          }
+        ]
+      },
+      "rrf_fts5+dense_svd": {
+        "aggregates": {
+          "questions": 3,
+          "citation_coverage": {
+            "@1": 0.6667,
+            "@3": 0.6667,
+            "@5": 0.6667,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.1667,
+          "mrr_must_cite": 0.7083
+        },
+        "per_question": [
+          {
+            "id": "SQ-001",
+            "route": "decision",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/concepts/standing-approval.md",
+              "wiki/sources/founding-note.md"
+            ]
+          },
+          {
+            "id": "SQ-002",
+            "route": "entity",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top3": [
+              "wiki/entities/owner.md",
+              "wiki/rules/curation-workarounds.md",
+              "wiki/ideas.md"
+            ]
+          },
+          {
+            "id": "SQ-003",
+            "route": "source",
+            "must_cite_rank": 8,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/concepts/did-webvh.md",
+              "wiki/overview.md",
+              "wiki/syntheses/marathon-round-10-2026-10-21.md"
+            ]
+          }
+        ]
+      },
+      "rrf_bm25+dense_hashing": {
+        "aggregates": {
+          "questions": 3,
+          "citation_coverage": {
+            "@1": 0.6667,
+            "@3": 1.0,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.1667,
+          "mrr_must_cite": 0.7778
+        },
+        "per_question": [
+          {
+            "id": "SQ-001",
+            "route": "decision",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/concepts/standing-approval.md"
+            ]
+          },
+          {
+            "id": "SQ-002",
+            "route": "entity",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top3": [
+              "wiki/entities/owner.md",
+              "wiki/ideas.md",
+              "wiki/rules/curation-workarounds.md"
+            ]
+          },
+          {
+            "id": "SQ-003",
+            "route": "source",
+            "must_cite_rank": 3,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top3": [
+              "wiki/concepts/did-webvh.md",
+              "wiki/overview.md",
+              "wiki/sources/founding-note.md"
+            ]
+          }
+        ]
+      }
+    },
+    "directional_slice": {
+      "production_bm25": {
+        "aggregates": {
+          "questions": 4,
+          "citation_coverage": {
+            "@1": 1.0,
+            "@3": 1.0,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.175,
+          "mrr_must_cite": 1.0
+        },
+        "per_question": [
+          {
+            "id": "ED-001",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 78.81824117747747,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/overview.md"
+            ]
+          },
+          {
+            "id": "ED-002",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 39.886575843596276,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/concepts/progressive-retrieval.md",
+              "wiki/rules/evidence-ttl.md"
+            ]
+          },
+          {
+            "id": "ED-003",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 26.744506810958793,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/i18n/ko/decision-register.md",
+              "wiki/i18n/ja/decision-register.md"
+            ]
+          },
+          {
+            "id": "ED-004",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 43.00200811201927,
+            "top3": [
+              "wiki/concepts/standing-approval.md",
+              "wiki/syntheses/decision-register.md",
+              "wiki/rules/notices.md"
+            ]
+          }
+        ]
+      },
+      "production_hybrid": {
+        "aggregates": {
+          "questions": 4,
+          "citation_coverage": {
+            "@1": 0.75,
+            "@3": 0.75,
+            "@5": 0.75,
+            "@10": 0.75
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.125,
+          "mrr_must_cite": 0.75
+        },
+        "per_question": [
+          {
+            "id": "ED-001",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 1.3502551020408162,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/overview.md"
+            ]
+          },
+          {
+            "id": "ED-002",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 1.2829201680672269,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/concepts/progressive-retrieval.md",
+              "wiki/concepts/memory-and-retrieval-designs.md"
+            ]
+          },
+          {
+            "id": "ED-003",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 1.3018877551020407,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/i18n/ko/decision-register.md",
+              "wiki/i18n/ja/decision-register.md"
+            ]
+          },
+          {
+            "id": "ED-004",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": null,
+            "hit_in_topk": true,
+            "must_in_topk": false,
+            "all_must_in_topk": false,
+            "precision_at_k": 0.1,
+            "top1_score": 0.8543770360580982,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+              "wiki/concepts/did-webvh.md"
+            ]
+          }
+        ]
+      },
+      "projection_fts5": {
+        "aggregates": {
+          "questions": 4,
+          "citation_coverage": {
+            "@1": 1.0,
+            "@3": 1.0,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.15,
+          "mrr_must_cite": 1.0
+        },
+        "per_question": [
+          {
+            "id": "ED-001",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 44.14828860104641,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/concepts/standing-approval.md"
+            ]
+          },
+          {
+            "id": "ED-002",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 27.094034107718883,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/rules/evidence-ttl.md",
+              "wiki/concepts/progressive-retrieval.md"
+            ]
+          },
+          {
+            "id": "ED-003",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 15.825774102906061,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/i18n/ja/decision-register.md",
+              "wiki/i18n/ko/decision-register.md"
+            ]
+          },
+          {
+            "id": "ED-004",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 28.163684264565813,
+            "top3": [
+              "wiki/concepts/standing-approval.md",
+              "wiki/syntheses/decision-register.md",
+              "wiki/log.md"
+            ]
+          }
+        ]
+      },
+      "dense_svd": {
+        "aggregates": {
+          "questions": 4,
+          "citation_coverage": {
+            "@1": 1.0,
+            "@3": 1.0,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.175,
+          "mrr_must_cite": 1.0
+        },
+        "per_question": [
+          {
+            "id": "ED-001",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.9179884829552817,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/i18n/de/overview.md"
+            ]
+          },
+          {
+            "id": "ED-002",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.6741008783910145,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/ideas.md",
+              "wiki/sources/founding-note.md"
+            ]
+          },
+          {
+            "id": "ED-003",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 0.8401239705268603,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/i18n/ko/decision-register.md"
+            ]
+          },
+          {
+            "id": "ED-004",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.9825224052263961,
+            "top3": [
+              "wiki/concepts/standing-approval.md",
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md"
+            ]
+          }
+        ]
+      },
+      "dense_hashing": {
+        "aggregates": {
+          "questions": 4,
+          "citation_coverage": {
+            "@1": 1.0,
+            "@3": 1.0,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.175,
+          "mrr_must_cite": 1.0
+        },
+        "per_question": [
+          {
+            "id": "ED-001",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.5082326753689179,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/ideas.md"
+            ]
+          },
+          {
+            "id": "ED-002",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.43864073845594487,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/overview.md"
+            ]
+          },
+          {
+            "id": "ED-003",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 0.3561776622938415,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/overview.md"
+            ]
+          },
+          {
+            "id": "ED-004",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.498015843164175,
+            "top3": [
+              "wiki/concepts/standing-approval.md",
+              "wiki/syntheses/decision-register.md",
+              "wiki/rules/notices.md"
+            ]
+          }
+        ]
+      },
+      "rrf_bm25+dense_svd": {
+        "aggregates": {
+          "questions": 4,
+          "citation_coverage": {
+            "@1": 1.0,
+            "@3": 1.0,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.175,
+          "mrr_must_cite": 1.0
+        },
+        "per_question": [
+          {
+            "id": "ED-001",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/overview.md"
+            ]
+          },
+          {
+            "id": "ED-002",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/ideas.md",
+              "wiki/concepts/progressive-retrieval.md"
+            ]
+          },
+          {
+            "id": "ED-003",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/i18n/ko/decision-register.md",
+              "wiki/sources/founding-note.md"
+            ]
+          },
+          {
+            "id": "ED-004",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/concepts/standing-approval.md",
+              "wiki/syntheses/decision-register.md",
+              "wiki/rules/notices.md"
+            ]
+          }
+        ]
+      },
+      "rrf_hybrid+dense_svd": {
+        "aggregates": {
+          "questions": 4,
+          "citation_coverage": {
+            "@1": 0.75,
+            "@3": 0.75,
+            "@5": 0.75,
+            "@10": 0.75
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.15,
+          "mrr_must_cite": 0.7561
+        },
+        "per_question": [
+          {
+            "id": "ED-001",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/overview.md"
+            ]
+          },
+          {
+            "id": "ED-002",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/concepts/progressive-retrieval.md",
+              "wiki/rules/notices.md"
+            ]
+          },
+          {
+            "id": "ED-003",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/i18n/ko/decision-register.md",
+              "wiki/sources/founding-note.md"
+            ]
+          },
+          {
+            "id": "ED-004",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 41,
+            "hit_in_topk": true,
+            "must_in_topk": false,
+            "all_must_in_topk": false,
+            "precision_at_k": 0.1,
+            "top1_score": 0.03252247488101534,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+              "wiki/rules/notices.md"
+            ]
+          }
+        ]
+      },
+      "rrf_fts5+dense_svd": {
+        "aggregates": {
+          "questions": 4,
+          "citation_coverage": {
+            "@1": 1.0,
+            "@3": 1.0,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.175,
+          "mrr_must_cite": 1.0
+        },
+        "per_question": [
+          {
+            "id": "ED-001",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/concepts/standing-approval.md"
+            ]
+          },
+          {
+            "id": "ED-002",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/ideas.md",
+              "wiki/rules/evidence-ttl.md"
+            ]
+          },
+          {
+            "id": "ED-003",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/i18n/ja/decision-register.md",
+              "wiki/i18n/ko/decision-register.md"
+            ]
+          },
+          {
+            "id": "ED-004",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/concepts/standing-approval.md",
+              "wiki/syntheses/decision-register.md",
+              "wiki/log.md"
+            ]
+          }
+        ]
+      },
+      "rrf_bm25+dense_hashing": {
+        "aggregates": {
+          "questions": 4,
+          "citation_coverage": {
+            "@1": 1.0,
+            "@3": 1.0,
+            "@5": 1.0,
+            "@10": 1.0
+          },
+          "hit_rate_topk": 1.0,
+          "mean_precision_at_k": 0.175,
+          "mrr_must_cite": 1.0
+        },
+        "per_question": [
+          {
+            "id": "ED-001",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/concepts/standing-approval.md"
+            ]
+          },
+          {
+            "id": "ED-002",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/concepts/progressive-retrieval.md",
+              "wiki/ideas.md"
+            ]
+          },
+          {
+            "id": "ED-003",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.1,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/syntheses/decision-register.md",
+              "wiki/sources/founding-note.md",
+              "wiki/rules/share-publish-cite-ready.md"
+            ]
+          },
+          {
+            "id": "ED-004",
+            "class": "temporal",
+            "axes": [
+              "governance"
+            ],
+            "slice": "directional",
+            "must_cite_rank": 1,
+            "hit_in_topk": true,
+            "must_in_topk": true,
+            "all_must_in_topk": true,
+            "precision_at_k": 0.2,
+            "top1_score": 0.03278688524590164,
+            "top3": [
+              "wiki/concepts/standing-approval.md",
+              "wiki/syntheses/decision-register.md",
+              "wiki/rules/notices.md"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "fusion_swings_top10": {
+    "golden": {
+      "rrf_bm25+dense_svd": {
+        "base": "production_bm25",
+        "gained_top10": [],
+        "lost_top10": []
+      },
+      "rrf_hybrid+dense_svd": {
+        "base": "production_hybrid",
+        "gained_top10": [],
+        "lost_top10": []
+      },
+      "rrf_fts5+dense_svd": {
+        "base": "projection_fts5",
+        "gained_top10": [
+          "SQ-003"
+        ],
+        "lost_top10": []
+      },
+      "rrf_bm25+dense_hashing": {
+        "base": "production_bm25",
+        "gained_top10": [],
+        "lost_top10": []
+      }
+    },
+    "directional_slice": {
+      "rrf_bm25+dense_svd": {
+        "base": "production_bm25",
+        "gained_top10": [],
+        "lost_top10": []
+      },
+      "rrf_hybrid+dense_svd": {
+        "base": "production_hybrid",
+        "gained_top10": [],
+        "lost_top10": []
+      },
+      "rrf_fts5+dense_svd": {
+        "base": "projection_fts5",
+        "gained_top10": [],
+        "lost_top10": []
+      },
+      "rrf_bm25+dense_hashing": {
+        "base": "production_bm25",
+        "gained_top10": [],
+        "lost_top10": []
+      }
+    }
+  }
+}

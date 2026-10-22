@@ -133,6 +133,13 @@ import sys
 from datetime import date as _date
 from pathlib import Path
 
+import wiki_dedupe  # W1.9: the shared capture-time dedupe
+# design (text-as-identity, comment-bearing copy wins,
+# backup-before-rewrite, every decision logged). This door
+# consults it at both write paths below; the raw preservation
+# above it is never deduped — a duplicate's raw record is
+# still written, always.
+
 ROOT = Path(__file__).resolve().parent.parent
 
 INBOX = "agent@example.com"
@@ -449,10 +456,8 @@ def draft_text(msg, cap, raw_rel):
     return "\n".join(lines)
 
 
-def append_to_draft(draft, msg, raw_rel):
-    text = draft["text"]
-    day = _datepart(msg["received_at"])
-    # Add the new raw file to sources; bump updated.
+def _touch_draft(text, raw_rel, day):
+    """Add the new raw file to sources; bump updated."""
     text = re.sub(r'^sources:\s*\[(.*)\]\s*$',
                   lambda m: 'sources: [%s, "%s"]'
                   % (m.group(1).rstrip(), raw_rel)
@@ -461,14 +466,96 @@ def append_to_draft(draft, msg, raw_rel):
                   text, count=1, flags=re.M)
     text = re.sub(r"^updated:.*$", "updated: %s" % day,
                   text, count=1, flags=re.M)
+    return text
+
+
+def append_to_draft(draft, msg, raw_rel, root):
+    """Append the message body as a new datamarked section.
+    Backup-before-rewrite is literal (W1.9): the current
+    draft is copied to staging/dedupe-backups/ first and the
+    backup's path returned, so the rewrite is never the only
+    copy of what stood there."""
+    backup = wiki_dedupe.backup_before_rewrite(
+        root, draft["path"], door="mailcapture")
+    text = _touch_draft(draft["text"], raw_rel,
+                        _datepart(msg["received_at"]))
     section = ("\n## Appended %s (message %s)\n\n"
                '%s page="%s">>>\n%s\n%s\n'
-               % (day, msg["id"], DATA_MARK_OPEN, raw_rel,
+               % (_datepart(msg["received_at"]), msg["id"],
+                  DATA_MARK_OPEN, raw_rel,
                   _neutralise_marks(msg["body"]),
                   DATA_MARK_CLOSE))
     if not text.endswith("\n"):
         text += "\n"
     draft["path"].write_text(text + section, encoding="utf-8")
+    return backup
+
+
+def _dedupe_verdict(draft_text, body):
+    """The W1.9 decision of an incoming body against the
+    datamarked payloads a draft already carries, or None
+    when no payload shares its fingerprint (distinct)."""
+    incoming = _neutralise_marks(body)
+    for payload in wiki_dedupe.datamark_payloads(draft_text):
+        verdict = wiki_dedupe.decide(payload, incoming)
+        if verdict["outcome"] != "distinct":
+            return verdict
+    return None
+
+
+def _supersede_section(root, draft, msg, raw_rel):
+    """Comment-bearing copy wins (W1.9): replace the matched
+    datamarked payload in the draft with the incoming body.
+    Backup-before-rewrite first; returns the backup path.
+    The losing copy is not destroyed — it is the backup, and
+    its own raw record stands under raw/captures/email/."""
+    backup = wiki_dedupe.backup_before_rewrite(
+        root, draft["path"], door="mailcapture")
+    incoming = _neutralise_marks(msg["body"])
+    want = wiki_dedupe.fingerprint(incoming)
+
+    def swap(m):
+        if wiki_dedupe.fingerprint(m.group(1)) == want:
+            return m.group(0).replace(m.group(1), incoming, 1)
+        return m.group(0)
+
+    text = re.sub(r"<<<DATA[^>]*>>>\n?(.*?)\n?<<</DATA>>>",
+                  swap, draft["text"], flags=re.S)
+    text = _touch_draft(text, raw_rel,
+                        _datepart(msg["received_at"]))
+    draft["path"].write_text(text, encoding="utf-8")
+    return backup
+
+
+def _log_dedupe(root, msg, verdict, action, survivor,
+                backup=None):
+    wiki_dedupe.log_decision(root, {
+        "door": "mailcapture",
+        "outcome": verdict["outcome"],
+        "action": action,
+        "survivor": survivor,
+        "incoming": "message %s" % msg["id"],
+        "fingerprint": verdict["fingerprint"],
+        "backup": backup,
+        "at": _datepart(msg["received_at"])})
+
+
+def _verdict_action(root, draft, msg, raw_rel, verdict):
+    """Act on a dedupe verdict against a draft. Returns an
+    action string when the verdict settles the message, or
+    None when the caller should fall through to its normal
+    write (collision: both copies are kept)."""
+    rel = str(draft["path"].relative_to(root))
+    if verdict["outcome"] in ("exact-duplicate", "existing-wins"):
+        _log_dedupe(root, msg, verdict, "duplicate-kept-existing",
+                    rel)
+        return "duplicate"
+    if verdict["outcome"] == "incoming-wins":
+        backup = _supersede_section(root, draft, msg, raw_rel)
+        _log_dedupe(root, msg, verdict, "superseded", rel, backup)
+        return "superseded"
+    _log_dedupe(root, msg, verdict, "collision-kept-both", rel)
+    return None
 
 
 def stage_capture(root, msg, cap):
@@ -487,7 +574,22 @@ def stage_capture(root, msg, cap):
         if msg["id"] in d["text"]:
             return ("already-staged",
                     str(d["path"].relative_to(root)))
-        append_to_draft(d, msg, raw_rel)
+        # W1.9 dedupe: the same TEXT under a new message id
+        # is the same capture. A duplicate is not appended a
+        # second time (its raw record above still stands);
+        # a comment-bearing re-send supersedes the bare
+        # section; a collision appends — both copies kept.
+        verdict = _dedupe_verdict(d["text"], msg["body"])
+        if verdict is not None:
+            acted = _verdict_action(root, d, msg, raw_rel,
+                                    verdict)
+            if acted == "duplicate":
+                return ("duplicate-append",
+                        str(d["path"].relative_to(root)))
+            if acted == "superseded":
+                return ("superseded",
+                        str(d["path"].relative_to(root)))
+        append_to_draft(d, msg, raw_rel, root)
         return ("appended", str(d["path"].relative_to(root)))
     dest_rel = "staging/captures/%s-%s.md" % (
         _datepart(msg["received_at"]), slugify(cap["title"]))
@@ -496,6 +598,16 @@ def stage_capture(root, msg, cap):
         existing = dest.read_text(encoding="utf-8")
         if msg["id"] in existing:
             return ("already-staged", dest_rel)
+        # W1.9 dedupe at the new-draft door: same title, same
+        # text, different message id — one draft, decided by
+        # the shared rules, never a silent second copy.
+        verdict = _dedupe_verdict(existing, msg["body"])
+        if verdict is not None:
+            acted = _verdict_action(
+                root, {"path": dest, "text": existing}, msg,
+                raw_rel, verdict)
+            if acted is not None:
+                return (acted, dest_rel)
         dest_rel = "staging/captures/%s-%s-%s.md" % (
             _datepart(msg["received_at"]), slugify(cap["title"]),
             msg["id"].replace("msg_", "")[:8])

@@ -1,0 +1,19 @@
+{
+  "schema": "extended-eval-baseline/1",
+  "recorded_at": "2026-10-22T06:53:22+00:00",
+  "git_head": "a02b5394ba2cde30b72b0afc95e4d31513fcb3ac",
+  "results_file": "evaluation/results/extended-latest.json",
+  "set": "evaluation/extended-questions.jsonl",
+  "set_questions": 12,
+  "engine": "hybrid",
+  "epsilon": 0.02,
+  "gated_metrics": {
+    "citation_coverage@10": 0.9,
+    "hit_rate_topk": 1.0,
+    "mrr_must_cite": 0.8125,
+    "abstention_rate": 1.0
+  },
+  "abstain_threshold": 1.2225,
+  "threshold_note": "Self-calibrated at baseline time: the median top-1 hybrid score of the answerable questions in this run. A no_answer question counts as abstainable when its top-1 score falls below it.",
+  "note": "The gateway eval gate (tools/gateway/gateway/evalgate.py) blocks promotion when the latest extended-latest report shows any gated metric more than epsilon below these values. Moving this baseline is a deliberate act: re-run with --emit-baseline."
+}

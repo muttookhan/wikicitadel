@@ -1,0 +1,45 @@
+{
+  "kind": "usage-weights",
+  "as_of": "2026-10-22",
+  "constants": {
+    "half_life_days": 30.0,
+    "daily_deposit_cap": 3.0,
+    "saturation_k": 10.0,
+    "max_usage_lift": 0.1,
+    "raw_supremum": 131.3483,
+    "lift_supremum": 0.092925
+  },
+  "counts": {
+    "events_total": 0,
+    "events_dated": 0,
+    "events_undated": 0,
+    "deposits_matched": 0,
+    "deposits_unmatched": 0
+  },
+  "pages": [],
+  "edges": [],
+  "sources": {
+    "use-log": {
+      "path": "/home/hatch/workspace/wikicitadel/evaluation/use-log.jsonl",
+      "records": 1,
+      "events": 0,
+      "dated": 0,
+      "undated": 0
+    },
+    "research-log": {
+      "path": "/home/hatch/workspace/wikicitadel/evaluation/research-log.jsonl",
+      "records": 0,
+      "events": 0,
+      "dated": 0,
+      "undated": 0
+    },
+    "ask-traces": {
+      "path": "0 trace file(s)",
+      "records": 0,
+      "events": 0,
+      "dated": 0,
+      "undated": 0,
+      "files": 0
+    }
+  }
+}

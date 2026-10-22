@@ -5,6 +5,7 @@ injection defences.
 
     python3 scripts/wiki_clip.py clip <url>
         [--sensitivity <class>] [--title "..."] [--timeout 30]
+        [--scrape-profile NAME] [--scrape-items] [--single-file]
     python3 scripts/wiki_clip.py clip --file <path>
         [--sensitivity <class>] [--title "..."]
     python3 scripts/wiki_clip.py clip --feed <url-or-file>
@@ -89,6 +90,102 @@ suggested_filing in its sidecar — destination suggestions
 from scripts/wiki_suggest_filing.py (DEVONthink Classify,
 Tier A half): suggestions only, never a filing.
 
+SNAPSHOT BY DEFAULT (implementation wave W1.10, 2026-10-22):
+every finished URL clip also carries a per-source snapshot
+bundle (scripts/wiki_snapshot.py, the ArchiveBox pattern —
+local bundle only, never uploaded anywhere), built from the
+bytes this clip already fetched: no second fetch is made.
+The bundle lives under a snapshots/ directory beside the
+preserved source, so it inherits the clip's custody exactly
+(raw/captures/web/ with a class, staging/captures/ without).
+--no-snapshot opts out at the door. The clip record (the
+sidecar's clip / capture block) always names the snapshot
+state — bundled (bundle path + manifest hash), opted-out, or
+failed (the error named) — never a silent absence; and a
+snapshot failure never loses the clip: the bundle is attached
+after the clip has landed, and its failure is recorded, not
+raised. Local-file, PDF and feed clips fetch no web source
+and carry no bundle.
+
+CLIP-TIME FEED DISCOVERY (implementation wave W4, 2026-10-22;
+the lemon24/reader pattern, via the Round 13 filing): a URL
+clip of an HTML page also records, in the sidecar's clip
+block, the feeds the page itself advertises (<link
+rel="alternate" type="application/rss+xml | atom+xml">) —
+read from the bytes this clip already fetched, never by
+fetching anything more, and recorded as
+discovered-not-subscribed: discovery happens only at the
+moment of a human clip (the Gap-9 boundary) and subscribes
+nothing. The list-exchange half of that filing is
+scripts/wiki_opml.py.
+
+PER-SOURCE-TYPE CLIP TEMPLATES (implementation wave W4,
+2026-10-22): beside the URL-pattern extraction profile above,
+a finished document clip is composed by a template chosen by
+the source's TYPE (scripts/wiki_source_templates.py —
+article / paper / video / forum / documentation / generic):
+the type is detected from the fetched bytes + URL with the
+evidence recorded in the sidecar's clip block
+(source_template), an explicit --template overrides
+detection, and an undetectable source falls back to the
+generic template, named as a fallback. The generic template
+IS the current behaviour — it shapes nothing and adds no
+frontmatter, so a generic clip's draft is byte-identical
+to this path without the layer. Templates shape the
+converted body and lift page metadata to frontmatter; they
+run only AFTER the converter's injection gate, and the one
+lifted-text step (the video description lead) goes back
+through the converter's own sanitiser. The sidecar records
+the template, how it was chosen, the metadata lifted, and
+the template's fidelity notes (what it moved, kept, or
+could not find).
+
+SCRAPE PROFILES + FIT-MARKDOWN (implementation wave W4,
+2026-10-22): a third seam onto the same path, from
+scripts/wiki_scrape_profiles.py — profiles held as DATA in
+templates/scrape-profiles.json (FreshRSS's XPath-scraping
+pattern and crawl4ai's fit-Markdown pruning, both clean
+re-implementations, ideas only). For an HTML clip the chosen
+profile (explicit --scrape-profile, else URL pattern, else
+page shape, else the built-in generic fallback — stated,
+never silent) may strip / keep / density-prune the CONVERSION
+COPY after the TA4 profile has run; the preserved source
+stays the fetched bytes verbatim, every removal is recorded
+in the sidecar's clip block as `scrape_profile` with its
+fidelity record, and the fitted copy still runs through the
+converter's injection gate — a profile can never weaken the
+gate or mark content trusted (its vocabulary has no such
+key). With --scrape-items, a profile's items schema extracts
+feed-shaped items from a feedless listing page and each item
+is staged as its own capture through exactly the feed path's
+defences; an extraction with no items is a door failure. A
+clip with no matching profile runs the generic profile,
+which changes nothing: its draft and preserved source are
+byte-identical to this path without the layer (the sidecar
+gains the scrape_profile record in all document cases, so a
+byte-identical sidecar is impossible by construction — the
+source-template precedent).
+
+SINGLE-FILE HTML VIEW (implementation wave W4, 2026-10-22;
+--single-file, URL document clips only): beside the Markdown
+draft and the snapshot bundle, a clip may also carry ONE
+self-contained HTML file (scripts/wiki_singlefile.py — the
+SingleFile pattern, clean re-implementation): the fetched
+page with the assets its own snapshot bundle holds inlined
+as data URIs under named caps, active content stripped and
+counted. It is a DERIVED VIEW — the preserved source and
+the bundle's original stay byte-verbatim — and a pure
+preservation transform: it inlines only bytes the capture
+already holds, names every reference it could not inline in
+the sidecar's clip block (`single_file`: inlined /
+capped-out / total-cap-skipped / not-held / held-not-
+inlined, with the sanitisation counts), and fetches
+NOTHING. A single-file failure never loses the clip (the
+snapshot discipline: recorded, not raised). Without the
+flag the layer has zero footprint — no record, no file —
+so a default clip is byte-identical to this path without
+it.
+
 TESTABILITY: the network fetcher is a seam. clip_url() takes a
 `fetcher` callable — fetcher(url) returns bytes or a FetchResult
 — and main() takes one too; the default fetcher is the only code
@@ -101,6 +198,7 @@ import argparse
 import hashlib
 import html as _html
 import json
+import mimetypes
 import re
 import sys
 import tempfile
@@ -109,15 +207,19 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import wiki_convert as wc  # noqa: E402  (the pipeline being reused)
+import wiki_scrape_profiles as wsp  # noqa: E402  (W4: scrape profiles + fit)
 import wiki_clip_templates as wct  # noqa: E402  (TA4: URL-pattern templates)
+import wiki_source_templates as wst  # noqa: E402  (W4: source-TYPE templates)
 import wiki_site_rules as wsr  # noqa: E402  (TA4: per-site extraction rules)
 import wiki_suggest_filing as wsf  # noqa: E402  (TA4: suggested filing)
 import wiki_url_normalise as wun  # noqa: E402  (R7 BA: tracking-strip at capture)
+import wiki_snapshot as wsnap  # noqa: E402  (R3 TB5: snapshot bundles)
+import wiki_singlefile as wsg  # noqa: E402  (W4: single-file HTML view)
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -309,7 +411,8 @@ def _write_all(preserved, data, sidecar, sidecar_obj,
 
 def _draft_text(title, kind, provenance, source_rel, sidecar_rel,
                 sensitivity, trust_tier, verdict, findings,
-                body_md, media_info, now, preview=False):
+                body_md, media_info, now, preview=False,
+                extra_frontmatter=None):
     lines = [
         "---",
         'title: "%s"' % title.replace('"', "'"),
@@ -337,6 +440,12 @@ def _draft_text(title, kind, provenance, source_rel, sidecar_rel,
             "# %s" % _SENSITIVITY_QUESTION,
             "sensitivity: TODO",
         ]
+    if extra_frontmatter:
+        # W4 source-type template: metadata the template
+        # lifted from the source's own page metadata. Empty
+        # for the generic template — one half of its
+        # byte-identity with the pre-template clip path.
+        lines += list(extra_frontmatter)
     lines += [
         "trust_tier: %s" % trust_tier,
         "sanitiser_verdict: %s" % verdict,
@@ -456,6 +565,205 @@ def _suggested_filing(root, title):
         return []
 
 
+def _snapshot_for_clip(root, res, url, data, content_type, now,
+                       enabled):
+    """Attach the per-source snapshot bundle record to a
+    FINISHED clip (W1.10: snapshot by default on the clip
+    path). Runs only after the clip has landed, so a door
+    failure still writes nothing and a snapshot failure never
+    loses the clip — it is recorded as a named state in the
+    clip record (the sidecar's clip / capture block) and in
+    the returned result. The bundle is built from the bytes
+    this clip already fetched via wiki_snapshot's injectable
+    fetcher: no second network fetch is made, and the bundle
+    is local only — wiki_snapshot never uploads anywhere.
+    The bundle directory sits beside the preserved source
+    (a snapshots/ sibling), inheriting the clip's custody:
+    raw/captures/web/ with a sensitivity class,
+    staging/captures/ without one."""
+    if not enabled:
+        record = {
+            "state": "opted-out",
+            "note": "no snapshot bundle was made: --no-snapshot "
+                    "was given at the clip door",
+        }
+    else:
+        headers = {}
+        if content_type:
+            headers["Content-Type"] = content_type
+
+        def _fetcher(_url, _data=data, _headers=headers):
+            return _data, dict(_headers)
+
+        out_dir = root / Path(res["preserved"]).parent / "snapshots"
+        try:
+            slug = wsnap.slugify(url)
+            manifest_path = out_dir / slug / "manifest.json"
+            if manifest_path.exists():
+                # A bundle for this source already stands. The
+                # raw layer is never silently overwritten: when
+                # the standing bundle records DIFFERENT bytes, a
+                # hash-suffixed sibling keeps both (the same
+                # discipline _plan_writes applies to preserved
+                # sources).
+                try:
+                    old = json.loads(manifest_path.read_text(
+                        encoding="utf-8"))
+                except (OSError, ValueError):
+                    old = {}
+                if old.get("sha256") and \
+                        old["sha256"] != wsnap.sha256_bytes(data):
+                    out_dir = out_dir / (
+                        "%s-%s" % (slug,
+                                   wsnap.sha256_bytes(data)[:8]))
+            dest, manifest = wsnap.bundle(
+                url, out_dir, _fetcher, fetched_at=now.isoformat())
+            record = {
+                "state": "bundled",
+                "bundle": _rel(root, dest),
+                "manifest_sha256": manifest["sha256"],
+                "size": manifest["size"],
+                "tool": "wiki_snapshot.py",
+            }
+        except Exception as exc:  # never lose the clip over this
+            record = {
+                "state": "failed",
+                "error": "%s: %s" % (type(exc).__name__, exc),
+            }
+    try:
+        sidecar_path = root / res["sidecar"]
+        obj = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        if "clip" in obj:
+            obj["clip"]["snapshot"] = record
+        elif "capture" in obj:
+            obj["capture"]["snapshot"] = record
+        sidecar_path.write_text(
+            json.dumps(obj, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8")
+    except (OSError, ValueError) as exc:
+        # The clip stands; the state still rides out on the
+        # result (and the CLI print) rather than vanishing.
+        record = dict(record)
+        record["record_error"] = (
+            "snapshot state could not be written to the "
+            "sidecar: %s" % exc)
+    res["snapshot"] = record
+    return record
+
+
+# ----------------------------------------------------------------
+# Single-file HTML view (implementation wave W4, 2026-10-22)
+# ----------------------------------------------------------------
+
+_SNAPSHOT_CORE_FILES = ("original.bin", "headers.json",
+                        "manifest.json")
+
+
+def _held_assets_for_clip(root, res, origin):
+    """The assets a clip's capture already holds, for the
+    single-file view: the files in the clip's snapshot
+    bundle directory BESIDE the bundle's verified core
+    (original.bin / headers.json / manifest.json), keyed by
+    the absolute URL each filename resolves to against the
+    page URL. Nothing is fetched and nothing outside the
+    bundle directory is read — the bundle is the capture's
+    asset set, by definition of this lane. Returns
+    (held, held_source_description)."""
+    snap = res.get("snapshot") or {}
+    if snap.get("state") != "bundled":
+        return {}, ("no snapshot bundle (%s) — no held "
+                    "assets; every reference stays a "
+                    "reference" % snap.get("state", "absent"))
+    bundle_dir = root / snap["bundle"]
+    held = {}
+    try:
+        entries = sorted(bundle_dir.iterdir())
+    except OSError:
+        entries = []
+    for f in entries:
+        if not f.is_file() or f.name in _SNAPSHOT_CORE_FILES \
+                or f.name.endswith(".single.html"):
+            continue
+        try:
+            data = f.read_bytes()
+        except OSError:
+            continue
+        held[urljoin(origin, f.name)] = (
+            data, mimetypes.guess_type(f.name)[0])
+    return held, ("snapshot bundle %s (%d held asset "
+                  "file(s))" % (snap["bundle"], len(held)))
+
+
+def _single_file_for_clip(root, res, data, origin, enabled,
+                          suffix):
+    """Build the single-file HTML view for a FINISHED URL
+    document clip (W4, --single-file). Runs after the clip
+    and its snapshot bundle have landed, like the snapshot
+    attach itself: a failure is recorded in the sidecar's
+    clip block, never raised, and never loses the clip.
+    Without the flag the layer has zero footprint (no
+    record, no file) — the default path is byte-identical
+    to this path without the layer. For a non-HTML document
+    the flag records itself as not-applicable, stated, in
+    the same block."""
+    if not enabled:
+        return None
+    if suffix not in (".html", ".htm"):
+        record = {
+            "state": "not-applicable",
+            "note": "the single-file view is built from an "
+                    "HTML page; this clip's payload is %s — "
+                    "nothing was built" % suffix,
+        }
+    else:
+        try:
+            held, held_source = _held_assets_for_clip(
+                root, res, origin)
+            out, record = wsg.build_single_file(
+                data, origin, held)
+            record["state"] = "built"
+            record["held_source"] = held_source
+            record["held_files"] = sorted(
+                Path(urlparse(u).path).name for u in held)
+            preserved = root / res["preserved"]
+            stem = Path(res["preserved"]).stem
+            dest = preserved.parent / (stem + ".single.html")
+            if dest.exists() and dest.read_bytes() != out:
+                # Same discipline as the snapshot attach: a
+                # standing artefact is never silently
+                # overwritten — a hash-suffixed sibling
+                # (content-derived, so re-clips of the same
+                # bytes land on the same name) keeps both.
+                dest = preserved.parent / (
+                    "%s-%s.single.html"
+                    % (stem, record["sha256"][:8]))
+            dest.write_bytes(out)
+            record["file"] = _rel(root, dest)
+        except Exception as exc:  # never lose the clip
+            record = {
+                "state": "failed",
+                "error": "%s: %s" % (type(exc).__name__, exc),
+            }
+    try:
+        sidecar_path = root / res["sidecar"]
+        obj = json.loads(sidecar_path.read_text(
+            encoding="utf-8"))
+        if "clip" in obj:
+            obj["clip"]["single_file"] = record
+        elif "capture" in obj:
+            obj["capture"]["single_file"] = record
+        sidecar_path.write_text(
+            json.dumps(obj, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8")
+    except (OSError, ValueError) as exc:
+        record = dict(record)
+        record["record_error"] = (
+            "single-file state could not be written to the "
+            "sidecar: %s" % exc)
+    res["single_file"] = record
+    return record
+
+
 def _finish_media(root, source_ref, data, suffix, sensitivity,
                   title, kind, now, preview=False):
     base = "%s-%s" % (now.strftime("%Y-%m-%d"), slugify(title))
@@ -491,7 +799,7 @@ def _finish_media(root, source_ref, data, suffix, sensitivity,
 def _finish_document(root, source_ref, data, md, report,
                      sensitivity, title, kind, now,
                      clip_extra=None, base_stem=None,
-                     preview=False):
+                     preview=False, draft_frontmatter=None):
     base = base_stem or ("%s-%s" % (now.strftime("%Y-%m-%d"),
                                     slugify(title)))
     suffix = clip_extra.pop("suffix") if clip_extra else ".md"
@@ -508,7 +816,8 @@ def _finish_document(root, source_ref, data, md, report,
         title, kind, source_ref, preserved_rel,
         _rel(root, sidecar), sensitivity, report.get("trust_tier"),
         scan.get("verdict"), scan.get("findings") or [],
-        md, None, now, preview=preview)
+        md, None, now, preview=preview,
+        extra_frontmatter=draft_frontmatter)
     _write_all(preserved, data, sidecar, sidecar_obj, draft,
                draft_text_)
     return {
@@ -524,6 +833,45 @@ def _finish_document(root, source_ref, data, md, report,
         "findings": scan.get("findings") or [],
         "format": report.get("format"),
     }
+
+
+# ----------------------------------------------------------------
+# Source-type template composition (implementation wave W4)
+# ----------------------------------------------------------------
+
+def _check_source_template(name):
+    """An explicit --template is validated at the door, before
+    any fetch or read: an unknown name is a refusal, never a
+    silent generic."""
+    try:
+        wst.validate_name(name)
+    except wst.SourceTemplateError as exc:
+        raise ClipError(str(exc)) from exc
+
+
+def _compose_source_template(md, explicit, data, url,
+                             content_type):
+    """Resolve the source-type template for a converted clip
+    and compose its body. Runs strictly AFTER the converter's
+    injection gate (the md arrived through convert_with_report)
+    and returns (md, record, frontmatter_lines): the record
+    rides in the sidecar's clip block as `source_template`
+    (template, how it was chosen, evidence, metadata lifted,
+    fidelity notes); the frontmatter lines ride into the
+    draft. The sanitiser is handed to the template layer as
+    the gate for its one lifted-text step."""
+    record = wst.resolve(explicit, data, url=url,
+                         content_type=content_type)
+    name = record["name"]
+    metadata = wst.extract_metadata(data, name) \
+        if name != "generic" else {}
+    gate = wc._SANITIZE.clean_text if wc._SANITIZE else None
+    md, notes = wst.shape_body(md, name, metadata, data=data,
+                               gate_clean=gate)
+    record = dict(record)
+    record["metadata"] = metadata
+    record["fidelity"] = notes
+    return md, record, wst.frontmatter_lines(name, metadata)
 
 
 # ----------------------------------------------------------------
@@ -580,13 +928,148 @@ def _apply_extraction_profile(data, url, root):
     return new_text.encode("utf-8"), template, rule, applied
 
 
+def _check_scrape_profile(name, root, need_items=False):
+    """An explicit --scrape-profile is validated at the door,
+    before any fetch: an unknown name (or, for --scrape-items,
+    a profile with no items schema) is a refusal, never a
+    silent generic. A malformed profiles file is likewise a
+    loud door error when a profile was explicitly asked for."""
+    if name is None:
+        return
+    try:
+        profiles = wsp.load_profiles(root)
+    except wsp.ProfileError as exc:
+        raise ClipError(str(exc)) from exc
+    profile = wsp.get_profile(profiles, name)
+    if profile is None:
+        raise ClipError(
+            "unknown scrape profile %r — "
+            "scripts/wiki_scrape_profiles.py list shows the "
+            "profiles on file" % name)
+    if need_items and not profile.get("items"):
+        raise ClipError(
+            "scrape profile %r declares no items schema — "
+            "--scrape-items needs a profile with one" % name)
+
+
+def _apply_scrape_profile(text, url, root, explicit):
+    """W4: select the scrape profile for an HTML clip and fit
+    the conversion copy under it. Returns (profile, record,
+    new_text): the record rides in the sidecar's clip block as
+    `scrape_profile` (name, how it was chosen, the fidelity
+    record). A profiles file that fails to load applies
+    NOTHING and the refusal is recorded in the record itself
+    (the TA4 site-rules precedent) — unless a profile was
+    explicitly named, which _check_scrape_profile already
+    refused at the door."""
+    try:
+        profiles = wsp.load_profiles(root)
+    except wsp.ProfileError as exc:
+        return None, {
+            "name": explicit, "selection": "unavailable",
+            "error": str(exc),
+            "note": "the scrape profiles file is invalid; no "
+                    "profile was applied — "
+                    "wiki_scrape_profiles.py check names the "
+                    "defect",
+        }, text
+    profile, selection = wsp.select_profile(
+        url, text, profiles, explicit=explicit)
+    new_text, fidelity = wsp.fit_markdown(text, profile)
+    record = {"name": profile["name"], "selection": selection,
+              "fit": fidelity}
+    return profile, record, new_text
+
+
+def _finish_scrape_items(root, url, origin, data, profile,
+                         record, sensitivity, now, preview=False):
+    """Stage each item a scrape profile extracts from a
+    feedless listing page as its own capture (W4): the feed
+    path's two-phase discipline — every item is converted
+    through the converter's defences BEFORE anything is
+    written, so a bad item fails the whole clip with nothing
+    staged. The preserved source per item is the item's own
+    small HTML page (the feed precedent); the listing page's
+    URL and the full extraction record ride in each item's
+    clip block."""
+    text = data.decode("utf-8", errors="replace")
+    items, extraction = wsp.extract_items(text, profile,
+                                          base_url=origin)
+    record = dict(record)
+    record["items"] = extraction
+    if not items:
+        raise ClipError(
+            "door failure: scrape profile %r extracted no "
+            "items from %s (found %d item element(s), %d "
+            "skipped) — refusing to stage an empty capture"
+            % (profile["name"], url, extraction["found"],
+               len(extraction["skipped"])))
+    prepared = []
+    for idx, item in enumerate(items, start=1):
+        title = item.get("title") or "scrape-item-%d" % idx
+        raw = _item_html({
+            "title": title,
+            "link": item.get("link") or "",
+            "body": item.get("body") or item.get("summary") or "",
+        })
+        md, report = _convert_temp(raw, ".html", sensitivity)
+        stem = "%s-%s-%02d" % (now.strftime("%Y-%m-%d"),
+                               slugify(title), idx)
+        draft = root / (PREVIEW_DIR if preview else STAGING_DIR) \
+            / (stem + "-capture.md")
+        if draft.exists():
+            raise ClipError(
+                "capture draft already exists: %s — refusing "
+                "to overwrite a staged draft" % draft)
+        prepared.append((item, title, raw, md, report, stem))
+    results = []
+    for item, title, raw, md, report, stem in prepared:
+        extra = {
+            "suffix": ".html",
+            "tool": "wiki_clip.py", "kind": "scrape-clip",
+            "url": origin, "item_link": item.get("link"),
+            "captured": now.strftime("%Y-%m-%d %H:%M %Z"),
+            "scrape_profile": record, "scrape_item": item,
+        }
+        results.append(_finish_document(
+            root, item.get("link") or origin, raw, md, report,
+            sensitivity, title, "scrape-clip", now,
+            clip_extra=extra, base_stem=stem, preview=preview))
+    return {"kind": "scrape-clip", "source": url,
+            "count": len(results), "items": results,
+            "scrape_profile": record}
+
+
 def clip_url(url, sensitivity=None, title=None, root=ROOT,
              fetcher=None, now=None, timeout=DEFAULT_TIMEOUT,
-             preview=False):
+             preview=False, snapshot=True, source_template=None,
+             scrape_profile=None, scrape_items=False,
+             single_file=False):
     """Clip one URL. `fetcher` is the injectable network seam:
     fetcher(url) -> bytes | FetchResult. A fetch failure raises
-    ClipError before anything is written."""
+    ClipError before anything is written. `snapshot` (default
+    True, W1.10) attaches a wiki_snapshot bundle built from the
+    fetched bytes; snapshot=False is the recorded opt-out.
+    `source_template` (W4) is an explicit source-type template
+    name overriding detection; None means detect, with the
+    generic fallback stated in the record. `scrape_profile`
+    (W4) is an explicit scrape profile name validated at the
+    door; None means select by URL pattern / page shape with
+    the generic fallback stated. `scrape_items` (W4, needs an
+    explicit scrape_profile with an items schema) stages each
+    extracted item as its own capture instead of the page.
+    `single_file` (W4) additionally builds the single-file
+    HTML view from the fetched bytes + the assets the clip's
+    snapshot bundle holds (wiki_singlefile.py); False (the
+    default) leaves no trace of the layer at all."""
     _check_sensitivity(sensitivity)
+    _check_source_template(source_template)
+    _check_scrape_profile(scrape_profile, root,
+                          need_items=scrape_items)
+    if scrape_items and not scrape_profile:
+        raise ClipError("--scrape-items needs an explicit "
+                        "--scrape-profile naming the item "
+                        "schema to extract with")
     if not re.match(r"^https?://", url or "", re.I):
         raise ClipError("a clip needs an http(s) URL, got %r" % url)
     now = now or datetime.now().astimezone()
@@ -617,21 +1100,76 @@ def clip_url(url, sensitivity=None, title=None, root=ROOT,
     _norm_origin, _orig_origin, _origin_changes = wun.normalise_url(
         result.final_url or url)
     origin = _norm_origin
+    if single_file and suffix in MEDIA_EXTS:
+        # W4: the single-file view is a view of an HTML
+        # document; a media capture is preserved as-is and
+        # has no page to derive one from — a door failure,
+        # stated before anything is written.
+        raise ClipError(
+            "door failure: --single-file builds a view of "
+            "an HTML document clip; %s is a media capture, "
+            "preserved as-is" % url)
+    if scrape_items:
+        # W4: items mode stages the profile's extracted items,
+        # not the page; anything but an HTML page is a door
+        # failure (stated before the media branch can claim
+        # the suffix).
+        if suffix not in (".html", ".htm"):
+            raise ClipError(
+                "door failure: --scrape-items needs an HTML "
+                "page, got suffix %r" % suffix)
+        profile = wsp.get_profile(wsp.load_profiles(root),
+                                  scrape_profile)
+        rec = {"name": profile["name"], "selection": "explicit",
+               "fit": None}
+        return _finish_scrape_items(
+            root, url, origin, data, profile, rec, sensitivity,
+            now, preview=preview)
     if suffix in MEDIA_EXTS:
-        return _finish_media(
+        res = _finish_media(
             root, origin, data, suffix, sensitivity,
             title or _title_from_html("", slugify(
                 Path(urlparse(url).path).stem or url)),
             "web-clip", now, preview=preview)
+        _snapshot_for_clip(root, res, origin, data,
+                           result.content_type, now, snapshot)
+        return res
     template = rule = applied = None
     convert_data = data
+    scrape_rec = None
     if suffix in (".html", ".htm"):
         # The profile rewrites only the CONVERTED text; the
         # preserved source below stays the fetched bytes,
         # verbatim (the clip path's standing rule).
         convert_data, template, rule, applied = \
             _apply_extraction_profile(data, origin, root)
+        # W4 scrape-profile layer, after the TA4 profile: it
+        # fits the same conversion copy and records itself in
+        # the sidecar's clip block (scrape_profile). Under the
+        # generic fallback it changes nothing.
+        _sp, scrape_rec, fitted_text = _apply_scrape_profile(
+            convert_data.decode("utf-8", errors="replace"),
+            origin, root, scrape_profile)
+        convert_data = fitted_text.encode("utf-8")
+    else:
+        # Document clips that are not HTML still carry the
+        # record (the source-template precedent): the layer
+        # states itself as not applied.
+        scrape_rec = {
+            "name": scrape_profile or "generic",
+            "selection": "explicit" if scrape_profile
+            else "generic-fallback",
+            "fit": None,
+            "note": "non-HTML payload — scrape profiles fit "
+                    "HTML pages only; nothing was applied",
+        }
     md, report = _convert_temp(convert_data, suffix, sensitivity)
+    # W4 source-type composition: detection reads the
+    # verbatim fetched bytes + the final URL (the same bytes
+    # feed discovery reads), never the profile-rewritten
+    # conversion copy.
+    md, st_record, st_front = _compose_source_template(
+        md, source_template, data, origin, result.content_type)
     if not title:
         title = (applied or {}).get("title") or _title_from_html(
             convert_data.decode("utf-8", errors="replace")
@@ -655,16 +1193,43 @@ def clip_url(url, sensitivity=None, title=None, root=ROOT,
             "site_rule_domain": rule.get("domain") if rule else None,
             "extraction": applied,
         }
-    return _finish_document(root, origin, data, md, report,
-                            sensitivity, title, "web-clip", now,
-                            clip_extra=extra, preview=preview)
+    extra["scrape_profile"] = scrape_rec
+    extra["source_template"] = st_record
+    if suffix in (".html", ".htm"):
+        # Clip-time feed discovery (W4): read from the fetched
+        # bytes (data, verbatim — not the profile-rewritten
+        # conversion copy); discovery records in the clip
+        # block, never subscribes (Gap-9).
+        extra["feeds_discovered"] = discover_feeds(data, origin)
+    res = _finish_document(root, origin, data, md, report,
+                           sensitivity, title, "web-clip", now,
+                           clip_extra=extra, preview=preview,
+                           draft_frontmatter=st_front)
+    res["scrape_profile"] = scrape_rec
+    res["source_template"] = st_record
+    if "feeds_discovered" in extra:
+        res["feeds_discovered"] = extra["feeds_discovered"]
+    _snapshot_for_clip(root, res, origin, data,
+                       result.content_type, now, snapshot)
+    # W4: the single-file view builds from the verbatim
+    # fetched bytes + the bundle the snapshot attach just
+    # made — after both have landed, so its failure (recorded,
+    # never raised) cannot lose either.
+    _single_file_for_clip(root, res, data, origin,
+                          single_file, suffix)
+    return res
 
 
 def clip_file(path, sensitivity=None, title=None, root=ROOT,
-              now=None, kind="file-clip", preview=False):
+              now=None, kind="file-clip", preview=False,
+              source_template=None):
     """Clip one local file: documents through the converter,
-    media preserved as-is. The original file is never modified."""
+    media preserved as-is. The original file is never modified.
+    `source_template` (W4) is as in clip_url; detection for a
+    local file reads its bytes, plus the URL inside a .url
+    file (the YouTube route's input)."""
     _check_sensitivity(sensitivity)
+    _check_source_template(source_template)
     now = now or datetime.now().astimezone()
     root = Path(root)
     src = Path(path)
@@ -690,20 +1255,33 @@ def clip_file(path, sensitivity=None, title=None, root=ROOT,
     if not title and suffix in (".html", ".htm"):
         title = _title_from_html(
             data.decode("utf-8", errors="replace"), src.stem)
+    detect_url = None
+    if suffix == ".url":
+        m = re.search(r"^URL=(.+)$",
+                      data.decode("utf-8", errors="replace"),
+                      re.M)
+        if m:
+            detect_url = m.group(1).strip()
+    md, st_record, st_front = _compose_source_template(
+        md, source_template, data, detect_url, None)
     extra = {
         "suffix": suffix or ".bin",
         "tool": "wiki_clip.py", "kind": kind,
         "source_file": str(src),
         "captured": now.strftime("%Y-%m-%d %H:%M %Z"),
+        "source_template": st_record,
     }
-    return _finish_document(root, str(src), data, md, report,
-                            sensitivity, title or src.stem,
-                            kind, now, clip_extra=extra,
-                            preview=preview)
+    res = _finish_document(root, str(src), data, md, report,
+                           sensitivity, title or src.stem,
+                           kind, now, clip_extra=extra,
+                           preview=preview,
+                           draft_frontmatter=st_front)
+    res["source_template"] = st_record
+    return res
 
 
 def clip_pdf(path, sensitivity=None, title=None, root=ROOT,
-             now=None, preview=False):
+             now=None, preview=False, source_template=None):
     """Clip one local PDF, explicitly: the file must carry a
     .pdf suffix, and it is staged through the SAME converter
     route clip_file uses (wiki_convert.convert_with_report —
@@ -716,7 +1294,58 @@ def clip_pdf(path, sensitivity=None, title=None, root=ROOT,
                         "got %s" % src)
     return clip_file(src, sensitivity=sensitivity, title=title,
                      root=root, now=now, kind="pdf-clip",
-                     preview=preview)
+                     preview=preview,
+                     source_template=source_template)
+
+
+# ----------------------------------------------------------------
+# Clip-time feed discovery (implementation wave W4, 2026-10-22)
+# ----------------------------------------------------------------
+
+FEED_LINK_TYPES = ("application/rss+xml", "application/atom+xml")
+_LINK_TAG_RE = re.compile(r"<link\b[^>]*>", re.I | re.S)
+_TAG_ATTR_RE = re.compile(
+    r"([\w:-]+)\s*=\s*(?:\"([^\"]*)\"|'([^']*)'|([^\s\"'>]+))")
+
+
+def _tag_attrs(tag):
+    attrs = {}
+    for m in _TAG_ATTR_RE.finditer(tag):
+        val = next(g for g in m.groups()[1:] if g is not None)
+        attrs[m.group(1).lower()] = _html.unescape(val)
+    return attrs
+
+
+def discover_feeds(data, base_url):
+    """The feeds an HTML page advertises about itself: <link
+    rel="alternate" type="application/rss+xml | atom+xml">.
+    Reads ONLY the bytes the clip already fetched — no feed is
+    fetched, nothing is subscribed; each hit is recorded with
+    state "discovered-not-subscribed" (Gap-9: discovery at the
+    moment of a human clip only). Relative hrefs resolve
+    against the page's final URL; duplicates collapse, first
+    sighting wins. Returns [{url, type, title, state}]."""
+    if isinstance(data, bytes):
+        text = data.decode("utf-8", errors="replace")
+    else:
+        text = data or ""
+    found, seen = [], set()
+    for m in _LINK_TAG_RE.finditer(text):
+        attrs = _tag_attrs(m.group(0))
+        rel = (attrs.get("rel") or "").lower().split()
+        ftype = (attrs.get("type") or "").strip().lower()
+        href = (attrs.get("href") or "").strip()
+        if "alternate" not in rel or ftype not in FEED_LINK_TYPES \
+                or not href:
+            continue
+        url = urljoin(base_url, href)
+        if url in seen:
+            continue
+        seen.add(url)
+        found.append({"url": url, "type": ftype,
+                      "title": attrs.get("title") or None,
+                      "state": "discovered-not-subscribed"})
+    return found
 
 
 # ----------------------------------------------------------------
@@ -893,6 +1522,21 @@ def _print_result(res):
         print("  finding: %s%s"
               % (f.get("kind", "?"),
                  (": " + str(detail)) if detail else ""))
+    sp = res.get("scrape_profile")
+    if sp:
+        print("scrape profile: %s (selection: %s)"
+              % (sp.get("name"), sp.get("selection")))
+        fit = sp.get("fit") or {}
+        if fit.get("pruned_counts"):
+            print("  fit pruning: %s"
+                  % ", ".join("%s ×%d" % (k, v) for k, v in
+                              sorted(fit["pruned_counts"].items())))
+    st = res.get("source_template")
+    if st:
+        print("source template: %s (selection: %s)"
+              % (st["name"], st["selection"]))
+        for note in st.get("fidelity") or []:
+            print("  template note: %s" % note)
     if res.get("suggested_filing"):
         print("suggested filing (suggestion only — nothing was "
               "filed by it):")
@@ -900,6 +1544,36 @@ def _print_result(res):
             print("  %s (score %s; matched: %s)"
                   % (s["page"], s["score"],
                      ", ".join(s["matched_terms"])))
+    for f in res.get("feeds_discovered") or []:
+        print("feed discovered at clip time (recorded in the "
+              "sidecar, NOT subscribed): %s (%s)"
+              % (f["url"], f["type"]))
+    snap = res.get("snapshot")
+    if snap:
+        if snap["state"] == "bundled":
+            print("snapshot bundle: %s" % snap["bundle"])
+        elif snap["state"] == "opted-out":
+            print("snapshot bundle: opted out at the door "
+                  "(recorded in the sidecar)")
+        else:
+            print("snapshot bundle: FAILED (%s) — the clip "
+                  "stands; the failure is recorded in the "
+                  "sidecar" % snap.get("error"))
+    sf = res.get("single_file")
+    if sf:
+        if sf["state"] == "built":
+            print("single-file view: %s (%d asset(s) inlined, "
+                  "%d not held, %d capped out — full record "
+                  "in the sidecar)"
+                  % (sf["file"], len(sf["inlined"]),
+                     len(sf["not_held"]), len(sf["capped_out"])))
+        elif sf["state"] == "not-applicable":
+            print("single-file view: not applicable — %s"
+                  % sf["note"])
+        else:
+            print("single-file view: FAILED (%s) — the clip "
+                  "stands; the failure is recorded in the "
+                  "sidecar" % sf.get("error"))
     if res.get("preview"):
         print("PREVIEW checkpoint: this draft is UNFILED in "
               "staging/previews/ — edit it there, then file it "
@@ -941,6 +1615,42 @@ def main(argv=None, fetcher=None, now=None):
                    "raw/captures/web/; without one, everything "
                    "stays in staging/captures/")
     p.add_argument("--title", default=None)
+    p.add_argument("--template", default=None,
+                   metavar="NAME",
+                   help="source-type clip template (W4): one "
+                        "of %s; overrides type detection; "
+                        "without one the type is detected and "
+                        "an undetectable source falls back to "
+                        "generic, stated in the sidecar"
+                        % ", ".join(wst.TEMPLATE_NAMES))
+    p.add_argument("--scrape-profile", default=None,
+                   metavar="NAME",
+                   help="scrape profile (W4) from "
+                        "templates/scrape-profiles.json; "
+                        "validated at the door; without one the "
+                        "profile is selected by URL pattern / "
+                        "page shape with the generic fallback "
+                        "stated in the sidecar")
+    p.add_argument("--scrape-items", action="store_true",
+                   help="with --scrape-profile: extract the "
+                        "profile's items from a feedless "
+                        "listing page and stage each item as "
+                        "its own capture (W4); the page itself "
+                        "is not staged")
+    p.add_argument("--no-snapshot", action="store_true",
+                   help="opt out of the snapshot bundle a URL "
+                   "clip carries by default (W1.10); the "
+                   "opt-out is recorded in the clip's sidecar")
+    p.add_argument("--single-file", action="store_true",
+                   help="also build a single-file HTML view "
+                        "of a URL document clip (W4): the "
+                        "fetched page with the assets its own "
+                        "snapshot bundle holds inlined as "
+                        "data URIs under stated caps, active "
+                        "content stripped and counted in the "
+                        "sidecar; assets the capture does not "
+                        "hold stay references, named in the "
+                        "sidecar; nothing more is fetched")
     p.add_argument("--preview", action="store_true",
                    help="MarkDownload checkpoint (TA4): stage "
                    "the draft as an unfiled PREVIEW in "
@@ -957,6 +1667,19 @@ def main(argv=None, fetcher=None, now=None):
             print("wiki_clip: give a URL, --file, --feed or --pdf, "
                   "not more than one", file=sys.stderr)
             return 2
+        if (args.scrape_profile or args.scrape_items) \
+                and not args.url:
+            print("wiki_clip: --scrape-profile / --scrape-items "
+                  "apply to a URL clip only", file=sys.stderr)
+            return 2
+        if args.single_file and not args.url:
+            print("wiki_clip: --single-file applies to a URL "
+                  "clip only", file=sys.stderr)
+            return 2
+        if args.scrape_items and not args.scrape_profile:
+            print("wiki_clip: --scrape-items needs "
+                  "--scrape-profile NAME", file=sys.stderr)
+            return 2
         if args.feed:
             res = clip_feed(args.feed,
                             sensitivity=args.sensitivity,
@@ -967,17 +1690,24 @@ def main(argv=None, fetcher=None, now=None):
         if args.pdf:
             res = clip_pdf(args.pdf, sensitivity=args.sensitivity,
                            title=args.title, root=root, now=now,
-                           preview=args.preview)
+                           preview=args.preview,
+                           source_template=args.template)
         elif args.file:
             res = clip_file(args.file, sensitivity=args.sensitivity,
                             title=args.title, root=root, now=now,
-                            preview=args.preview)
+                            preview=args.preview,
+                            source_template=args.template)
         elif args.url:
             res = clip_url(args.url, sensitivity=args.sensitivity,
                            title=args.title, root=root,
                            fetcher=fetcher, now=now,
                            timeout=args.timeout,
-                           preview=args.preview)
+                           preview=args.preview,
+                           snapshot=not args.no_snapshot,
+                           source_template=args.template,
+                           scrape_profile=args.scrape_profile,
+                           scrape_items=args.scrape_items,
+                           single_file=args.single_file)
         else:
             print("wiki_clip: a clip needs a URL, --file <path>, "
                   "--feed <url-or-file> or --pdf <file>",
@@ -986,7 +1716,15 @@ def main(argv=None, fetcher=None, now=None):
     except ClipError as exc:
         print("wiki_clip: %s" % exc, file=sys.stderr)
         return 1
-    _print_result(res)
+    if res.get("kind") == "scrape-clip":
+        print("clip: scrape capture — %d item(s) from %s "
+              "(profile %s)"
+              % (res["count"], res["source"],
+                 res["scrape_profile"]["name"]))
+        for item in res["items"]:
+            _print_result(item)
+    else:
+        _print_result(res)
     return 0
 
 
