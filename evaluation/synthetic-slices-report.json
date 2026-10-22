@@ -1,0 +1,1723 @@
+{
+  "kind": "synthetic-slices-report",
+  "version": 1,
+  "row_family": "synthetic-slices",
+  "bias_statement": "SYNTHETIC SLICE — read before citing any figure. These questions were generated deterministically from the corpus's own structure, so the answer is structurally near the question by construction: this slice is EASIER than the hand-written golden/extended sets and its scores must never be pooled with theirs. Its value is regression breadth — breadth the 15-question golden set cannot give — not difficulty. Per-class figures only; the overall synthetic figure is a summary of this slice, not a corpus quality score.",
+  "never_pooled": "These figures are reported ONLY here; they are not inputs to the bakeoff ledger, the meta-benchmark criteria, or any hand-written set's score.",
+  "slice": {
+    "file": "evaluation/synthetic-questions.jsonl",
+    "sha256": "7a2911a60e1843fba305a0bbbc7ce88d80333bb9150f89195adf9948e1f00b88",
+    "questions": 79,
+    "counts": {
+      "claim": 9,
+      "heading": 5,
+      "multihop": 12,
+      "table": 7,
+      "title": 22,
+      "zeromatch": 24
+    },
+    "excluded": {
+      "claim": {},
+      "episodic": {
+        "episodic-ambiguous-two-pages-entitled": 11
+      },
+      "heading": {
+        "heading-no-answerable-sentence": 37,
+        "heading-too-few-content-tokens": 10
+      },
+      "multihop": {
+        "multihop-no-answerable-sentence": 8
+      },
+      "table": {},
+      "title": {
+        "title-covered-by-another-title": 10,
+        "title-too-few-content-tokens": 9
+      },
+      "zeromatch": {
+        "over-cap": 3
+      }
+    }
+  },
+  "config": {
+    "name": "house",
+    "spec": {
+      "engine": "hybrid",
+      "reranker": "coverage",
+      "governance": "on",
+      "expansion": null,
+      "usage": false,
+      "dense_run": null,
+      "note": "the serving defaults: hybrid_rank with the default coverage reranker and the governance artefact loaded (governance=None)"
+    }
+  },
+  "corpus": {
+    "git_head": "e9ee878401eb6198bee9c6418ec22e0699c62beb",
+    "dirty": true,
+    "docs": 43,
+    "scope": "wiki/"
+  },
+  "per_class": {
+    "title": {
+      "questions": 22,
+      "citation_coverage": {
+        "@1": 0.8636,
+        "@3": 0.9091,
+        "@5": 0.9091,
+        "@10": 0.9545
+      },
+      "hit_rate_topk": 0.9545,
+      "mean_precision_at_k": 0.0955,
+      "mrr_must_cite": 0.8853
+    },
+    "heading": {
+      "questions": 5,
+      "citation_coverage": {
+        "@1": 1.0,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.1,
+      "mrr_must_cite": 1.0
+    },
+    "claim": {
+      "questions": 9,
+      "citation_coverage": {
+        "@1": 1.0,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.1,
+      "mrr_must_cite": 1.0
+    },
+    "multihop": {
+      "questions": 12,
+      "citation_coverage": {
+        "@1": 0.5,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.175,
+      "mrr_must_cite": 0.75
+    },
+    "table": {
+      "questions": 7,
+      "citation_coverage": {
+        "@1": 1.0,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mean_precision_at_k": 0.1,
+      "mrr_must_cite": 1.0
+    }
+  },
+  "overall_synthetic": {
+    "questions": 55,
+    "citation_coverage": {
+      "@1": 0.8364,
+      "@3": 0.9636,
+      "@5": 0.9636,
+      "@10": 0.9818
+    },
+    "hit_rate_topk": 0.9818,
+    "mean_precision_at_k": 0.1145,
+    "mrr_must_cite": 0.8996
+  },
+  "zeromatch": {
+    "tau": 1.2225,
+    "tau_source": "evaluation/extended-baseline.json abstain_threshold (the battery's own source)",
+    "n": 24,
+    "would_abstain": 4,
+    "rate": 0.1667,
+    "per_question": [
+      {
+        "id": "SQ-0056",
+        "top1_path": "wiki/concepts/capture-pipeline-extensions.md",
+        "top1_score": 1.2292,
+        "home_page": "wiki/concepts/capture-pipeline-extensions.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0057",
+        "top1_path": "wiki/syntheses/marathon-round-9-2026-10-21.md",
+        "top1_score": 1.115,
+        "home_page": "wiki/concepts/capture-triage-machinery.md",
+        "home_rank": 2,
+        "would_abstain": true
+      },
+      {
+        "id": "SQ-0058",
+        "top1_path": "wiki/concepts/did-webvh.md",
+        "top1_score": 1.25,
+        "home_page": "wiki/concepts/did-webvh.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0059",
+        "top1_path": "wiki/concepts/eval-judging-machinery-r3.md",
+        "top1_score": 1.2292,
+        "home_page": "wiki/concepts/eval-judging-machinery-r3.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0060",
+        "top1_path": "wiki/concepts/memory-and-retrieval-designs.md",
+        "top1_score": 1.195,
+        "home_page": "wiki/concepts/memory-and-retrieval-designs.md",
+        "home_rank": 1,
+        "would_abstain": true
+      },
+      {
+        "id": "SQ-0061",
+        "top1_path": "wiki/concepts/progressive-retrieval.md",
+        "top1_score": 1.2467,
+        "home_page": "wiki/concepts/progressive-retrieval.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0062",
+        "top1_path": "wiki/rules/notices.md",
+        "top1_score": 1.2111,
+        "home_page": "wiki/concepts/standing-approval.md",
+        "home_rank": null,
+        "would_abstain": true
+      },
+      {
+        "id": "SQ-0063",
+        "top1_path": "wiki/rules/curation-workarounds.md",
+        "top1_score": 1.2731,
+        "home_page": "wiki/rules/curation-workarounds.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0064",
+        "top1_path": "wiki/rules/notices.md",
+        "top1_score": 1.245,
+        "home_page": "wiki/rules/evidence-ttl.md",
+        "home_rank": 2,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0065",
+        "top1_path": "wiki/rules/notices.md",
+        "top1_score": 1.2444,
+        "home_page": "wiki/rules/notices.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0066",
+        "top1_path": "wiki/rules/share-publish-cite-ready.md",
+        "top1_score": 1.25,
+        "home_page": "wiki/rules/share-publish-cite-ready.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0067",
+        "top1_path": "wiki/syntheses/marathon-round-9-2026-10-21.md",
+        "top1_score": 1.1278,
+        "home_page": "wiki/sources/founding-note.md",
+        "home_rank": 6,
+        "would_abstain": true
+      },
+      {
+        "id": "SQ-0068",
+        "top1_path": "wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md",
+        "top1_score": 1.6335,
+        "home_page": "wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0069",
+        "top1_path": "wiki/syntheses/marathon-r3-tb7-retrieval.md",
+        "top1_score": 1.2423,
+        "home_page": "wiki/syntheses/marathon-r3-tb7-retrieval.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0070",
+        "top1_path": "wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md",
+        "top1_score": 1.2231,
+        "home_page": "wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0071",
+        "top1_path": "wiki/syntheses/marathon-round-9-2026-10-21.md",
+        "top1_score": 1.5869,
+        "home_page": "wiki/syntheses/marathon-round-10-2026-10-21.md",
+        "home_rank": 10,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0072",
+        "top1_path": "wiki/syntheses/marathon-round-9-2026-10-21.md",
+        "top1_score": 1.5624,
+        "home_page": "wiki/syntheses/marathon-round-11-2026-10-21.md",
+        "home_rank": 2,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0073",
+        "top1_path": "wiki/syntheses/marathon-round-9-2026-10-21.md",
+        "top1_score": 1.5624,
+        "home_page": "wiki/syntheses/marathon-round-12-2026-10-21.md",
+        "home_rank": 3,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0074",
+        "top1_path": "wiki/syntheses/marathon-round-9-2026-10-21.md",
+        "top1_score": 1.5624,
+        "home_page": "wiki/syntheses/marathon-round-13-2026-10-21.md",
+        "home_rank": 2,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0075",
+        "top1_path": "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+        "top1_score": 1.2423,
+        "home_page": "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+        "home_rank": 1,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0076",
+        "top1_path": "wiki/syntheses/marathon-round-9-2026-10-21.md",
+        "top1_score": 1.5869,
+        "home_page": "wiki/syntheses/marathon-round-4-2026-10-21.md",
+        "home_rank": 2,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0077",
+        "top1_path": "wiki/syntheses/marathon-round-9-2026-10-21.md",
+        "top1_score": 1.5869,
+        "home_page": "wiki/syntheses/marathon-round-5-2026-10-21.md",
+        "home_rank": 3,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0078",
+        "top1_path": "wiki/syntheses/marathon-round-9-2026-10-21.md",
+        "top1_score": 1.5869,
+        "home_page": "wiki/syntheses/marathon-round-6-2026-10-21.md",
+        "home_rank": 8,
+        "would_abstain": false
+      },
+      {
+        "id": "SQ-0079",
+        "top1_path": "wiki/syntheses/marathon-round-9-2026-10-21.md",
+        "top1_score": 1.5869,
+        "home_page": "wiki/syntheses/marathon-round-7-2026-10-21.md",
+        "home_rank": 6,
+        "would_abstain": false
+      }
+    ]
+  },
+  "per_question": {
+    "title": [
+      {
+        "id": "SQ-0001",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/concepts/capture-pipeline-extensions.md",
+          "wiki/index.md",
+          "wiki/log.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0001",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/concepts/capture-pipeline-extensions.md",
+            "wiki/index.md",
+            "wiki/log.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0002",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/concepts/capture-triage-machinery.md",
+          "wiki/index.md",
+          "wiki/concepts/capture-pipeline-extensions.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0002",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/concepts/capture-triage-machinery.md",
+            "wiki/index.md",
+            "wiki/concepts/capture-pipeline-extensions.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0003",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/concepts/citation-chain.md",
+          "wiki/syntheses/marathon-round-4-2026-10-21.md",
+          "wiki/concepts/memory-and-retrieval-designs.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0003",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/concepts/citation-chain.md",
+            "wiki/syntheses/marathon-round-4-2026-10-21.md",
+            "wiki/concepts/memory-and-retrieval-designs.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0004",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/concepts/demo-guide-ja.md",
+          "wiki/rules/notices.md",
+          "wiki/concepts/capture-pipeline-extensions.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0004",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/concepts/demo-guide-ja.md",
+            "wiki/rules/notices.md",
+            "wiki/concepts/capture-pipeline-extensions.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0005",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/concepts/demo-guide-ko.md",
+          "wiki/rules/notices.md",
+          "wiki/i18n/ko/overview.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0005",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/concepts/demo-guide-ko.md",
+            "wiki/rules/notices.md",
+            "wiki/i18n/ko/overview.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0006",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/concepts/did-webvh.md",
+          "wiki/index.md",
+          "wiki/syntheses/marathon-round-4-2026-10-21.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0006",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/concepts/did-webvh.md",
+            "wiki/index.md",
+            "wiki/syntheses/marathon-round-4-2026-10-21.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0007",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/concepts/eval-judging-machinery-r3.md",
+          "wiki/index.md",
+          "wiki/log.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0007",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/concepts/eval-judging-machinery-r3.md",
+            "wiki/index.md",
+            "wiki/log.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0008",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/concepts/memory-and-retrieval-designs.md",
+          "wiki/index.md",
+          "wiki/overview.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0008",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/concepts/memory-and-retrieval-designs.md",
+            "wiki/index.md",
+            "wiki/overview.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0009",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/concepts/progressive-retrieval.md",
+          "wiki/index.md",
+          "wiki/log.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0009",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/concepts/progressive-retrieval.md",
+            "wiki/index.md",
+            "wiki/log.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0010",
+        "must_cite_rank": null,
+        "hit_in_topk": false,
+        "must_in_topk": false,
+        "precision_at_k": 0.0,
+        "top3": [
+          "wiki/syntheses/decision-register.md",
+          "wiki/rules/notices.md",
+          "wiki/concepts/capture-pipeline-extensions.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0010",
+          "route": "exact",
+          "must_cite_rank": null,
+          "hit_in_topk": false,
+          "must_in_topk": false,
+          "precision_at_k": 0.0,
+          "top3": [
+            "wiki/syntheses/decision-register.md",
+            "wiki/rules/notices.md",
+            "wiki/concepts/capture-pipeline-extensions.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0011",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/corrections-ledger.md",
+          "wiki/syntheses/marathon-round-9-2026-10-21.md",
+          "wiki/overview.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0011",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/corrections-ledger.md",
+            "wiki/syntheses/marathon-round-9-2026-10-21.md",
+            "wiki/overview.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0012",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/curation-workarounds.md",
+          "wiki/index.md",
+          "wiki/syntheses/marathon-round-13-2026-10-21.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0012",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/curation-workarounds.md",
+            "wiki/index.md",
+            "wiki/syntheses/marathon-round-13-2026-10-21.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0013",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/evidence-ttl.md",
+          "wiki/rules/notices.md",
+          "wiki/index.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0013",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/evidence-ttl.md",
+            "wiki/rules/notices.md",
+            "wiki/index.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0014",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/notices.md",
+          "wiki/overview.md",
+          "wiki/concepts/capture-pipeline-extensions.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0014",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/notices.md",
+            "wiki/overview.md",
+            "wiki/concepts/capture-pipeline-extensions.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0015",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/share-publish-cite-ready.md",
+          "wiki/syntheses/marathon-round-13-2026-10-21.md",
+          "wiki/index.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0015",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/share-publish-cite-ready.md",
+            "wiki/syntheses/marathon-round-13-2026-10-21.md",
+            "wiki/index.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0016",
+        "must_cite_rank": 3,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/overview.md",
+          "wiki/concepts/capture-pipeline-extensions.md",
+          "wiki/sources/founding-note.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0016",
+          "route": "exact",
+          "must_cite_rank": 3,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/overview.md",
+            "wiki/concepts/capture-pipeline-extensions.md",
+            "wiki/sources/founding-note.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0017",
+        "must_cite_rank": 7,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/overview.md",
+          "wiki/rules/notices.md",
+          "wiki/rules/curation-workarounds.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0017",
+          "route": "exact",
+          "must_cite_rank": 7,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/overview.md",
+            "wiki/rules/notices.md",
+            "wiki/rules/curation-workarounds.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0018",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md",
+          "wiki/concepts/progressive-retrieval.md",
+          "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0018",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md",
+            "wiki/concepts/progressive-retrieval.md",
+            "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0019",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/syntheses/marathon-r3-tb7-retrieval.md",
+          "wiki/index.md",
+          "wiki/concepts/progressive-retrieval.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0019",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/syntheses/marathon-r3-tb7-retrieval.md",
+            "wiki/index.md",
+            "wiki/concepts/progressive-retrieval.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0020",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md",
+          "wiki/index.md",
+          "wiki/log.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0020",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md",
+            "wiki/index.md",
+            "wiki/log.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0021",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+          "wiki/index.md",
+          "wiki/log.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0021",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+            "wiki/index.md",
+            "wiki/log.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0022",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/syntheses/source-registry.md",
+          "wiki/syntheses/marathon-round-4-2026-10-21.md",
+          "wiki/concepts/capture-pipeline-extensions.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0022",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/syntheses/source-registry.md",
+            "wiki/syntheses/marathon-round-4-2026-10-21.md",
+            "wiki/concepts/capture-pipeline-extensions.md"
+          ]
+        }
+      }
+    ],
+    "heading": [
+      {
+        "id": "SQ-0023",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/notices.md",
+          "wiki/syntheses/decision-register.md",
+          "wiki/sources/founding-note.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0023",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/notices.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/sources/founding-note.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0024",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/notices.md",
+          "wiki/syntheses/decision-register.md",
+          "wiki/overview.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0024",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/notices.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/overview.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0025",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/notices.md",
+          "wiki/overview.md",
+          "wiki/syntheses/decision-register.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0025",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/notices.md",
+            "wiki/overview.md",
+            "wiki/syntheses/decision-register.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0026",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+          "wiki/index.md",
+          "wiki/log.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0026",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+            "wiki/index.md",
+            "wiki/log.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0027",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+          "wiki/log.md",
+          "wiki/index.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0027",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+            "wiki/log.md",
+            "wiki/index.md"
+          ]
+        }
+      }
+    ],
+    "claim": [
+      {
+        "id": "SQ-0028",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/i18n/de/overview.md",
+          "wiki/sources/founding-note.md",
+          "wiki/rules/notices.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0028",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/i18n/de/overview.md",
+            "wiki/sources/founding-note.md",
+            "wiki/rules/notices.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0029",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/i18n/ja/decision-register.md",
+          "wiki/i18n/ja/overview.md",
+          "wiki/concepts/demo-guide-ja.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0029",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/i18n/ja/decision-register.md",
+            "wiki/i18n/ja/overview.md",
+            "wiki/concepts/demo-guide-ja.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0030",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/i18n/ja/overview.md",
+          "wiki/i18n/ja/decision-register.md",
+          "wiki/concepts/demo-guide-ja.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0030",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/i18n/ja/overview.md",
+            "wiki/i18n/ja/decision-register.md",
+            "wiki/concepts/demo-guide-ja.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0031",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/i18n/ko/decision-register.md",
+          "wiki/i18n/ko/overview.md",
+          "wiki/syntheses/decision-register.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0031",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/i18n/ko/decision-register.md",
+            "wiki/i18n/ko/overview.md",
+            "wiki/syntheses/decision-register.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0032",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/i18n/ko/overview.md",
+          "wiki/i18n/ko/decision-register.md",
+          "wiki/syntheses/decision-register.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0032",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/i18n/ko/overview.md",
+            "wiki/i18n/ko/decision-register.md",
+            "wiki/syntheses/decision-register.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0033",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/i18n/zh/overview.md",
+          "wiki/i18n/ja/overview.md",
+          "wiki/sources/founding-note.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0033",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/i18n/zh/overview.md",
+            "wiki/i18n/ja/overview.md",
+            "wiki/sources/founding-note.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0034",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/overview.md",
+          "wiki/ideas.md",
+          "wiki/sources/founding-note.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0034",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/overview.md",
+            "wiki/ideas.md",
+            "wiki/sources/founding-note.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0035",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/sources/founding-note.md",
+          "wiki/syntheses/decision-register.md",
+          "wiki/overview.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0035",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/sources/founding-note.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/overview.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0036",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/syntheses/decision-register.md",
+          "wiki/sources/founding-note.md",
+          "wiki/rules/notices.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0036",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/syntheses/decision-register.md",
+            "wiki/sources/founding-note.md",
+            "wiki/rules/notices.md"
+          ]
+        }
+      }
+    ],
+    "multihop": [
+      {
+        "id": "SQ-0037",
+        "must_cite_rank": 2,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.2,
+        "top3": [
+          "wiki/concepts/demo-guide-ja.md",
+          "wiki/rules/notices.md",
+          "wiki/syntheses/decision-register.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0037",
+          "route": "exact",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/concepts/demo-guide-ja.md",
+            "wiki/rules/notices.md",
+            "wiki/syntheses/decision-register.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0038",
+        "must_cite_rank": 2,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.2,
+        "top3": [
+          "wiki/concepts/demo-guide-ja.md",
+          "wiki/rules/notices.md",
+          "wiki/i18n/ja/overview.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0038",
+          "route": "exact",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/concepts/demo-guide-ja.md",
+            "wiki/rules/notices.md",
+            "wiki/i18n/ja/overview.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0039",
+        "must_cite_rank": 2,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.2,
+        "top3": [
+          "wiki/concepts/demo-guide-ja.md",
+          "wiki/rules/notices.md",
+          "wiki/rules/corrections-ledger.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0039",
+          "route": "exact",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/concepts/demo-guide-ja.md",
+            "wiki/rules/notices.md",
+            "wiki/rules/corrections-ledger.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0040",
+        "must_cite_rank": 2,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.2,
+        "top3": [
+          "wiki/concepts/demo-guide-ko.md",
+          "wiki/rules/notices.md",
+          "wiki/syntheses/decision-register.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0040",
+          "route": "exact",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/concepts/demo-guide-ko.md",
+            "wiki/rules/notices.md",
+            "wiki/syntheses/decision-register.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0041",
+        "must_cite_rank": 2,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.2,
+        "top3": [
+          "wiki/concepts/demo-guide-ko.md",
+          "wiki/rules/notices.md",
+          "wiki/i18n/ko/overview.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0041",
+          "route": "exact",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/concepts/demo-guide-ko.md",
+            "wiki/rules/notices.md",
+            "wiki/i18n/ko/overview.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0042",
+        "must_cite_rank": 2,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.2,
+        "top3": [
+          "wiki/concepts/demo-guide-ko.md",
+          "wiki/rules/notices.md",
+          "wiki/rules/corrections-ledger.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0042",
+          "route": "exact",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/concepts/demo-guide-ko.md",
+            "wiki/rules/notices.md",
+            "wiki/rules/corrections-ledger.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0043",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/notices.md",
+          "wiki/syntheses/decision-register.md",
+          "wiki/sources/founding-note.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0043",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/notices.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/sources/founding-note.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0044",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/notices.md",
+          "wiki/rules/corrections-ledger.md",
+          "wiki/concepts/capture-pipeline-extensions.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0044",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/notices.md",
+            "wiki/rules/corrections-ledger.md",
+            "wiki/concepts/capture-pipeline-extensions.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0045",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/notices.md",
+          "wiki/rules/corrections-ledger.md",
+          "wiki/syntheses/marathon-round-4-2026-10-21.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0045",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/notices.md",
+            "wiki/rules/corrections-ledger.md",
+            "wiki/syntheses/marathon-round-4-2026-10-21.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0046",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.2,
+        "top3": [
+          "wiki/rules/notices.md",
+          "wiki/syntheses/decision-register.md",
+          "wiki/sources/founding-note.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0046",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/rules/notices.md",
+            "wiki/syntheses/decision-register.md",
+            "wiki/sources/founding-note.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0047",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.2,
+        "top3": [
+          "wiki/rules/notices.md",
+          "wiki/overview.md",
+          "wiki/rules/corrections-ledger.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0047",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/rules/notices.md",
+            "wiki/overview.md",
+            "wiki/rules/corrections-ledger.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0048",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.2,
+        "top3": [
+          "wiki/rules/notices.md",
+          "wiki/overview.md",
+          "wiki/syntheses/marathon-round-4-2026-10-21.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0048",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.2,
+          "top3": [
+            "wiki/rules/notices.md",
+            "wiki/overview.md",
+            "wiki/syntheses/marathon-round-4-2026-10-21.md"
+          ]
+        }
+      }
+    ],
+    "table": [
+      {
+        "id": "SQ-0049",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/curation-workarounds.md",
+          "wiki/rules/notices.md",
+          "wiki/rules/corrections-ledger.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0049",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/curation-workarounds.md",
+            "wiki/rules/notices.md",
+            "wiki/rules/corrections-ledger.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0050",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/curation-workarounds.md",
+          "wiki/rules/notices.md",
+          "wiki/rules/corrections-ledger.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0050",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/curation-workarounds.md",
+            "wiki/rules/notices.md",
+            "wiki/rules/corrections-ledger.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0051",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/curation-workarounds.md",
+          "wiki/rules/notices.md",
+          "wiki/rules/corrections-ledger.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0051",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/curation-workarounds.md",
+            "wiki/rules/notices.md",
+            "wiki/rules/corrections-ledger.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0052",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/curation-workarounds.md",
+          "wiki/rules/notices.md",
+          "wiki/rules/corrections-ledger.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0052",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/curation-workarounds.md",
+            "wiki/rules/notices.md",
+            "wiki/rules/corrections-ledger.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0053",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/curation-workarounds.md",
+          "wiki/rules/notices.md",
+          "wiki/rules/corrections-ledger.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0053",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/curation-workarounds.md",
+            "wiki/rules/notices.md",
+            "wiki/rules/corrections-ledger.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0054",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/curation-workarounds.md",
+          "wiki/rules/corrections-ledger.md",
+          "wiki/rules/notices.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0054",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/curation-workarounds.md",
+            "wiki/rules/corrections-ledger.md",
+            "wiki/rules/notices.md"
+          ]
+        }
+      },
+      {
+        "id": "SQ-0055",
+        "must_cite_rank": 1,
+        "hit_in_topk": true,
+        "must_in_topk": true,
+        "precision_at_k": 0.1,
+        "top3": [
+          "wiki/rules/curation-workarounds.md",
+          "wiki/rules/notices.md",
+          "wiki/rules/corrections-ledger.md"
+        ],
+        "scorer_row": {
+          "id": "SQ-0055",
+          "route": "exact",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/rules/curation-workarounds.md",
+            "wiki/rules/notices.md",
+            "wiki/rules/corrections-ledger.md"
+          ]
+        }
+      }
+    ]
+  },
+  "criteria_note": "No criteria judge this row family: the meta-benchmark's frozen v1 covers the hand-written instruments only. Whether synthetic slices deserve criteria (e.g. a regression floor per class) is a v2 question for the owner/meta-benchmark, recorded here, not decided.",
+  "row_identity": "e59c9bc730efaffe014454bedbb3901218c18bcc4ddd086e4caf385b426d5560"
+}
