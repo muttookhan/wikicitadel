@@ -49,3 +49,4 @@ on the owner.
 ## Sources
 
 - [[founding-note]] — the founding dictation, preserved at `raw/sources/founding-note.md`.
+- [[comprehensive-research-report-2026-10-21]] — the research programme's Completed Edition: the gap analysis (fifteen capabilities) preserved at `raw/sources/2026-10-21-comprehensive-research-gap-analysis.md`; the 1,259 deep-studied rows as data in `evaluation/source-index.jsonl`, the 3,425-row catalogue in `evaluation/catalogue-index.jsonl`, and the fifteen capabilities as a register in `evaluation/capability-register.jsonl`.

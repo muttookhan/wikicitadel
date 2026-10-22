@@ -5,7 +5,8 @@ type: concept
 status: current
 created: 2026-10-20
 updated: 2026-10-20
-sources: []
+sources:
+  - raw/diagrams/citation-chain.svg
 tags:
   - founding
 work_type: record

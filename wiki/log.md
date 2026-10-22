@@ -2,6 +2,33 @@
 
 Append-only. Latest first.
 
+## 2026-10-22 — research report ingest: capability register, source indexes, vault map
+
+- Ingest (owner-approved in chat, 2026-10-22): the comprehensive
+  research report (Completed Edition) entered the raw layer as an
+  extract — preface, programme-in-numbers, how-to-read, and the
+  complete fifteen-capability gap analysis, verbatim — at
+  `raw/sources/2026-10-21-comprehensive-research-gap-analysis.md`,
+  sensitivity class **public** (stamped in its `.ingest.json`
+  sidecar; the extraction is stated on the file's own face).
+  Compiled as [[comprehensive-research-report-2026-10-21]].
+- The report's rows stand as data, no per-project pages:
+  `evaluation/source-index.jsonl` (1,259 deep-studied rows with
+  GOOD / BAD / TOOK / DIDN'T and licence) and
+  `evaluation/catalogue-index.jsonl` (3,425 rows, marked
+  *catalogued, not studied*; contact emails in listing text
+  redacted).
+- The gap analysis stands as a register:
+  `evaluation/capability-register.jsonl` (15 rows; verdicts —
+  idea 10, owner-gated 4, rejected 1, code 0), maintained by
+  `scripts/wiki_capability_register.py`.
+- Priority builds from the analysis: three verified already
+  standing (severance exclusions in search; the corrections-
+  ledger precheck; the lexical support check) and one built —
+  the standing JSONL vault map, `scripts/wiki_vault_map.py` →
+  `evaluation/vault-map.jsonl`. Owner-gated capabilities stay
+  parked as register rows.
+
 ## 2026-01-16 — i18n demo pages
 
 - Added two fictional demo pages, [[demo-guide-ja]] (Japanese) and

@@ -1,13 +1,13 @@
 {
   "manifest": "WikiCitadel raw/ provenance manifest (all of raw/)",
   "schema_version": 1,
-  "generated_at": "2026-10-20T14:45:27-04:00",
+  "generated_at": "2026-10-22T13:41:10-04:00",
   "root": "raw",
   "excludes": [
     "raw/sources/provenance-manifest.json (the manifest never lists itself)"
   ],
-  "file_count": 1,
-  "total_bytes": 796,
+  "file_count": 4,
+  "total_bytes": 28817,
   "sub_manifests": [
     {
       "path": "raw/sources/mirror-a-manifest.json",
@@ -26,6 +26,18 @@
   ],
   "sub_manifest_drift": [],
   "files": {
+    "raw/diagrams/citation-chain.svg": {
+      "bytes": 1163,
+      "sha256": "b206ced8c49860b20c54c720379a97f7ad79976135796cab4c03e72966874a1d"
+    },
+    "raw/sources/2026-10-21-comprehensive-research-gap-analysis.ingest.json": {
+      "bytes": 1264,
+      "sha256": "e234d220f1d1d62f3b8992488edc004be917c3284013420e26827e06a8845f0e"
+    },
+    "raw/sources/2026-10-21-comprehensive-research-gap-analysis.md": {
+      "bytes": 25594,
+      "sha256": "bfaa3b90c1f60b216abd53b18366844a6a3f48bc29bb0fd07e003e6be8540879"
+    },
     "raw/sources/founding-note.md": {
       "bytes": 796,
       "sha256": "2a2f7adf1c92693ea6374dfc11261a8287078eac4f297644f4f1bd5b16948962"
