@@ -1,0 +1,50 @@
+{
+ "@context": {
+  "broader": {
+   "@id": "skos:broader",
+   "@type": "@id"
+  },
+  "citesSource": {
+   "@id": "wk:citesSource",
+   "@type": "@id"
+  },
+  "cito": "http://purl.org/spar/cito/",
+  "dcterms": "http://purl.org/dc/terms/",
+  "edgeObject": {
+   "@id": "wk:edgeObject",
+   "@type": "@id"
+  },
+  "edgePredicate": {
+   "@id": "wk:edgePredicate",
+   "@type": "@id"
+  },
+  "edgeSubject": {
+   "@id": "wk:edgeSubject",
+   "@type": "@id"
+  },
+  "hasSelector": {
+   "@id": "wk:hasSelector",
+   "@type": "@id"
+  },
+  "oa": "http://www.w3.org/ns/oa#",
+  "onPage": {
+   "@id": "wk:onPage",
+   "@type": "@id"
+  },
+  "prov": "http://www.w3.org/ns/prov#",
+  "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+  "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+  "schema": "https://schema.org/",
+  "skos": "http://www.w3.org/2004/02/skos/core#",
+  "statedOn": {
+   "@id": "wk:statedOn",
+   "@type": "@id"
+  },
+  "subject": {
+   "@id": "dcterms:subject",
+   "@type": "@id"
+  },
+  "wk": "https://wikicitadel.example.org/vocab#",
+  "xsd": "http://www.w3.org/2001/XMLSchema#"
+ }
+}

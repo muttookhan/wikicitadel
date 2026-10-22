@@ -1,0 +1,5182 @@
+{
+ "@context": {
+  "broader": {
+   "@id": "skos:broader",
+   "@type": "@id"
+  },
+  "citesSource": {
+   "@id": "wk:citesSource",
+   "@type": "@id"
+  },
+  "cito": "http://purl.org/spar/cito/",
+  "dcterms": "http://purl.org/dc/terms/",
+  "edgeObject": {
+   "@id": "wk:edgeObject",
+   "@type": "@id"
+  },
+  "edgePredicate": {
+   "@id": "wk:edgePredicate",
+   "@type": "@id"
+  },
+  "edgeSubject": {
+   "@id": "wk:edgeSubject",
+   "@type": "@id"
+  },
+  "hasSelector": {
+   "@id": "wk:hasSelector",
+   "@type": "@id"
+  },
+  "oa": "http://www.w3.org/ns/oa#",
+  "onPage": {
+   "@id": "wk:onPage",
+   "@type": "@id"
+  },
+  "prov": "http://www.w3.org/ns/prov#",
+  "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+  "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+  "schema": "https://schema.org/",
+  "skos": "http://www.w3.org/2004/02/skos/core#",
+  "statedOn": {
+   "@id": "wk:statedOn",
+   "@type": "@id"
+  },
+  "subject": {
+   "@id": "dcterms:subject",
+   "@type": "@id"
+  },
+  "wk": "https://wikicitadel.example.org/vocab#",
+  "xsd": "http://www.w3.org/2001/XMLSchema#"
+ },
+ "@graph": [
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000001",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/capture-pipeline-extensions.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000002",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000003",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000004",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000005",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/eval-judging-machinery-r3.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000006",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000007",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000008",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000009",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000010",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000011",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000012",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000013",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000014",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000015",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000016",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000017",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000018",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000019",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000020",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/decision-register.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000021",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/decision-register.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000022",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000023",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000024",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000025",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000026",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000027",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000028",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000029",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000030",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000031",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000032",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/capture-pipeline-extensions.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000033",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000034",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000035",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000036",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/did-webvh.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000037",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/eval-judging-machinery-r3.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000038",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/memory-and-retrieval-designs.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000039",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000040",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000041",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000042",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000043",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000044",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000045",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/rules/curation-workarounds.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000046",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/rules/evidence-ttl.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000047",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000048",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/rules/share-publish-cite-ready.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000049",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "heading-inferred-type",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 0.75
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:grounds"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "INFERRED",
+   "wk:relation": "grounds"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000050",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000051",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb7-retrieval.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000052",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000053",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-10-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000054",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-11-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000055",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-12-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000056",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-13-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000057",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000058",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-4-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000059",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-5-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000060",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-6-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000061",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-7-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000062",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-8-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000063",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-9-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000064",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/source-registry.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000065",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000066",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000067",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000068",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000069",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000070",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000071",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000072",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000073",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000074",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000075",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-10-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000076",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-11-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000077",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-12-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000078",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-13-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000079",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000080",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-4-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000081",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-5-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000082",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-6-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000083",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-7-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000084",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-8-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000085",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-9-2026-10-21.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/log.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000086",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000087",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000088",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000089",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000090",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/overview.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000091",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000092",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/overview.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000093",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000094",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000095",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000096",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000097",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb7-retrieval.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000098",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000099",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000100",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "verbatim-link",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "wikilink",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/source-registry.md"
+   },
+   "wk:edgePredicate": {
+    "@id": "wk:mentions"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-4-2026-10-21.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "mentions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/assertion/000101",
+   "@type": [
+    "wk:EdgeAssertion"
+   ],
+   "wk:assignmentRule": "citation-frontmatter",
+   "wk:edgeConfidence": {
+    "@type": "xsd:decimal",
+    "@value": 1.0
+   },
+   "wk:edgeKind": "citation",
+   "wk:edgeObject": {
+    "@id": "https://wikicitadel.example.org/raw/sources/provenance-manifest.json"
+   },
+   "wk:edgePredicate": {
+    "@id": "cito:cites"
+   },
+   "wk:edgeSubject": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/source-registry.md"
+   },
+   "wk:polarity": "positive",
+   "wk:provenanceLabel": "EXTRACTED",
+   "wk:relation": "cites"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0001",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "4059f6476331ee1b7edc5c1011e26ade8bf34842ffb73542cb220ebc318ae56b",
+   "wk:claimText": "The owner is the human who owns this installation: the corpus, the decisions, and the final word on both.",
+   "wk:contentHash": "cb6d807b466ee6c5c44db08f52d9c997a943c15b48b0859fd510980b1c46be23",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0001/selector"
+   },
+   "wk:lineHash": [
+    "4a7ec0cee94ff0735e0a2aaa0417f4dc4a20dfc79e0411b96ac899722430aae3",
+    "6f964512d0630a3aa74ba646b1ffa40e4ab0fd5ca9b843b7a06aec5984b9b405",
+    "d54015565d0d61cf1a5412496ea344f92792a29f7c66e31d53037bd251480ece",
+    "e5fa6dd1d3bdf563accec9f92bfe3d6b9195bce95cce9e107869e1078502d25d"
+   ],
+   "wk:lineRangeEnd": 16,
+   "wk:lineRangeStart": 13,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+   },
+   "wk:pageLine": 21
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0001/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "One correction, the same day, and it overrides the sentence above wherever\nthe two conflict: that direction covers work, never decisions. Every\ndecision — what to adopt, what to publish, what to spend, what to delete —\nneeds my own approval, asked for one at a time.",
+   "oa:prefix": "— without asking me\neach time.\n\n"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0002",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "ca248b66d2bc17fe3398826c86a75ab2da03ce7a5784afc0640e37928a901d14",
+   "wk:claimText": "Dieses Wiki existiert, weil der Eigentümer sich entschied, den Kontext des Agenten sichtbar zu halten, in versionierten Dateien, die jede Person prüfen kann, statt im eigenen Gedächtnis des Agenten.",
+   "wk:contentHash": "3f0de5c9edd17ccc4b61d1dbc9d0c500d6dfc4a96e071d6817ba0526e262d513",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0002/selector"
+   },
+   "wk:lineHash": [
+    "4408bc4b4a3c151e005b92f005ff0343a3e6885298540109cd22ccba0229ce83",
+    "82e0002876a0a8459cd229282a9542c48cc9fe292981d2d00cb3cd3be33a5a3a",
+    "852ad901f1b4ef04472da04b7842a9f2b653f3cf4eade833251ee896a9797464",
+    "cdbb7ddad51f1e9c365765ca78e0437a992f9786aa8b9dddcf2d03c7cf44f533",
+    "dd8e8f0ee2d21bb5533bd056df130116428d29ea2738abea97f8aabe6169f065"
+   ],
+   "wk:lineRangeEnd": 7,
+   "wk:lineRangeStart": 3,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+   },
+   "wk:pageLine": 24
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0002/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "I am setting up this wiki because I do not want the agent's working memory\nto live inside the agent, where I cannot see it, check it, or hand it to\nanother agent. Everything the agent knows about my work should live here,\nin plain files under version control, with the source of every claim\nattached to the claim.",
+   "oa:prefix": "tated by the owner, 2026-01-15\n\n",
+   "oa:suffix": "\n\nTo keep things moving I am giv"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0003",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "975aa4d27b9aaecb38c2cb8d47f7edfa7c017f2bd5e9b3d392a882a87067e1a9",
+   "wk:claimText": "**D1 ― 一括指示（置き換えられた形式）。** 所有者は、エージェントが毎回尋ねることなく作業――読むこと、ファイリングすること、構築すること――を進めてよいと指示した。 この形式の決定は同日のうちにD2によって置き換えられた。ここに残され、処遇レジスタにも否定的な処遇とともに残されているのは、静かに書き換えられたレジスタが後のすべての読者に偽りの歴史を教えてしまうためである。",
+   "wk:contentHash": "ca62113a89653cdde347adfdbf166c6d7382827644e83ebb01112cb55ae2a99b",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0003/selector"
+   },
+   "wk:lineHash": [
+    "041b1274423a01ef0d92d47c00478c7365237a767b711a0e6ae1e786c97a55cb",
+    "69d9298917ab0b8e536e8054620d0536cacb792042a6690ed963d4053a4e2a23",
+    "aa7f6cce2dd058b0fdd7ad652264333171f83172c6e67137b429ca2be921e854",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   ],
+   "wk:lineRangeEnd": 12,
+   "wk:lineRangeStart": 9,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md"
+   },
+   "wk:pageLine": 26
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0003/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "To keep things moving I am giving a blanket direction: the agent may\nproceed with the work — reading, filing, building — without asking me\neach time.\n",
+   "oa:prefix": "y claim\nattached to the claim.\n\n",
+   "oa:suffix": "\nOne correction, the same day, a"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0004",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "1891c1ead6f979c00e5e1a871bcfe899f90df26d4acdc5c6d31e5fbd2eb16601",
+   "wk:claimText": "**D2 ― 決定は決して対象に含まれない（現行）。** 所有者は同日のうちに一括指示を覆した。決定はその対象に含まれず、すべての決定には所有者自身の承認が必要である。",
+   "wk:contentHash": "cb6d807b466ee6c5c44db08f52d9c997a943c15b48b0859fd510980b1c46be23",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0004/selector"
+   },
+   "wk:lineHash": [
+    "4a7ec0cee94ff0735e0a2aaa0417f4dc4a20dfc79e0411b96ac899722430aae3",
+    "6f964512d0630a3aa74ba646b1ffa40e4ab0fd5ca9b843b7a06aec5984b9b405",
+    "d54015565d0d61cf1a5412496ea344f92792a29f7c66e31d53037bd251480ece",
+    "e5fa6dd1d3bdf563accec9f92bfe3d6b9195bce95cce9e107869e1078502d25d"
+   ],
+   "wk:lineRangeEnd": 16,
+   "wk:lineRangeStart": 13,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md"
+   },
+   "wk:pageLine": 28
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0004/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "One correction, the same day, and it overrides the sentence above wherever\nthe two conflict: that direction covers work, never decisions. Every\ndecision — what to adopt, what to publish, what to spend, what to delete —\nneeds my own approval, asked for one at a time.",
+   "oa:prefix": "— without asking me\neach time.\n\n"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0005",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "8fc84cc7f2ef1ac7b30ee1982653c3441e5d578a5816bd0055802b05c9eac1d7",
+   "wk:claimText": "このウィキが存在するのは、所有者が、エージェントの文脈を、エージェント自身の記憶の中ではなく、誰もが検証できる版管理されたファイルの中に、目に見える形で保持することを選んだからである。",
+   "wk:contentHash": "3f0de5c9edd17ccc4b61d1dbc9d0c500d6dfc4a96e071d6817ba0526e262d513",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0005/selector"
+   },
+   "wk:lineHash": [
+    "4408bc4b4a3c151e005b92f005ff0343a3e6885298540109cd22ccba0229ce83",
+    "82e0002876a0a8459cd229282a9542c48cc9fe292981d2d00cb3cd3be33a5a3a",
+    "852ad901f1b4ef04472da04b7842a9f2b653f3cf4eade833251ee896a9797464",
+    "cdbb7ddad51f1e9c365765ca78e0437a992f9786aa8b9dddcf2d03c7cf44f533",
+    "dd8e8f0ee2d21bb5533bd056df130116428d29ea2738abea97f8aabe6169f065"
+   ],
+   "wk:lineRangeEnd": 7,
+   "wk:lineRangeStart": 3,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md"
+   },
+   "wk:pageLine": 24
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0005/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "I am setting up this wiki because I do not want the agent's working memory\nto live inside the agent, where I cannot see it, check it, or hand it to\nanother agent. Everything the agent knows about my work should live here,\nin plain files under version control, with the source of every claim\nattached to the claim.",
+   "oa:prefix": "tated by the owner, 2026-01-15\n\n",
+   "oa:suffix": "\n\nTo keep things moving I am giv"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0006",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "2bfb250c34261a36f765cf84d74232842686f510d9f8d10d3c9f0099f82d1839",
+   "wk:claimText": "이 형식의 결정은 같은 날 D2에 의해 대체되었다.",
+   "wk:contentHash": "ca62113a89653cdde347adfdbf166c6d7382827644e83ebb01112cb55ae2a99b",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0006/selector"
+   },
+   "wk:lineHash": [
+    "041b1274423a01ef0d92d47c00478c7365237a767b711a0e6ae1e786c97a55cb",
+    "69d9298917ab0b8e536e8054620d0536cacb792042a6690ed963d4053a4e2a23",
+    "aa7f6cce2dd058b0fdd7ad652264333171f83172c6e67137b429ca2be921e854",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   ],
+   "wk:lineRangeEnd": 12,
+   "wk:lineRangeStart": 9,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/decision-register.md"
+   },
+   "wk:pageLine": 26
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0006/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "To keep things moving I am giving a blanket direction: the agent may\nproceed with the work — reading, filing, building — without asking me\neach time.\n",
+   "oa:prefix": "y claim\nattached to the claim.\n\n",
+   "oa:suffix": "\nOne correction, the same day, a"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0007",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "1a8602610a448ade3d3ae5dca8f13e2d992bab45634077ed553c392ab44d6a06",
+   "wk:claimText": "**D2 ― 결정은 결코 포함되지 않는다(현행).** 소유자는 같은 날 포괄 지시를 뒤집었다. 결정은 그 대상에 포함되지 않으며, 모든 결정에는 소유자 자신의 승인이 필요하다.",
+   "wk:contentHash": "cb6d807b466ee6c5c44db08f52d9c997a943c15b48b0859fd510980b1c46be23",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0007/selector"
+   },
+   "wk:lineHash": [
+    "4a7ec0cee94ff0735e0a2aaa0417f4dc4a20dfc79e0411b96ac899722430aae3",
+    "6f964512d0630a3aa74ba646b1ffa40e4ab0fd5ca9b843b7a06aec5984b9b405",
+    "d54015565d0d61cf1a5412496ea344f92792a29f7c66e31d53037bd251480ece",
+    "e5fa6dd1d3bdf563accec9f92bfe3d6b9195bce95cce9e107869e1078502d25d"
+   ],
+   "wk:lineRangeEnd": 16,
+   "wk:lineRangeStart": 13,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/decision-register.md"
+   },
+   "wk:pageLine": 28
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0007/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "One correction, the same day, and it overrides the sentence above wherever\nthe two conflict: that direction covers work, never decisions. Every\ndecision — what to adopt, what to publish, what to spend, what to delete —\nneeds my own approval, asked for one at a time.",
+   "oa:prefix": "— without asking me\neach time.\n\n"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0008",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "a64dc597d2785de06a28d7d3258df1fa4b398720694c686949fc9615057708af",
+   "wk:claimText": "이 위키가 존재하는 것은, 소유자가 에이전트의 맥락을 에이전트 자신의 기억이 아니라 누구나 검사할 수 있는 버전 관리 파일 안에 눈에 보이게 보관하기로 선택했기 때문이다.",
+   "wk:contentHash": "3f0de5c9edd17ccc4b61d1dbc9d0c500d6dfc4a96e071d6817ba0526e262d513",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0008/selector"
+   },
+   "wk:lineHash": [
+    "4408bc4b4a3c151e005b92f005ff0343a3e6885298540109cd22ccba0229ce83",
+    "82e0002876a0a8459cd229282a9542c48cc9fe292981d2d00cb3cd3be33a5a3a",
+    "852ad901f1b4ef04472da04b7842a9f2b653f3cf4eade833251ee896a9797464",
+    "cdbb7ddad51f1e9c365765ca78e0437a992f9786aa8b9dddcf2d03c7cf44f533",
+    "dd8e8f0ee2d21bb5533bd056df130116428d29ea2738abea97f8aabe6169f065"
+   ],
+   "wk:lineRangeEnd": 7,
+   "wk:lineRangeStart": 3,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md"
+   },
+   "wk:pageLine": 24
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0008/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "I am setting up this wiki because I do not want the agent's working memory\nto live inside the agent, where I cannot see it, check it, or hand it to\nanother agent. Everything the agent knows about my work should live here,\nin plain files under version control, with the source of every claim\nattached to the claim.",
+   "oa:prefix": "tated by the owner, 2026-01-15\n\n",
+   "oa:suffix": "\n\nTo keep things moving I am giv"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0009",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "132ac311535a1564da0f7909a4ab4deaf542dd308c73a930e9ab1b1dc6d4925d",
+   "wk:claimText": "本维基之所以存在，是因为所有者选择把智能体的上下文以可见的方式保存在任何人都可以检查的受版本管理的文件中，而不是保存在智能体自身的记忆里。",
+   "wk:contentHash": "3f0de5c9edd17ccc4b61d1dbc9d0c500d6dfc4a96e071d6817ba0526e262d513",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0009/selector"
+   },
+   "wk:lineHash": [
+    "4408bc4b4a3c151e005b92f005ff0343a3e6885298540109cd22ccba0229ce83",
+    "82e0002876a0a8459cd229282a9542c48cc9fe292981d2d00cb3cd3be33a5a3a",
+    "852ad901f1b4ef04472da04b7842a9f2b653f3cf4eade833251ee896a9797464",
+    "cdbb7ddad51f1e9c365765ca78e0437a992f9786aa8b9dddcf2d03c7cf44f533",
+    "dd8e8f0ee2d21bb5533bd056df130116428d29ea2738abea97f8aabe6169f065"
+   ],
+   "wk:lineRangeEnd": 7,
+   "wk:lineRangeStart": 3,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md"
+   },
+   "wk:pageLine": 24
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0009/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "I am setting up this wiki because I do not want the agent's working memory\nto live inside the agent, where I cannot see it, check it, or hand it to\nanother agent. Everything the agent knows about my work should live here,\nin plain files under version control, with the source of every claim\nattached to the claim.",
+   "oa:prefix": "tated by the owner, 2026-01-15\n\n",
+   "oa:suffix": "\n\nTo keep things moving I am giv"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0010",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "a10b6bb2290ec68bc9fc8521cf40ca1b1e64f058c4133d1d3b93aa4ca1588dcd",
+   "wk:claimText": "This wiki exists because the owner chose to hold the agent's context visibly, in versioned files anyone can inspect, rather than in the agent's own memory.",
+   "wk:contentHash": "3f0de5c9edd17ccc4b61d1dbc9d0c500d6dfc4a96e071d6817ba0526e262d513",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0010/selector"
+   },
+   "wk:lineHash": [
+    "4408bc4b4a3c151e005b92f005ff0343a3e6885298540109cd22ccba0229ce83",
+    "82e0002876a0a8459cd229282a9542c48cc9fe292981d2d00cb3cd3be33a5a3a",
+    "852ad901f1b4ef04472da04b7842a9f2b653f3cf4eade833251ee896a9797464",
+    "cdbb7ddad51f1e9c365765ca78e0437a992f9786aa8b9dddcf2d03c7cf44f533",
+    "dd8e8f0ee2d21bb5533bd056df130116428d29ea2738abea97f8aabe6169f065"
+   ],
+   "wk:lineRangeEnd": 7,
+   "wk:lineRangeStart": 3,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/overview.md"
+   },
+   "wk:pageLine": 22
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0010/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "I am setting up this wiki because I do not want the agent's working memory\nto live inside the agent, where I cannot see it, check it, or hand it to\nanother agent. Everything the agent knows about my work should live here,\nin plain files under version control, with the source of every claim\nattached to the claim.",
+   "oa:prefix": "tated by the owner, 2026-01-15\n\n",
+   "oa:suffix": "\n\nTo keep things moving I am giv"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0011",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "0b7902f902a0116d717d9a6d60dd0b8409f54e7f56064e870c335d41b80121c7",
+   "wk:claimText": "This form of the decision was superseded the same day by D2; it is retained here, and in the treatment register with a negative treatment, because a register that quietly rewrote it would teach every later reader a false history.",
+   "wk:contentHash": "ca62113a89653cdde347adfdbf166c6d7382827644e83ebb01112cb55ae2a99b",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0011/selector"
+   },
+   "wk:lineHash": [
+    "041b1274423a01ef0d92d47c00478c7365237a767b711a0e6ae1e786c97a55cb",
+    "69d9298917ab0b8e536e8054620d0536cacb792042a6690ed963d4053a4e2a23",
+    "aa7f6cce2dd058b0fdd7ad652264333171f83172c6e67137b429ca2be921e854",
+    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+   ],
+   "wk:lineRangeEnd": 12,
+   "wk:lineRangeStart": 9,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:pageLine": 26
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0011/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "To keep things moving I am giving a blanket direction: the agent may\nproceed with the work — reading, filing, building — without asking me\neach time.\n",
+   "oa:prefix": "y claim\nattached to the claim.\n\n",
+   "oa:suffix": "\nOne correction, the same day, a"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0012",
+   "@type": [
+    "wk:Citation"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:citesSource": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "wk:claimHash": "bc57ef12a42b35d2d45f2825f3cdf28a8be3215fcbcda6a6ba3836a6fc7cd6e9",
+   "wk:claimText": "**D2 — Decisions are never covered (current).** The owner reversed the blanket direction the same day: decisions are NOT covered by it — every decision needs the owner's own approval.",
+   "wk:contentHash": "cb6d807b466ee6c5c44db08f52d9c997a943c15b48b0859fd510980b1c46be23",
+   "wk:hasSelector": {
+    "@id": "https://wikicitadel.example.org/citation/c0012/selector"
+   },
+   "wk:lineHash": [
+    "4a7ec0cee94ff0735e0a2aaa0417f4dc4a20dfc79e0411b96ac899722430aae3",
+    "6f964512d0630a3aa74ba646b1ffa40e4ab0fd5ca9b843b7a06aec5984b9b405",
+    "d54015565d0d61cf1a5412496ea344f92792a29f7c66e31d53037bd251480ece",
+    "e5fa6dd1d3bdf563accec9f92bfe3d6b9195bce95cce9e107869e1078502d25d"
+   ],
+   "wk:lineRangeEnd": 16,
+   "wk:lineRangeStart": 13,
+   "wk:onPage": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:pageLine": 31
+  },
+  {
+   "@id": "https://wikicitadel.example.org/citation/c0012/selector",
+   "@type": [
+    "oa:TextQuoteSelector"
+   ],
+   "oa:exact": "One correction, the same day, and it overrides the sentence above wherever\nthe two conflict: that direction covers work, never decisions. Every\ndecision — what to adopt, what to publish, what to spend, what to delete —\nneeds my own approval, asked for one at a time.",
+   "oa:prefix": "— without asking me\neach time.\n\n"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/claim/wiki/i18n/de/overview.md",
+   "@type": [
+    "wk:Claim"
+   ],
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:claimText": "Dieses Wiki existiert, um den Kontext des Agenten sichtbar in versionierten Dateien zu halten, statt im eigenen Gedächtnis des Agenten.",
+   "wk:contradictsCount": 0,
+   "wk:indexedOn": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:registerHash": "a796ca8dec647036",
+   "wk:stated": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:statedOn": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+   },
+   "wk:superseded": false,
+   "wk:supportsCount": 0,
+   "wk:verifiedCount": 0
+  },
+  {
+   "@id": "https://wikicitadel.example.org/claim/wiki/i18n/ja/decision-register.md",
+   "@type": [
+    "wk:Claim"
+   ],
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:claimText": "決定が一括指示の対象になることは決してない。すべての決定には所有者自身の承認が必要である。",
+   "wk:contradictsCount": 0,
+   "wk:indexedOn": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:registerHash": "2fa13739110fb9d2",
+   "wk:stated": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:statedOn": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md"
+   },
+   "wk:superseded": false,
+   "wk:supportsCount": 0,
+   "wk:verifiedCount": 0
+  },
+  {
+   "@id": "https://wikicitadel.example.org/claim/wiki/i18n/ja/overview.md",
+   "@type": [
+    "wk:Claim"
+   ],
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:claimText": "このウィキは、エージェント自身の記憶の中ではなく、版管理されたファイルの中に、エージェントの文脈を目に見える形で保持するために存在する。",
+   "wk:contradictsCount": 0,
+   "wk:indexedOn": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:registerHash": "b451d0636d7e5da2",
+   "wk:stated": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:statedOn": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md"
+   },
+   "wk:superseded": false,
+   "wk:supportsCount": 0,
+   "wk:verifiedCount": 0
+  },
+  {
+   "@id": "https://wikicitadel.example.org/claim/wiki/i18n/ko/decision-register.md",
+   "@type": [
+    "wk:Claim"
+   ],
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:claimText": "결정은 포괄 지시의 대상이 되는 일이 결코 없다. 모든 결정에는 소유자 자신의 승인이 필요하다.",
+   "wk:contradictsCount": 0,
+   "wk:indexedOn": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:registerHash": "c942c3b30fef041c",
+   "wk:stated": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:statedOn": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/decision-register.md"
+   },
+   "wk:superseded": false,
+   "wk:supportsCount": 0,
+   "wk:verifiedCount": 0
+  },
+  {
+   "@id": "https://wikicitadel.example.org/claim/wiki/i18n/ko/overview.md",
+   "@type": [
+    "wk:Claim"
+   ],
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:claimText": "이 위키는 에이전트 자신의 기억이 아니라, 버전이 관리되는 파일 안에 에이전트의 맥락을 눈에 보이게 보관하기 위해 존재한다.",
+   "wk:contradictsCount": 0,
+   "wk:indexedOn": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:registerHash": "1cff9f7e2b968556",
+   "wk:stated": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:statedOn": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md"
+   },
+   "wk:superseded": false,
+   "wk:supportsCount": 0,
+   "wk:verifiedCount": 0
+  },
+  {
+   "@id": "https://wikicitadel.example.org/claim/wiki/i18n/zh/overview.md",
+   "@type": [
+    "wk:Claim"
+   ],
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:claimText": "本维基的存在，是为了把智能体的上下文以可见的方式保存在受版本管理的文件中，而不是保存在智能体自身的记忆里。",
+   "wk:contradictsCount": 0,
+   "wk:indexedOn": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:registerHash": "fe9773bc50e97abf",
+   "wk:stated": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:statedOn": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md"
+   },
+   "wk:superseded": false,
+   "wk:supportsCount": 0,
+   "wk:verifiedCount": 0
+  },
+  {
+   "@id": "https://wikicitadel.example.org/claim/wiki/overview.md",
+   "@type": [
+    "wk:Claim"
+   ],
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:claimText": "This wiki exists to hold the agent's context visibly, in versioned files, rather than in the agent's own memory.",
+   "wk:contradictsCount": 0,
+   "wk:indexedOn": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:registerHash": "28eb6110fc3463d6",
+   "wk:stated": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:statedOn": {
+    "@id": "https://wikicitadel.example.org/wiki/overview.md"
+   },
+   "wk:superseded": false,
+   "wk:supportsCount": 0,
+   "wk:verifiedCount": 0
+  },
+  {
+   "@id": "https://wikicitadel.example.org/claim/wiki/sources/founding-note.md",
+   "@type": [
+    "wk:Claim"
+   ],
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:claimText": "The founding note grants a blanket direction over work and reverses it for decisions in the same sitting.",
+   "wk:contradictsCount": 0,
+   "wk:indexedOn": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:registerHash": "00e455f5cc11cfd1",
+   "wk:stated": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:statedOn": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:superseded": false,
+   "wk:supportsCount": 0,
+   "wk:verifiedCount": 0
+  },
+  {
+   "@id": "https://wikicitadel.example.org/claim/wiki/syntheses/decision-register.md",
+   "@type": [
+    "wk:Claim"
+   ],
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:claimText": "Decisions are never covered by the blanket direction; every decision needs the owner's own approval.",
+   "wk:contradictsCount": 0,
+   "wk:indexedOn": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:registerHash": "51f225d9d312c517",
+   "wk:stated": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:statedOn": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+   },
+   "wk:superseded": false,
+   "wk:supportsCount": 0,
+   "wk:verifiedCount": 0
+  },
+  {
+   "@id": "https://wikicitadel.example.org/export/linked-data",
+   "@type": [
+    "schema:Dataset"
+   ],
+   "schema:name": "LLM Wiki — linked-data export",
+   "wk:citationCount": 12,
+   "wk:claimCount": 9,
+   "wk:corpusCommit": "a02b5394ba2cde30b72b0afc95e4d31513fcb3ac",
+   "wk:corpusDirty": true,
+   "wk:edgeCount": 101,
+   "wk:mappingVersion": "1.0.0",
+   "wk:pageCount": 42,
+   "wk:sourceCount": 2,
+   "wk:tagCount": 39
+  },
+  {
+   "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md",
+   "@type": [
+    "prov:Entity",
+    "wk:RawSource"
+   ],
+   "cito:isCitedBy": [
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/capture-pipeline-extensions.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/i18n/ko/decision-register.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/overview.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md"
+    }
+   ]
+  },
+  {
+   "@id": "https://wikicitadel.example.org/raw/sources/provenance-manifest.json",
+   "@type": [
+    "prov:Entity",
+    "wk:RawSource"
+   ],
+   "cito:isCitedBy": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/source-registry.md"
+   }
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/automation",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "automation"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/build",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "build"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/capture",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "capture"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/decisions",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "decisions"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/demo",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "demo"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/did",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "did"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/evaluation",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "evaluation"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/founding",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "founding"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/governance",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "governance"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/graphify",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "graphify"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/i18n",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "i18n"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/identifiers",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "identifiers"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/judging",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "judging"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/kr-r1",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "kr-r1"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/lead",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "lead"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/lightmem",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "lightmem"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/machinery",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "machinery"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/marathon",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "marathon"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/marathon-r3",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "marathon-r3"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/mcp",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "mcp"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/memory",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "memory"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/people",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "people"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/proposals",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "proposals"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/purpose",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "purpose"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/ranking",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "ranking"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/record",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/registry",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "registry"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/reme",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "reme"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/retrieval",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "retrieval"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/round-10",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "round-10"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/round-11",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "round-11"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/round-12",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "round-12"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/round-13",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "round-13"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/sage-wiki",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "sage-wiki"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/search",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "search"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/sources",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "sources"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/tools",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "tools"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/triage",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "triage"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/tag/vanillaflava",
+   "@type": [
+    "skos:Concept"
+   ],
+   "skos:prefLabel": "vanillaflava"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/capture-pipeline-extensions.md",
+   "@type": [
+    "skos:Concept",
+    "wk:ConceptPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/founding"
+   },
+   "schema:name": "Capture pipeline extensions (Marathon Round 3, TA4)",
+   "wk:pageType": "concept",
+   "wk:stage": "planted",
+   "wk:status": "draft",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md",
+   "@type": [
+    "skos:Concept",
+    "wk:ConceptPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/capture"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/machinery"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/triage"
+    }
+   ],
+   "schema:name": "Capture and triage machinery",
+   "wk:pageType": "concept",
+   "wk:stage": "planted",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/citation-chain.md",
+   "@type": [
+    "skos:Concept",
+    "wk:ConceptPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-20"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-20"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/founding"
+   },
+   "schema:name": "Citation chain",
+   "wk:pageType": "concept",
+   "wk:stage": "planted",
+   "wk:status": "current",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md",
+   "@type": [
+    "skos:Concept",
+    "wk:ConceptPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-16"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-16"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/demo"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/i18n"
+    }
+   ],
+   "schema:name": "デモガイド（日本語）",
+   "wk:mentions": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md"
+   },
+   "wk:pageType": "concept",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-01-16"
+   },
+   "wk:stage": "seedling",
+   "wk:status": "active",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-01-16"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md",
+   "@type": [
+    "skos:Concept",
+    "wk:ConceptPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-16"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-16"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/demo"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/i18n"
+    }
+   ],
+   "schema:name": "데모 가이드 (한국어)",
+   "wk:mentions": {
+    "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md"
+   },
+   "wk:pageType": "concept",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-01-16"
+   },
+   "wk:stage": "seedling",
+   "wk:status": "active",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-01-16"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/did-webvh.md",
+   "@type": [
+    "skos:Concept",
+    "wk:ConceptPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/did"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/identifiers"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/lead"
+    }
+   ],
+   "schema:name": "did:webvh — a reading lead, not a build",
+   "wk:pageType": "concept",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/eval-judging-machinery-r3.md",
+   "@type": [
+    "skos:Concept",
+    "wk:ConceptPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/evaluation"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/judging"
+    }
+   ],
+   "schema:name": "Eval & judging machinery (Marathon Round 3, TB6)",
+   "wk:pageType": "concept",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/memory-and-retrieval-designs.md",
+   "@type": [
+    "skos:Concept",
+    "wk:ConceptPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon-r3"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/memory"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/retrieval"
+    }
+   ],
+   "schema:name": "Memory and retrieval designs",
+   "wk:pageType": "concept",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md",
+   "@type": [
+    "skos:Concept",
+    "wk:ConceptPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/retrieval"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/search"
+    }
+   ],
+   "schema:name": "Progressive retrieval — dual-level routing, layered disclosure, proposed lenses",
+   "wk:methods": "Compiled from the harvest sketches for dual-level routing (LightRAG, MIT), the 3-layer progressive-disclosure read path (claude-mem, Apache-2.0) and the proposed-lenses pattern (exocortex, MIT); machinery built and fixture-tested in Marathon Round 3, lane TA1, against the fictional demo corpus only.",
+   "wk:pageType": "concept",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:status": "draft",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "synthesis"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md",
+   "@type": [
+    "skos:Concept",
+    "wk:ConceptPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/founding"
+   },
+   "schema:name": "Standing approval (retired)",
+   "wk:pageType": "concept",
+   "wk:stage": "planted",
+   "wk:status": "tombstoned",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/entities/owner.md",
+   "@type": [
+    "schema:Thing",
+    "wk:EntityPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/people"
+   },
+   "schema:name": "The owner",
+   "wk:pageType": "entity",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:verifiedBy": "owner",
+   "wk:verifiedUntil": {
+    "@type": "xsd:date",
+    "@value": "2027-01-15"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/founding"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/purpose"
+    }
+   ],
+   "schema:name": "Überblick",
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:mentions": [
+    {
+     "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+    }
+   ],
+   "wk:methods": "Vom Agenten beim Ingest aus der Gründungsnotiz kompiliert; jede Behauptung trägt ihre Zitierung auf die bewahrte Quelle.",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "synthesis"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/decisions"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/founding"
+    }
+   ],
+   "schema:name": "決定レジスタ",
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:mentions": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md"
+   },
+   "wk:methods": "創設ノートの二つの指示段落からコンパイルしたもの。置き換えられた形式がその処遇の下で見えるまま残るよう、組として保持されている。",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/founding"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/purpose"
+    }
+   ],
+   "schema:name": "概要",
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:mentions": [
+    {
+     "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+    }
+   ],
+   "wk:methods": "取り込み時にエージェントが創設ノートからコンパイルしたもの。すべての主張は、保存された出典への引用を伴う。",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "synthesis"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/ko/decision-register.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/decisions"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/founding"
+    }
+   ],
+   "schema:name": "결정 등록부",
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:mentions": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md"
+   },
+   "wk:methods": "창립 노트의 두 지시 단락에서 컴파일한 것으로, 대체된 형식이 그 처분 아래에서 그대로 보이도록 한 쌍으로 유지된다.",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/founding"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/purpose"
+    }
+   ],
+   "schema:name": "개요",
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:mentions": [
+    {
+     "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+    }
+   ],
+   "wk:methods": "수집 시점에 에이전트가 창립 노트에서 컴파일한 것이다. 모든 주장에는 보존된 출처에 대한 인용이 붙는다.",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "synthesis"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/founding"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/purpose"
+    }
+   ],
+   "schema:name": "概述",
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:mentions": [
+    {
+     "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+    }
+   ],
+   "wk:methods": "由智能体在摄取时根据创始说明编译而成；每项主张都带有指向所保存来源的引用。",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "synthesis"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/ideas.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:isCitedBy": [
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/eval-judging-machinery-r3.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb7-retrieval.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md"
+    }
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/governance"
+   },
+   "schema:name": "Ideas",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/index.md",
+   "@type": [
+    "wk:Page"
+   ],
+   "wk:grounds": {
+    "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+   },
+   "wk:mentions": [
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/capture-pipeline-extensions.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/did-webvh.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/eval-judging-machinery-r3.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/memory-and-retrieval-designs.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/rules/curation-workarounds.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/rules/evidence-ttl.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/rules/share-publish-cite-ready.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb7-retrieval.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-10-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-11-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-12-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-13-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-4-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-5-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-6-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-7-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-8-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-9-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/source-registry.md"
+    }
+   ]
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/log.md",
+   "@type": [
+    "wk:Page"
+   ],
+   "wk:mentions": [
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-10-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-11-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-12-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-13-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-4-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-5-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-6-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-7-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-8-2026-10-21.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-9-2026-10-21.md"
+    }
+   ]
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/overview.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/founding"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/purpose"
+    }
+   ],
+   "schema:name": "Overview",
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:mentions": [
+    {
+     "@id": "https://wikicitadel.example.org/wiki/entities/owner.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/rules/notices.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+    }
+   ],
+   "wk:methods": "Compiled by the agent from the founding note at ingest; every claim carries its citation to the preserved source.",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "synthesis"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/rules/curation-workarounds.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/governance"
+   },
+   "schema:name": "Curation activities and workarounds register — the rules page",
+   "wk:methods": "Register page for Marathon Round 13 lane BA; the column structure restates, in this edition's own words, the activity structure of Lee & Stvilia 2017 (Round 11 RA find 1).",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/rules/evidence-ttl.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/governance"
+   },
+   "schema:name": "Evidence TTL — the rules page",
+   "wk:methods": "Convention adopted from the object-TTL pattern in the project's research notes; enforcement is scripts/wiki_evidence_ttl.py.",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "advice"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/rules/notices.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/governance"
+   },
+   "schema:name": "Notices — the rules page",
+   "wk:methods": "Generated from evaluation/notice-vocabulary.json so the fixed texts quoted here are verbatim by construction.",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/rules/share-publish-cite-ready.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/governance"
+   },
+   "schema:name": "Share, publish, cite-ready — a controlled vocabulary",
+   "wk:methods": "Vocabulary note for Marathon Round 13 lane BA; the distinction and its three publish tests restate, in this edition's own words, Kuusniemi & Nykyri 2025 (Round 11 RA find 6).",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "advice"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+   "@type": [
+    "wk:SourcePage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/founding"
+   },
+   "schema:name": "Founding note (source)",
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:isGroundedBy": {
+    "@id": "https://wikicitadel.example.org/wiki/index.md"
+   },
+   "wk:mentions": [
+    {
+     "@id": "https://wikicitadel.example.org/wiki/overview.md"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md"
+    }
+   ],
+   "wk:pageType": "source",
+   "wk:stage": "planted",
+   "wk:status": "current",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/decisions"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/founding"
+    }
+   ],
+   "schema:name": "Decision register",
+   "wk:asOf": {
+    "@type": "xsd:date",
+    "@value": "2026-01-15"
+   },
+   "wk:mentions": {
+    "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md"
+   },
+   "wk:methods": "Compiled from the founding note's two direction paragraphs, kept as a pair so the superseded form stays visible under its treatment.",
+   "wk:pageType": "synthesis",
+   "wk:stage": "tended",
+   "wk:status": "current",
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/graphify"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/kr-r1"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/lightmem"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/proposals"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/reme"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/sage-wiki"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/vanillaflava"
+    }
+   ],
+   "schema:name": "Marathon Round 3, Lane TA5 — proposal machinery (2026-10-21)",
+   "wk:methods": "Built in a scratch copy by lane TA5 under the Marathon Round 3 lane brief; every tool is deterministic stdlib Python, proposal-only, and pinned by fixture tests in scripts/tests/ using the fictional demo corpus.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:status": "draft",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb7-retrieval.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/ranking"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/retrieval"
+    }
+   ],
+   "schema:name": "Retrieval and ranking machinery — Marathon Round 3 (TB7)",
+   "wk:methods": "Compiled from the lane's own build record; every tool named here is in scripts/ with fixture tests in scripts/tests/. The demo corpus is fictional throughout.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": {
+    "@id": "https://wikicitadel.example.org/tag/tools"
+   },
+   "schema:name": "Five gated patterns — build notes (demo corpus)",
+   "wk:methods": "Build notes for machinery added to this demo codebase; each pattern was implemented in scoped form and pinned by fixture tests. No demo-corpus content is described beyond the tooling itself.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:status": "current",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "synthesis"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-10-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/record"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/round-10"
+    }
+   ],
+   "schema:name": "Marathon Round 10 — record (2026-10-21)",
+   "wk:pageType": "synthesis",
+   "wk:status": "current"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-11-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/record"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/round-11"
+    }
+   ],
+   "schema:name": "Marathon Round 11 — record (2026-10-21)",
+   "wk:pageType": "synthesis",
+   "wk:status": "current"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-12-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/record"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/round-12"
+    }
+   ],
+   "schema:name": "Marathon Round 12 — record (2026-10-21)",
+   "wk:pageType": "synthesis",
+   "wk:status": "current"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-13-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/record"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/round-13"
+    }
+   ],
+   "schema:name": "Marathon Round 13 — record (2026-10-21)",
+   "wk:pageType": "synthesis",
+   "wk:status": "current"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/wiki/ideas.md"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/automation"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/build"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/mcp"
+    }
+   ],
+   "schema:name": "Marathon Round 3 — TA7: doors and watch machinery",
+   "wk:methods": "Compiled by lane TA7 of Marathon Round 3 from the lane's own build record: the four tools below and their fixture tests, in the fictional demo corpus's terms.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:status": "current",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "synthesis"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-4-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/record"
+    }
+   ],
+   "schema:name": "Marathon Round 4 — record (2026-10-21)",
+   "wk:mentions": {
+    "@id": "https://wikicitadel.example.org/wiki/syntheses/source-registry.md"
+   },
+   "wk:methods": "Written from the artefacts: suite counts re-run in this tree after integration; the fix round's per-task verification is stated with its evidence. This page is a build record; its claims are checkable against the code, the tests and the registers in this tree.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-5-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/record"
+    }
+   ],
+   "schema:name": "Marathon Round 5 — record (2026-10-21)",
+   "wk:methods": "Written from the artefacts: suite counts re-run in this tree after integration; lane manifests hash-audited against their scratch trees before any file was copied. This page is a build record; its claims are checkable against the code and tests in this tree.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-6-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/record"
+    }
+   ],
+   "schema:name": "Marathon Round 6 — record (2026-10-21)",
+   "wk:methods": "Written from the artefacts: suite counts re-run in this tree after integration; lane manifests hash-audited against their scratch trees before any file was copied. This page is a build record; its claims are checkable against the code, tests and registers in this tree.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-7-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/record"
+    }
+   ],
+   "schema:name": "Marathon Round 7 — record (2026-10-21)",
+   "wk:methods": "Written from the artefacts: suite counts re-run in this tree after integration; lane manifests hash-audited against their scratch trees before any file was copied. This page is a build record; its claims are checkable against the code, tests and registers in this tree.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-8-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/record"
+    }
+   ],
+   "schema:name": "Marathon Round 8 — record (2026-10-21)",
+   "wk:methods": "Written from the artefacts: suite counts re-run in this tree after integration; lane manifests hash-audited against their scratch trees before any file was copied. This page is a build record; its claims are checkable against the code, tests and registers in this tree.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-9-2026-10-21.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/marathon"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/record"
+    }
+   ],
+   "schema:name": "Marathon Round 9 — record (2026-10-21)",
+   "wk:methods": "Written from the artefacts: suite counts re-run in this tree after integration; lane manifests hash-audited against their scratch trees before any file was copied. This page is a build record; its claims are checkable against the code, tests and registers in this tree.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "seedling",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "record"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/source-registry.md",
+   "@type": [
+    "schema:Article",
+    "wk:SynthesisPage"
+   ],
+   "cito:cites": {
+    "@id": "https://wikicitadel.example.org/raw/sources/provenance-manifest.json"
+   },
+   "dcterms:created": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:modified": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "dcterms:subject": [
+    {
+     "@id": "https://wikicitadel.example.org/tag/evaluation"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/registry"
+    },
+    {
+     "@id": "https://wikicitadel.example.org/tag/sources"
+    }
+   ],
+   "schema:name": "Source registry — one manifest over raw/sources",
+   "wk:methods": "Generated by scripts/wiki_source_registry.py from evaluation/source-catalog.json; every number on this page is read from that registry, never hand-counted.",
+   "wk:pageType": "synthesis",
+   "wk:planted": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:stage": "budding",
+   "wk:tended": {
+    "@type": "xsd:date",
+    "@value": "2026-10-21"
+   },
+   "wk:workType": "synthesis"
+  }
+ ]
+}

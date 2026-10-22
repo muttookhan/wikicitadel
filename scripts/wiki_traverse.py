@@ -72,7 +72,17 @@ Commands (every one a read):
     python3 scripts/wiki_traverse.py --as <identity> cite <page>
     python3 scripts/wiki_traverse.py --as <identity> cite --id c0001
     python3 scripts/wiki_traverse.py --as <identity> search "<query>"
-        [--top N] [--scope wiki|raw|all]
+        [--top N] [--scope wiki|raw|all] [--depth quick|standard|deep]
+    python3 scripts/wiki_traverse.py --as <identity> depth [--json]
+
+The depth ladder (W6) is the Ask door's ladder
+(tools/ask/depth_ladder.py — loaded by path, one definition
+for both doors): `depth` prints the three declared levels
+(quick / standard / deep) with their bundles and costs;
+`search --depth <level>` answers at that level's traverse
+bundle (its search-top, unless --top overrides) and stamps
+the output with the depth and its cost. No declaration =
+the standard bundle's top, unstamped, exactly as before.
 
 <name> resolves by repo-relative path, then by path without
 suffix, then by file stem, then by frontmatter title — the
@@ -190,6 +200,11 @@ def claims_mod(root):
     return _load_module("wiki_claims", root / "scripts" / "wiki_claims.py")
 
 
+def depth_mod(root):
+    return _load_module(
+        "ask_depth_ladder", root / "tools" / "ask" / "depth_ladder.py")
+
+
 # ---------------------------------------------------------------------------
 # Sensitivity classification of a raw path
 # ---------------------------------------------------------------------------
@@ -294,8 +309,16 @@ def build_edges(root, pages, keys):
         key = (src, dst, kind, relation)
         if src != dst and key not in seen:
             seen.add(key)
+            # Edge provenance label (build wave 1, item W1.8;
+            # lenslib's edge_label — the three-way EXTRACTED /
+            # INFERRED / AMBIGUOUS tag plus a confidence and a
+            # polarity). Additive metadata: consumers that do
+            # not read these keys see the edge exactly as
+            # before, and an edge without them is unlabeled,
+            # never invalid.
             edges.append({"src": src, "dst": dst, "kind": kind,
-                          "relation": relation})
+                          "relation": relation,
+                          **lens.edge_label(kind, relation)})
 
     for rel, (fields, body, _text) in sorted(pages.items()):
         for target, _a, _label, _h, ltype in lens.extract_wikilinks_typed(body):
@@ -599,7 +622,7 @@ def cmd_memos(root, identity, tag, as_json):
     return "\n".join(lines) + "\n"
 
 
-def cmd_search(root, identity, query, top, scope):
+def cmd_search(root, identity, query, top, scope, depth=None):
     effective = scope
     note = None
     if identity not in FULL_RAW and scope != "wiki":
@@ -607,6 +630,30 @@ def cmd_search(root, identity, query, top, scope):
         note = (f"scope restricted to the compiled layer for "
                 f"identity '{identity}' (the sensitivity gate: "
                 f"ranked raw snippets cannot be class-filtered)")
+    stamp = None
+    if depth is not None:
+        # The query depth ladder (W6, tools/ask/depth_ladder.py
+        # — one ladder for both doors): a declared depth sets
+        # the result count from the level's traverse bundle
+        # when the caller did not pass --top, and the run is
+        # stamped with its depth and cost. An unknown level is
+        # refused by name before any search runs.
+        ladder = depth_mod(root)
+        error = ladder.declaration_error(depth)
+        if error:
+            raise Refusal(error)
+        level = ladder.get_level(depth)
+        if top is None:
+            top = level["traverse"]["search_top"]
+        stamp = (f"depth: {level['label']} (declared) — "
+                 f"traverse bundle: search top "
+                 f"{level['traverse']['search_top']}, "
+                 f"neighbours {level['traverse']['neighbour_hops']} "
+                 f"hop(s), path max-depth "
+                 f"{level['traverse']['path_max_depth']}; "
+                 f"cost: {level['cost']}")
+    if top is None:
+        top = 10
     cmd = [sys.executable, str(root / "scripts" / "wiki_search.py"),
            query, "--top", str(top), "--scope", effective]
     proc = subprocess.run(cmd, cwd=root, capture_output=True,
@@ -614,10 +661,42 @@ def cmd_search(root, identity, query, top, scope):
     out = proc.stdout
     if note:
         out = f"[{note}]\n" + out
+    if stamp:
+        out = f"[{stamp}]\n" + out
     if proc.returncode != 0:
         raise Refusal("wiki_search.py failed: " +
                       (proc.stderr.strip().splitlines() or [""])[-1])
     return out
+
+
+def cmd_depth(root, as_json):
+    """Print the query depth ladder (W6): the declared
+    quick / standard / deep bundles both doors answer at,
+    loaded from the one canonical definition
+    (tools/ask/depth_ladder.py). A read of data, like every
+    verb here."""
+    ladder = depth_mod(root)
+    levels = ladder.ladder_table()
+    if as_json:
+        return {"depth_ladder": levels,
+                "default": ladder.DEFAULT_DEPTH,
+                "abstention_invariant": ladder.ABSTENTION_INVARIANT}
+    lines = ["query depth ladder (tools/ask/depth_ladder.py) — "
+             f"default: {ladder.DEFAULT_DEPTH}"]
+    for level in levels:
+        trav = level["traverse"]
+        lines.append(
+            f"- {level['level']} ({level['label']}): "
+            f"candidate pool {level['candidate_pool']}, "
+            f"evidence budget {level['pack_budget_tokens']} "
+            f"tokens, sentence scoring "
+            f"{level['sentence_scoring']}; traverse: search "
+            f"top {trav['search_top']}, neighbours "
+            f"{trav['neighbour_hops']} hop(s), path max-depth "
+            f"{trav['path_max_depth']}")
+        lines.append(f"  cost: {level['cost']}")
+    lines.append(ladder.ABSTENTION_INVARIANT)
+    return "\n".join(lines) + "\n"
 
 
 # ---------------------------------------------------------------------------
@@ -679,9 +758,20 @@ def main(argv):
 
     qp = sub.add_parser("search", help="delegate to wiki_search.py")
     qp.add_argument("query")
-    qp.add_argument("--top", type=int, default=10)
+    qp.add_argument("--top", type=int, default=None,
+                    help="result count (default: the declared "
+                         "depth's traverse bundle, else 10 — "
+                         "the standard level's bundle)")
+    qp.add_argument("--depth", default=None,
+                    help="declare a query depth (quick / "
+                         "standard / deep — the ladder of "
+                         "tools/ask/depth_ladder.py); the run "
+                         "is stamped with its depth and cost")
     qp.add_argument("--scope", choices=("wiki", "raw", "all"),
                     default="all")
+
+    dp = sub.add_parser("depth", help="print the query depth ladder")
+    dp.add_argument("--json", action="store_true")
 
     args = ap.parse_args(argv)
     root = args.root
@@ -716,7 +806,9 @@ def main(argv):
                             args.json)
         elif args.cmd == "search":
             out = cmd_search(root, args.identity, args.query,
-                             args.top, args.scope)
+                             args.top, args.scope, args.depth)
+        elif args.cmd == "depth":
+            out = cmd_depth(root, args.json)
         else:  # pragma: no cover
             return 2
     except Refusal as exc:

@@ -1,0 +1,282 @@
+{
+ "artefact_note": "hashes cover the five generated artefacts; this report is not hashed into itself",
+ "artefacts": {
+  "citation-linkset.json": "16454a5884acece185c651ed219d8c430539c043860941336ffb14f39f8cc9a4",
+  "page-history-prov.jsonld": "2533db8b506b35ba0af362b04249438175f0f79d5a29db7679ac63d98f371770",
+  "premis-alignment.md": "cd52c1d9774b9d69d80ae413fded1fa8e5b370ec64f69b99beb37cddbef8c215",
+  "premis-events.jsonl": "2b2614312712788e845498b9a5bbf44744c8faec2ea8f2010a0c34edfb78da44",
+  "uuidv7-policy.md": "2ea7e494a504e848b50896abc16079271a21ec5876673519e88473244b2f659b"
+ },
+ "bundles": {
+  "linkset": {
+   "counts": {
+    "anchors": 24,
+    "dangling": 0,
+    "duplicates_collapsed": 0,
+    "links": 101,
+    "per_relation": {
+     "cites": 19,
+     "grounds": 1,
+     "mentions": 81
+    },
+    "per_target_kind": {
+     "page": 86,
+     "raw": 15
+    }
+   },
+   "dangling": [],
+   "gaps": [
+    "the linkset carries the door graph's edges only: citation selectors, line ranges and lock hashes stay in the citation lockfile and the linked-data export — the sidecar is the relation index, not the citation record",
+    "W1.8 provenance labels (EXTRACTED / INFERRED / AMBIGUOUS) and confidences are not carried per link: RFC 9264's standard target attributes have no provenance slot, and inventing one would fork the format; the labels live on the linked-data export's EdgeAssertion nodes for the same edges",
+    "relations with no predicate in the closed vocabulary (today: exemplifies) are emitted under their wk: vocabulary URI as RFC 9264 extension relation types — typed, but with no external predicate semantics, which the report states",
+    "dangling targets are minted under the export's unresolved/ namespace so the link stays visible in the sidecar; the namespace names a non-target, not a fetchable resource"
+   ],
+   "mapping_version": "1.0.0",
+   "media_type": "application/linkset+json"
+  },
+  "premis": {
+   "alignment": [
+    {
+     "entity": "Object",
+     "house": "repo-relative path (checkpoints.d/<id>.json, evaluation/merkle-manifest.jsonl, a bag's payload paths)",
+     "notes": "paths are the wiki's object identifiers; the linked-data export derives IRIs from them",
+     "premis": "objectIdentifier"
+    },
+    {
+     "entity": "Object",
+     "house": "checkpoint line_hash + signature; provenance manifest_sha256 and corpus_root in each checkpoint line; manifest-sha256.txt inside a bag",
+     "notes": "sha256 throughout, as PREMIS records the algorithm with the digest",
+     "premis": "objectCharacteristics / fixity (messageDigest)"
+    },
+    {
+     "entity": "Object",
+     "house": "retention-policy.json classes (keep-forever vs clocked) and the witness copy outside the repo",
+     "notes": "class-level only; no per-object preservationLevel is recorded — see gaps",
+     "premis": "preservationLevel / storage"
+    },
+    {
+     "entity": "Event",
+     "house": "<checkpoint id>/<event slug>, minted by this generator",
+     "notes": "derived identifiers: stable because the source lines are hash-chained and immutable",
+     "premis": "eventIdentifier"
+    },
+    {
+     "entity": "Event",
+     "house": "derived from the register line kind + the act it records (creation / fixity check / replication / timestamp anchor)",
+     "notes": "Library of Congress PREMIS event types where they fit; 'timestamp anchor' is a named local extension",
+     "premis": "eventType"
+    },
+    {
+     "entity": "Event",
+     "house": "created_utc (checkpoint lines) / attempted_utc (anchor lines)",
+     "notes": "the record's own datetime, never the generator's clock",
+     "premis": "eventDateTime"
+    },
+    {
+     "entity": "Event",
+     "house": "anchor entries' recorded status, verbatim (a failed anchor stays failed); signature presence for checkpoint creation",
+     "notes": "outcomes are copied, never upgraded — the schema's dual-anchor rule in PREMIS dress",
+     "premis": "eventOutcomeInformation"
+    },
+    {
+     "entity": "Event",
+     "house": "signer identity on checkpoint lines (mehmed@llm-wiki); scripts/wiki_checkpoint.py for the acts the tool performs (anchoring, witness copy)",
+     "notes": "the register records the identity string; agentType is not recorded there — see gaps",
+     "premis": "linkingAgentIdentifier"
+    },
+    {
+     "entity": "Event",
+     "house": "the checkpoint artefact / the provenance manifest the checkpoint binds",
+     "notes": "every event also names its source register line by line_hash (the derivation audit trail, a house field riding beside PREMIS)",
+     "premis": "linkingObjectIdentifier"
+    },
+    {
+     "entity": "Agent",
+     "house": "signer identity string; the checkpoint tool as software agent for its own acts",
+     "notes": "no agent register exists; identity is the string on the signed lines",
+     "premis": "agentIdentifier / agentName / agentType"
+    },
+    {
+     "entity": "Rights",
+     "house": "retention-policy.json classes (how long, what act an expiry names) + sensitivity.json classes (who may read/cite)",
+     "notes": "policy-level mapping only: no per-object rights statements are recorded — see gaps",
+     "premis": "rightsStatement (rightsBasis, rightsGranted)"
+    }
+   ],
+   "counts": {
+    "anchor_lines": 0,
+    "by_outcome": {},
+    "by_type": {},
+    "checkpoint_lines": 0,
+    "events": 0,
+    "header_lines": 0
+   },
+   "event_types": {
+    "creation": "LoC PREMIS event type",
+    "fixity check": "LoC PREMIS event type",
+    "replication": "LoC PREMIS event type",
+    "timestamp anchor": "local extension (the schema's dual-anchor rule)"
+   },
+   "gaps": [
+    "verification runs: evaluation/reverify-history.jsonl is an empty register (0 bytes) — no verification event exists on the record to align, so none is asserted here",
+    "erasures: evaluation/erasure-certificates.jsonl is an empty register (0 bytes) — no erasure event is asserted",
+    "bagging: scripts/wiki_bag.py (BagIt, RFC 8493) exists, but no bag artefact (bag-info.txt) stands in the tree, so no bagging event is asserted; the nightly Drive zip is a different route whose records live in goal state outside this tree and is likewise not asserted here",
+    "rights: the alignment maps retention + sensitivity CLASSES to PREMIS rights terms; no per-object rights statement is recorded anywhere in the wiki, so none is emitted",
+    "agents: the checkpoint register records the signer identity string only; PREMIS agentType (person / organization / software) is not on the record for the signer and is not invented here — only the tool's own acts name it, as software, by construction",
+    "preservationLevel is class-level (retention policy), never per-object, in the house records"
+   ],
+   "mapping_version": "1.0.0"
+  },
+  "prov": {
+   "counts": {
+    "activities": 23,
+    "agent_names": [
+     "muttookhan"
+    ],
+    "agents": 1,
+    "pages": 18,
+    "revision_entities": 23
+   },
+   "gaps": {
+    "not_covered": [
+     "the capture -> ingest -> compile -> cite -> correct provenance chain is not serialised as PROV here: citation/claim provenance lives in the linked-data export (cito/oa terms, and prov:wasDerivedFrom for derives-from edges only), and the corrections ledger (wiki/rules/corrections-ledger.md) has no PROV serialisation",
+     "activity start and end are the same timestamp: the artefact records one date per commit",
+     "revision CONTENT is not carried: the bundle is metadata about revisions; the bytes are git's objects, and the artefact's latest_diff field is not reproduced",
+     "agents are the artefact's author strings, verbatim; no identity resolution beyond the string is asserted (e.g. two strings for one actor stay two agents)",
+     "renames: the artefact is built with git log --follow, so a renamed page's history is the followed history; the bundle asserts nothing about rename events themselves"
+    ],
+    "pages_not_in_page_history_artefact": [
+     "wiki/concepts/capture-pipeline-extensions.md",
+     "wiki/concepts/capture-triage-machinery.md",
+     "wiki/concepts/did-webvh.md",
+     "wiki/concepts/eval-judging-machinery-r3.md",
+     "wiki/concepts/memory-and-retrieval-designs.md",
+     "wiki/concepts/progressive-retrieval.md",
+     "wiki/rules/curation-workarounds.md",
+     "wiki/rules/evidence-ttl.md",
+     "wiki/rules/share-publish-cite-ready.md",
+     "wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md",
+     "wiki/syntheses/marathon-r3-tb7-retrieval.md",
+     "wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md",
+     "wiki/syntheses/marathon-round-10-2026-10-21.md",
+     "wiki/syntheses/marathon-round-11-2026-10-21.md",
+     "wiki/syntheses/marathon-round-12-2026-10-21.md",
+     "wiki/syntheses/marathon-round-13-2026-10-21.md",
+     "wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+     "wiki/syntheses/marathon-round-4-2026-10-21.md",
+     "wiki/syntheses/marathon-round-5-2026-10-21.md",
+     "wiki/syntheses/marathon-round-6-2026-10-21.md",
+     "wiki/syntheses/marathon-round-7-2026-10-21.md",
+     "wiki/syntheses/marathon-round-8-2026-10-21.md",
+     "wiki/syntheses/marathon-round-9-2026-10-21.md",
+     "wiki/syntheses/source-registry.md"
+    ],
+    "pages_not_in_page_history_count": 24
+   },
+   "mapping": {
+    "a commit author string": {
+     "prov": "prov:Agent (the gateway author also prov:SoftwareAgent); rdfs:label and wk:authorString carry the string verbatim; the activity prov:wasAssociatedWith the agent and the revision prov:wasAttributedTo the agent",
+     "via": "distinct author strings in the artefact"
+    },
+    "compiled page (a key of evaluation/page-history.json)": {
+     "prov": "prov:Entity, typed wk:Page",
+     "via": "the page IRI the linked-data export mints"
+    },
+    "one recorded commit in a page's history": {
+     "prov": "prov:Activity, typed wk:RevisionActivity; prov:startedAtTime = prov:endedAtTime = the commit's recorded date; dcterms:description = the commit subject; wk:commit = the full sha",
+     "via": "evaluation/page-history.json history rows"
+    },
+    "the page state a commit produced": {
+     "prov": "prov:Entity, typed wk:PageRevision; prov:wasGeneratedBy the activity; prov:specializationOf the page entity; prov:wasRevisionOf the previous (older) revision of the same page, where one is recorded; prov:generatedAtTime = the commit's recorded date",
+     "via": "one revision entity per history row"
+    }
+   },
+   "mapping_version": "1.0.0"
+  },
+  "uuid7": {
+   "census": {
+    "register_uuids_by_version": {},
+    "uuid4_minting_files": [
+     "scripts/wiki_grobid.py",
+     "scripts/wiki_openrefine_trial.py",
+     "scripts/wiki_warc.py",
+     "scripts/wiki_warc_capture.py"
+    ]
+   },
+   "policy": {
+    "adopted": "2026-10-22",
+    "default_rule": "Every NEW internal identifier minted by wiki tooling from adoption forward is a UUIDv7, unless the object's register already runs a grandfathered scheme (below), in which case the register's own scheme continues — one scheme per register, never two in one register.",
+    "gaps": [
+     "adoption is prospective and by convention: no existing tool is rewritten tonight to mint v7 — the first register that needs a new non-schemed identifier is where the default first applies, and that adoption is recorded when it happens",
+     "within one millisecond, string order among v7 ids is random-tail order, not insertion order (RFC 9562 makes the same statement); a register that needs intra-millisecond order keeps its own sequence field"
+    ],
+    "grandfathered_schemes": [
+     {
+      "disposition": "continues; checkpoint ids stay sequential and human-citable",
+      "register": "evaluation/checkpoints.jsonl",
+      "scheme": "cp-NNNNNN"
+     },
+     {
+      "disposition": "continues",
+      "register": "evaluation/ocr-queue.jsonl",
+      "scheme": "ocr-NNNN"
+     },
+     {
+      "disposition": "continues",
+      "register": "evaluation/predictions.jsonl",
+      "scheme": "pred-NNNN"
+     },
+     {
+      "disposition": "continues",
+      "register": "forecast ids cited across wiki pages",
+      "scheme": "fc-NNNN"
+     },
+     {
+      "disposition": "continues",
+      "register": "evaluation/weeding-nominations.jsonl",
+      "scheme": "weed-NNNN"
+     },
+     {
+      "disposition": "retained for WARC tooling interoperability; the ids are minted at capture time and stored in the WARC records themselves, not in a house register",
+      "register": "WARC record ids (scripts/wiki_warc.py, scripts/wiki_warc_capture.py)",
+      "scheme": "UUIDv4 (runtime-minted)"
+     }
+    ],
+    "minting_rules": [
+     "time-ordered: the 48-bit unix millisecond field makes string order agree with mint order across milliseconds; identifiers sort by creation without a separate timestamp column",
+     "no re-minting: an identifier, once written to any register or artefact, is never replaced; a correction appends a new record naming the old id, it does not rewrite the id",
+     "legacy ids are never rewritten: grandfathered schemes keep issuing and resolving exactly as before; no migration, no alias table is created — each register remains the map for its own ids",
+     "an id names the object, not its content: content identity stays with the house hashes (citation lockfile line hashes, checkpoint line hashes, merkle roots), which this policy does not touch",
+     "mint through scripts/wiki_standards_bundles.py uuid7 new (or mint_uuid7 in this module) so the layout is the RFC's, verified against the RFC's own example vector in the test suite"
+    ],
+    "out_of_scope": [
+     "content hashes (sha256 lock hashes, merkle roots, canonical export hashes) are identifiers OF content and are not replaced by UUIDs",
+     "page paths and raw paths are the wiki's human identifiers and stay; the linked-data export's IRIs are derived from them, not from UUIDs",
+     "external identifiers (DOIs, ORCIDs, git SHAs, message ids from other systems) are recorded as issued, never re-minted",
+     "ephemeral protocol values minted at runtime (e.g. the multipart boundary in scripts/wiki_openrefine_trial.py) are not identifiers of record and are out of scope"
+    ],
+    "standard": "RFC 9562 section 5.7 (UUIDv7)",
+    "version": "1.0.0"
+   },
+   "policy_version": "1.0.0",
+   "rfc_vector": "017f22e2-79b0-7cc3-98c4-dc0c0c07398f"
+  }
+ },
+ "bundles_version": "1.0.0",
+ "corpus": {
+  "commit": "a02b5394ba2cde30b72b0afc95e4d31513fcb3ac",
+  "dirty": true
+ },
+ "inputs": {
+  "checkpoints_register": {
+   "path": "evaluation/checkpoints.jsonl",
+   "sha256": null
+  },
+  "page_history": {
+   "path": "evaluation/page-history.json",
+   "sha256": "22d64a527954d4440323748d9412cb218553a9ff28829a8be03b96ffd2c4d572"
+  },
+  "witness_dir": "/home/hatch/workspace/wiki-checkpoints"
+ },
+ "kind": "standards-bundles-report"
+}

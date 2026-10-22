@@ -1,0 +1,258 @@
+{
+ "artefacts": {
+  "context.jsonld": {
+   "bytes": 1074,
+   "sha256": "10727bd9b65d2652d00d6a208f3b7ee475702b04bf2496de158e023dff8bfa11"
+  },
+  "llms.txt": {
+   "bytes": 9612,
+   "sha256": "c4930129d645d0d0acc352367c50cce10884fca9d135442d6b490777762dc077"
+  },
+  "wiki.jsonld": {
+   "bytes": 145076,
+   "sha256": "44f664701dda0057262e29b934bb10e84169bae737eefe0e4f42726fa79bdb19"
+  },
+  "wiki.ttl": {
+   "bytes": 214771,
+   "sha256": "7e132c3167e4224b6bfffd4bc566751b092e1be38309e366442037fb24aaa461"
+  }
+ },
+ "canonical_sha256": "911a82fc2bcdd5799e1a0f98fa802ffdae3ac33317ca48bd022be3c6b1befc0b",
+ "corpus_commit": "a02b5394ba2cde30b72b0afc95e4d31513fcb3ac",
+ "corpus_dirty": true,
+ "counts": {
+  "citation_targets": {
+   "page": 4,
+   "raw": 15
+  },
+  "citations": 12,
+  "claims": 9,
+  "claims_from_frontmatter_only": 0,
+  "claims_text_divergent": 0,
+  "claims_with_absent_page": 0,
+  "direct_relation_triples": 101,
+  "edges": 101,
+  "loss_constructs": 6,
+  "loss_instances": 38,
+  "pages": 42,
+  "raw_sources": 2,
+  "selectors": 12,
+  "tags": 39,
+  "triples": 2048
+ },
+ "kind": "linked-data-export-report",
+ "loss": [
+  {
+   "construct": "frontmatter field 'id'",
+   "count": 23,
+   "detail": "no mapping in the table; the field is not emitted",
+   "kind": "frontmatter-field"
+  },
+  {
+   "construct": "frontmatter field 'lang'",
+   "count": 6,
+   "detail": "no mapping in the table; the field is not emitted",
+   "kind": "frontmatter-field"
+  },
+  {
+   "construct": "frontmatter field 'replaced_by'",
+   "count": 1,
+   "detail": "no mapping in the table; the field is not emitted",
+   "kind": "frontmatter-field"
+  },
+  {
+   "construct": "frontmatter field 'tombstone_reason'",
+   "count": 1,
+   "detail": "no mapping in the table; the field is not emitted",
+   "kind": "frontmatter-field"
+  },
+  {
+   "construct": "frontmatter field 'tombstoned'",
+   "count": 1,
+   "detail": "no mapping in the table; the field is not emitted",
+   "kind": "frontmatter-field"
+  },
+  {
+   "construct": "frontmatter field 'translation_of'",
+   "count": 6,
+   "detail": "no mapping in the table; the field is not emitted",
+   "kind": "frontmatter-field"
+  }
+ ],
+ "mapping": {
+  "citations": {
+   "claim": "wk:claimText",
+   "claim_hash": "wk:claimHash",
+   "content_hash": "wk:contentHash",
+   "line_hashes": "wk:lineHash",
+   "page": "wk:onPage",
+   "page_line": "wk:pageLine"
+  },
+  "claims": {
+   "contradicts": "wk:contradictsCount",
+   "hash": "wk:registerHash",
+   "indexed_on": "wk:indexedOn",
+   "stated": "wk:stated",
+   "superseded": "wk:superseded",
+   "supports": "wk:supportsCount",
+   "text": "wk:claimText",
+   "verified_n": "wk:verifiedCount"
+  },
+  "edge_assertion": {
+   "assignment_rule": "wk:assignmentRule",
+   "confidence": "wk:edgeConfidence",
+   "kind": "wk:edgeKind",
+   "object": "wk:edgeObject",
+   "polarity": "wk:polarity",
+   "predicate": "wk:edgePredicate",
+   "provenance_label": "wk:provenanceLabel",
+   "relation": "wk:relation",
+   "subject": "wk:edgeSubject"
+  },
+  "frontmatter_fields": {
+   "as_of": [
+    "wk:asOf",
+    "date"
+   ],
+   "compiled_converter": [
+    "wk:compiledConverter",
+    "literal"
+   ],
+   "compiled_date": [
+    "wk:compiledDate",
+    "date"
+   ],
+   "compiled_prompt": [
+    "wk:compiledPrompt",
+    "literal"
+   ],
+   "confidence": [
+    "wk:confidence",
+    "literal"
+   ],
+   "created": [
+    "dcterms:created",
+    "date"
+   ],
+   "methods": [
+    "wk:methods",
+    "literal"
+   ],
+   "planted": [
+    "wk:planted",
+    "date"
+   ],
+   "stage": [
+    "wk:stage",
+    "literal"
+   ],
+   "status": [
+    "wk:status",
+    "literal"
+   ],
+   "tended": [
+    "wk:tended",
+    "date"
+   ],
+   "title": [
+    "schema:name",
+    "literal"
+   ],
+   "updated": [
+    "dcterms:modified",
+    "date"
+   ],
+   "verified_by": [
+    "wk:verifiedBy",
+    "literal"
+   ],
+   "verified_until": [
+    "wk:verifiedUntil",
+    "date"
+   ],
+   "work_type": [
+    "wk:workType",
+    "literal"
+   ]
+  },
+  "namespaces": {
+   "cito": "http://purl.org/spar/cito/",
+   "dcterms": "http://purl.org/dc/terms/",
+   "oa": "http://www.w3.org/ns/oa#",
+   "prov": "http://www.w3.org/ns/prov#",
+   "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+   "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+   "schema": "https://schema.org/",
+   "skos": "http://www.w3.org/2004/02/skos/core#",
+   "wk": "https://wikicitadel.example.org/vocab#",
+   "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "page_types": {
+   "(absent)": [
+    "wk:Page"
+   ],
+   "concept": [
+    "wk:ConceptPage",
+    "skos:Concept"
+   ],
+   "entity": [
+    "wk:EntityPage",
+    "schema:Thing"
+   ],
+   "query": [
+    "wk:QueryPage"
+   ],
+   "source": [
+    "wk:SourcePage"
+   ],
+   "synthesis": [
+    "wk:SynthesisPage",
+    "schema:Article"
+   ]
+  },
+  "relations": {
+   "cites": [
+    "cito:cites",
+    "cito:isCitedBy"
+   ],
+   "contradicts": [
+    "wk:contradicts",
+    "wk:contradicts"
+   ],
+   "corrects": [
+    "wk:corrects",
+    "wk:isCorrectedBy"
+   ],
+   "derives-from": [
+    "prov:wasDerivedFrom",
+    null
+   ],
+   "extends": [
+    "wk:extends",
+    null
+   ],
+   "grounds": [
+    "wk:grounds",
+    "wk:isGroundedBy"
+   ],
+   "mentions": [
+    "wk:mentions",
+    null
+   ],
+   "replaces-part-of": [
+    "wk:replacesPartOf",
+    null
+   ],
+   "supersedes": [
+    "dcterms:replaces",
+    "dcterms:isReplacedBy"
+   ]
+  }
+ },
+ "mapping_version": "1.0.0",
+ "notes": [
+  "The lockfile's converter block is the lockfile tool's own identity, not a per-citation construct; no per-citation converter is recorded in the corpus, so none is mapped.",
+  "Frontmatter fields consumed structurally (type, sources, tags, links, claim, the relation fields) are mapped as classes, edges, tag nodes and claim nodes, not as literals."
+ ],
+ "tool": "wiki_linked_data"
+}

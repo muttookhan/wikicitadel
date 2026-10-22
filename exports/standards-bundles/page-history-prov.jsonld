@@ -1,0 +1,934 @@
+{
+ "@context": {
+  "dcterms": "http://purl.org/dc/terms/",
+  "prov": "http://www.w3.org/ns/prov#",
+  "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+  "wk": "https://wikicitadel.example.org/vocab#",
+  "xsd": "http://www.w3.org/2001/XMLSchema#"
+ },
+ "@graph": [
+  {
+   "@id": "https://wikicitadel.example.org/activities/07625ee1e08633d31125833ddee1a1ec4beccebd/wiki/overview.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Seed polish: provenance manifest, cross-links (Lens lint clean)",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:38-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:38-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "07625ee1e08633d31125833ddee1a1ec4beccebd"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/07625ee1e08633d31125833ddee1a1ec4beccebd/wiki/syntheses/decision-register.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Seed polish: provenance manifest, cross-links (Lens lint clean)",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:38-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:38-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "07625ee1e08633d31125833ddee1a1ec4beccebd"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/concepts/standing-approval.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Seed corpus verified: validator PASS, citation lockfile built, severance + registers derived",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "490d389b14ebeb620e9560cdc0b4865e5fc20745"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/entities/owner.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Seed corpus verified: validator PASS, citation lockfile built, severance + registers derived",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "490d389b14ebeb620e9560cdc0b4865e5fc20745"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/overview.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Seed corpus verified: validator PASS, citation lockfile built, severance + registers derived",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "490d389b14ebeb620e9560cdc0b4865e5fc20745"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/rules/notices.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Seed corpus verified: validator PASS, citation lockfile built, severance + registers derived",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "490d389b14ebeb620e9560cdc0b4865e5fc20745"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/syntheses/decision-register.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Seed corpus verified: validator PASS, citation lockfile built, severance + registers derived",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "490d389b14ebeb620e9560cdc0b4865e5fc20745"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/concepts/standing-approval.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "WikiCitadel v1 seed: schema, engine, tools, and the fictional demo installation",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/entities/owner.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "WikiCitadel v1 seed: schema, engine, tools, and the fictional demo installation",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/ideas.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "WikiCitadel v1 seed: schema, engine, tools, and the fictional demo installation",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/index.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "WikiCitadel v1 seed: schema, engine, tools, and the fictional demo installation",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/log.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "WikiCitadel v1 seed: schema, engine, tools, and the fictional demo installation",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/overview.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "WikiCitadel v1 seed: schema, engine, tools, and the fictional demo installation",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/rules/notices.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "WikiCitadel v1 seed: schema, engine, tools, and the fictional demo installation",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/sources/founding-note.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "WikiCitadel v1 seed: schema, engine, tools, and the fictional demo installation",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/syntheses/decision-register.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "WikiCitadel v1 seed: schema, engine, tools, and the fictional demo installation",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/94f38695c654d14a7bf1f4945d5e6475a8e00880/wiki/overview.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Audit pass 3 fixes: fictionalise two Ask test passages; genericise gateway trust rule, token prefix, provenance mirrors; seed claim pages; narration scrub",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:47:41-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:47:41-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "94f38695c654d14a7bf1f4945d5e6475a8e00880"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/94f38695c654d14a7bf1f4945d5e6475a8e00880/wiki/sources/founding-note.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Audit pass 3 fixes: fictionalise two Ask test passages; genericise gateway trust rule, token prefix, provenance mirrors; seed claim pages; narration scrub",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:47:41-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:47:41-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "94f38695c654d14a7bf1f4945d5e6475a8e00880"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/94f38695c654d14a7bf1f4945d5e6475a8e00880/wiki/syntheses/decision-register.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Audit pass 3 fixes: fictionalise two Ask test passages; genericise gateway trust rule, token prefix, provenance mirrors; seed claim pages; narration scrub",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:47:41-04:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:47:41-04:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "94f38695c654d14a7bf1f4945d5e6475a8e00880"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/concepts/demo-guide-ja.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Marathon port: gaps 3-15 build wave (exports/import, queue, clipper, graph, router, quarantine, editor, sync, presets, bench pack + scale ceiling, demo, audio briefs) + community files + ja/ko seed pages",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "dce1c37b9ff52b953fd7e99f4ab738d94dbb002c"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/concepts/demo-guide-ko.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Marathon port: gaps 3-15 build wave (exports/import, queue, clipper, graph, router, quarantine, editor, sync, presets, bench pack + scale ceiling, demo, audio briefs) + community files + ja/ko seed pages",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "dce1c37b9ff52b953fd7e99f4ab738d94dbb002c"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/index.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Marathon port: gaps 3-15 build wave (exports/import, queue, clipper, graph, router, quarantine, editor, sync, presets, bench pack + scale ceiling, demo, audio briefs) + community files + ja/ko seed pages",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "dce1c37b9ff52b953fd7e99f4ab738d94dbb002c"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/activities/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/log.md",
+   "@type": [
+    "prov:Activity",
+    "wk:RevisionActivity"
+   ],
+   "dcterms:description": "Marathon port: gaps 3-15 build wave (exports/import, queue, clipper, graph, router, quarantine, editor, sync, presets, bench pack + scale ceiling, demo, audio briefs) + community files + ja/ko seed pages",
+   "prov:endedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:startedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:wasAssociatedWith": "https://wikicitadel.example.org/agents/muttookhan",
+   "wk:commit": "dce1c37b9ff52b953fd7e99f4ab738d94dbb002c"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/agents/muttookhan",
+   "@type": [
+    "prov:Agent"
+   ],
+   "rdfs:label": "muttookhan",
+   "wk:authorString": "muttookhan"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/07625ee1e08633d31125833ddee1a1ec4beccebd/wiki/overview.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:38-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/overview.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/07625ee1e08633d31125833ddee1a1ec4beccebd/wiki/overview.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/overview.md",
+   "wk:commit": "07625ee1e08633d31125833ddee1a1ec4beccebd"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/07625ee1e08633d31125833ddee1a1ec4beccebd/wiki/syntheses/decision-register.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:38-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/07625ee1e08633d31125833ddee1a1ec4beccebd/wiki/syntheses/decision-register.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/syntheses/decision-register.md",
+   "wk:commit": "07625ee1e08633d31125833ddee1a1ec4beccebd"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/concepts/standing-approval.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/concepts/standing-approval.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/concepts/standing-approval.md",
+   "wk:commit": "490d389b14ebeb620e9560cdc0b4865e5fc20745"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/entities/owner.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/entities/owner.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/entities/owner.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/entities/owner.md",
+   "wk:commit": "490d389b14ebeb620e9560cdc0b4865e5fc20745"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/overview.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/overview.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/overview.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/overview.md",
+   "wk:commit": "490d389b14ebeb620e9560cdc0b4865e5fc20745"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/rules/notices.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/rules/notices.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/rules/notices.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/rules/notices.md",
+   "wk:commit": "490d389b14ebeb620e9560cdc0b4865e5fc20745"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/syntheses/decision-register.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:38:12-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/490d389b14ebeb620e9560cdc0b4865e5fc20745/wiki/syntheses/decision-register.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/syntheses/decision-register.md",
+   "wk:commit": "490d389b14ebeb620e9560cdc0b4865e5fc20745"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/concepts/standing-approval.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/concepts/standing-approval.md",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/entities/owner.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/entities/owner.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/entities/owner.md",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/ideas.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/ideas.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/ideas.md",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/index.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/index.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/index.md",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/log.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/log.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/log.md",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/overview.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/overview.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/overview.md",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/rules/notices.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/rules/notices.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/rules/notices.md",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/sources/founding-note.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/sources/founding-note.md",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/syntheses/decision-register.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:37:09-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/syntheses/decision-register.md",
+   "wk:commit": "5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/94f38695c654d14a7bf1f4945d5e6475a8e00880/wiki/overview.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:47:41-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/overview.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/94f38695c654d14a7bf1f4945d5e6475a8e00880/wiki/overview.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/07625ee1e08633d31125833ddee1a1ec4beccebd/wiki/overview.md",
+   "wk:commit": "94f38695c654d14a7bf1f4945d5e6475a8e00880"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/94f38695c654d14a7bf1f4945d5e6475a8e00880/wiki/sources/founding-note.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:47:41-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/94f38695c654d14a7bf1f4945d5e6475a8e00880/wiki/sources/founding-note.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/sources/founding-note.md",
+   "wk:commit": "94f38695c654d14a7bf1f4945d5e6475a8e00880"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/94f38695c654d14a7bf1f4945d5e6475a8e00880/wiki/syntheses/decision-register.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T14:47:41-04:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/94f38695c654d14a7bf1f4945d5e6475a8e00880/wiki/syntheses/decision-register.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/07625ee1e08633d31125833ddee1a1ec4beccebd/wiki/syntheses/decision-register.md",
+   "wk:commit": "94f38695c654d14a7bf1f4945d5e6475a8e00880"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/concepts/demo-guide-ja.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/concepts/demo-guide-ja.md",
+   "wk:commit": "dce1c37b9ff52b953fd7e99f4ab738d94dbb002c"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/concepts/demo-guide-ko.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/concepts/demo-guide-ko.md",
+   "wk:commit": "dce1c37b9ff52b953fd7e99f4ab738d94dbb002c"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/index.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/index.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/index.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/index.md",
+   "wk:commit": "dce1c37b9ff52b953fd7e99f4ab738d94dbb002c"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/revisions/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/log.md",
+   "@type": [
+    "prov:Entity",
+    "wk:PageRevision"
+   ],
+   "prov:generatedAtTime": {
+    "@type": "xsd:dateTime",
+    "@value": "2026-10-20T19:59:26+00:00"
+   },
+   "prov:specializationOf": "https://wikicitadel.example.org/wiki/log.md",
+   "prov:wasAttributedTo": "https://wikicitadel.example.org/agents/muttookhan",
+   "prov:wasGeneratedBy": "https://wikicitadel.example.org/activities/dce1c37b9ff52b953fd7e99f4ab738d94dbb002c/wiki/log.md",
+   "prov:wasRevisionOf": "https://wikicitadel.example.org/revisions/5be32bf07d35dded2f46c9aeb6da3dbc50b3bb80/wiki/log.md",
+   "wk:commit": "dce1c37b9ff52b953fd7e99f4ab738d94dbb002c"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/citation-chain.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/concepts/citation-chain.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/concepts/demo-guide-ja.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/concepts/demo-guide-ko.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/concepts/standing-approval.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/entities/owner.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/entities/owner.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/de/overview.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/i18n/de/overview.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/i18n/ja/decision-register.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/i18n/ja/overview.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/ko/decision-register.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/i18n/ko/decision-register.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/i18n/ko/overview.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/i18n/zh/overview.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/ideas.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/ideas.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/index.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/index.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/log.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/log.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/overview.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/overview.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/rules/notices.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/rules/notices.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/sources/founding-note.md"
+  },
+  {
+   "@id": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+   "@type": [
+    "prov:Entity",
+    "wk:Page"
+   ],
+   "rdfs:label": "wiki/syntheses/decision-register.md"
+  }
+ ]
+}

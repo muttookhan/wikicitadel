@@ -1,0 +1,342 @@
+{
+ "kind": "shacl-pattern-shapes",
+ "pattern": "SHACL-pattern validation (W3C SHACL / SHACL-AF pattern, house re-implementation): shapes target node classes and property annotations, never path lists. This report is NOT the output of a conformant SHACL processor; shapes.ttl beside it carries the same shapes for a real engine.",
+ "shapes": [
+  {
+   "clauses": [
+    {
+     "exactly": 1,
+     "kind": "count",
+     "path": "wk:pageType"
+    },
+    {
+     "kind": "in",
+     "path": "wk:pageType",
+     "values": [
+      "source",
+      "entity",
+      "concept",
+      "synthesis",
+      "query"
+     ]
+    },
+    {
+     "kind": "class-agreement",
+     "path": "wk:pageType",
+     "primary_class": {
+      "concept": "wk:ConceptPage",
+      "entity": "wk:EntityPage",
+      "query": "wk:QueryPage",
+      "source": "wk:SourcePage",
+      "synthesis": "wk:SynthesisPage"
+     }
+    }
+   ],
+   "id": "wkshape:PageTypeShape",
+   "name": "Compiled page type is declared and agrees with its class",
+   "rule_source": "AGENTS.md, Page conventions: frontmatter `type` is one of (source | entity | concept | synthesis | query) on every wiki page",
+   "target": {
+    "classes": [
+     "wk:SourcePage",
+     "wk:EntityPage",
+     "wk:ConceptPage",
+     "wk:SynthesisPage",
+     "wk:QueryPage"
+    ],
+    "in_words": "every node carrying one of the five typed page classes",
+    "kind": "class"
+   }
+  },
+  {
+   "clauses": [
+    {
+     "kind": "in",
+     "only_when_present": true,
+     "path": "wk:pageType",
+     "values": [
+      "source",
+      "entity",
+      "concept",
+      "synthesis",
+      "query"
+     ]
+    }
+   ],
+   "id": "wkshape:PageTypeVocabularyShape",
+   "name": "A declared page type is in the closed vocabulary",
+   "rule_source": "AGENTS.md, Page conventions (the same closed type list); a type outside it is not a page type here",
+   "target": {
+    "classes": [
+     "wk:Page"
+    ],
+    "in_words": "every node typed only with the generic wk:Page class (pages whose type the exporter could not map, and the structural pages)",
+    "kind": "class"
+   }
+  },
+  {
+   "clauses": [
+    {
+     "exactly": 1,
+     "kind": "count",
+     "path": "wk:relation"
+    },
+    {
+     "kind": "in",
+     "path": "wk:relation",
+     "values": [
+      "cites",
+      "contradicts",
+      "corrects",
+      "derives-from",
+      "extends",
+      "grounds",
+      "is-cited-by",
+      "is-corrected-by",
+      "is-grounded-by",
+      "is-superseded-by",
+      "mentions",
+      "replaces-part-of",
+      "supersedes"
+     ]
+    }
+   ],
+   "id": "wkshape:RelationVocabularyShape",
+   "name": "Edge relation is in the closed relation vocabulary",
+   "rule_source": "wiki/rules/relation-vocabulary.md: \"Closed. A relation outside this list is not declared\" (the ten adopted terms + the grounds extension of 2026-10-20 + mentions, the untyped default)",
+   "target": {
+    "classes": [
+     "wk:EdgeAssertion"
+    ],
+    "in_words": "every edge assertion node",
+    "kind": "class"
+   }
+  },
+  {
+   "clauses": [
+    {
+     "kind": "inverse-pair",
+     "pairs": [
+      [
+       "dcterms:replaces",
+       "dcterms:isReplacedBy"
+      ],
+      [
+       "wk:corrects",
+       "wk:isCorrectedBy"
+      ],
+      [
+       "wk:grounds",
+       "wk:isGroundedBy"
+      ],
+      [
+       "wk:contradicts",
+       "wk:contradicts"
+      ],
+      [
+       "cito:cites",
+       "cito:isCitedBy"
+      ]
+     ]
+    }
+   ],
+   "id": "wkshape:DeclaredInverseShape",
+   "name": "A declared relation between two of our pages carries its declared inverse",
+   "rule_source": "wiki/rules/relation-vocabulary.md, Rules of use: \"When both pages are ours, the inverse is written on the target too, and the pair must agree\"",
+   "target": {
+    "in_words": "every direct triple under a predicate whose vocabulary entry declares an inverse, where BOTH endpoints are page nodes (\"when both pages are ours\")",
+    "kind": "triples"
+   }
+  },
+  {
+   "clauses": [
+    {
+     "exactly": 1,
+     "kind": "count",
+     "path": "wk:provenanceLabel"
+    },
+    {
+     "kind": "in",
+     "path": "wk:provenanceLabel",
+     "values": [
+      "EXTRACTED",
+      "INFERRED",
+      "AMBIGUOUS"
+     ]
+    },
+    {
+     "exactly": 1,
+     "kind": "count",
+     "path": "wk:edgeConfidence"
+    },
+    {
+     "kind": "decimal-range",
+     "max": 1.0,
+     "min": 0.0,
+     "path": "wk:edgeConfidence"
+    },
+    {
+     "exactly": 1,
+     "kind": "count",
+     "path": "wk:polarity"
+    },
+    {
+     "kind": "in",
+     "path": "wk:polarity",
+     "values": [
+      "positive",
+      "negative"
+     ]
+    }
+   ],
+   "id": "wkshape:EdgeProvenanceShape",
+   "name": "Every edge carries its provenance label, confidence and polarity",
+   "rule_source": "The W1.8 edge-label model (tools/lens/lenslib.py edge-label section; scripts/wiki_edge_labels.py check: every door edge carries a label from the closed set with a confidence in [0, 1])",
+   "target": {
+    "classes": [
+     "wk:EdgeAssertion"
+    ],
+    "in_words": "every edge assertion node",
+    "kind": "class"
+   }
+  },
+  {
+   "clauses": [
+    {
+     "kind": "count",
+     "min": 1,
+     "path": "wk:claimText"
+    },
+    {
+     "exactly": 1,
+     "kind": "count",
+     "path": "wk:statedOn"
+    },
+    {
+     "classes": [
+      "wk:Page-classes"
+     ],
+     "kind": "target-class",
+     "path": "wk:statedOn"
+    },
+    {
+     "kind": "count",
+     "min": 1,
+     "path": "wk:asOf"
+    },
+    {
+     "kind": "joined-count",
+     "min": 1,
+     "path": "wk:statedOn",
+     "then": "cito:cites"
+    }
+   ],
+   "id": "wkshape:ClaimShape",
+   "name": "A claim is stated, dated, on a real page, and its page rests on a source",
+   "rule_source": "AGENTS.md, Outcome-verified claims: a claim page opts in with frontmatter `claim:` (one falsifiable sentence) + `as_of:`; Page conventions: `sources` is a required frontmatter element — the claim's evidence is its page's sources, carried in the graph as the page's outgoing cito:cites",
+   "target": {
+    "classes": [
+     "wk:Claim"
+    ],
+    "in_words": "every claim node",
+    "kind": "class"
+   }
+  },
+  {
+   "clauses": [
+    {
+     "exactly": 1,
+     "kind": "count",
+     "path": "wk:onPage"
+    },
+    {
+     "classes": [
+      "wk:Page-classes"
+     ],
+     "kind": "target-class",
+     "path": "wk:onPage"
+    },
+    {
+     "exactly": 1,
+     "kind": "count",
+     "path": "wk:citesSource"
+    },
+    {
+     "kind": "target-typed",
+     "path": "wk:citesSource"
+    },
+    {
+     "kind": "count",
+     "min": 1,
+     "path": "wk:contentHash"
+    },
+    {
+     "kind": "count",
+     "min": 1,
+     "path": "wk:hasSelector"
+    },
+    {
+     "classes": [
+      "oa:TextQuoteSelector"
+     ],
+     "kind": "target-class",
+     "path": "wk:hasSelector"
+    },
+    {
+     "kind": "resolves-on-disk",
+     "path": "wk:citesSource"
+    }
+   ],
+   "id": "wkshape:CitationShape",
+   "name": "A citation is locked, anchored, and its target resolves",
+   "rule_source": "AGENTS.md, Page conventions (claim-level citations): \"The path is repo-relative and must resolve\"; the citation lockfile (evaluation/citation-lockfile.json) is the machinery that proves a cited source has not changed — its entries carry the content hash and the quote selector",
+   "target": {
+    "classes": [
+     "wk:Citation"
+    ],
+    "in_words": "every citation node (the citation lockfile's entries)",
+    "kind": "class"
+   }
+  },
+  {
+   "clauses": [
+    {
+     "in_words": "some page node stands in dcterms:replaces to the tombstone (the graph form of its declared is-superseded-by)",
+     "kind": "inverse-exists",
+     "predicate": "dcterms:replaces"
+    }
+   ],
+   "id": "wkshape:TombstoneShape",
+   "name": "A tombstone declares its replacement",
+   "rule_source": "wiki/rules/relation-vocabulary.md, Tombstones + AGENTS.md, Tombstones: a tombstone carries `replaced_by` when there is a replacement and declares the is-superseded-by relation. HALF MECHANISED: the export's mapping carries wk:status but not the tombstone reason/date fields, so this shape checks the replacement half only (see the report's gap list)",
+   "target": {
+    "in_words": "every page whose wk:status is \"tombstoned\" (a value target — the SHACL-AF custom-target form)",
+    "kind": "value",
+    "path": "wk:status",
+    "value": "tombstoned"
+   }
+  },
+  {
+   "clauses": [
+    {
+     "kind": "count",
+     "min": 1,
+     "path": "skos:scopeNote"
+    },
+    {
+     "kind": "not-value",
+     "path": "wk:tagStatus",
+     "value": "deprecated"
+    }
+   ],
+   "id": "wkshape:TagRegistrationShape",
+   "name": "A tag in use is registered",
+   "rule_source": "AGENTS.md, Tag registry: (1) \"A tag is registered at first use\"; (2) \"A concept's scopeNote says what the tag means here\" — the export joins a used tag to its registry row and emits skos:scopeNote exactly when the join succeeds, so a used tag with no scopeNote is an unregistered tag in use; (3) deprecation supersedes — a deprecated tag still in use is named",
+   "target": {
+    "in_words": "every node that is the object of a dcterms:subject triple (tags actually used on pages)",
+    "kind": "objects-of",
+    "path": "dcterms:subject"
+   }
+  }
+ ],
+ "version": "1.0.0"
+}

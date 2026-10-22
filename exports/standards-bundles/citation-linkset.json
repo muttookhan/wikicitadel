@@ -1,0 +1,529 @@
+{
+ "linkset": [
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/concepts/capture-pipeline-extensions.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md",
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md",
+     "title": "概要"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md",
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md",
+     "title": "개요"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/concepts/eval-judging-machinery-r3.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/ideas.md"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/entities/owner.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/i18n/de/overview.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ],
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/entities/owner.md",
+     "title": "The owner"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/rules/notices.md",
+     "title": "Notices — the rules page"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+     "title": "Founding note (source)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+     "title": "Decision register"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ],
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md",
+     "title": "Standing approval (retired)"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/i18n/ja/overview.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ],
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/entities/owner.md",
+     "title": "The owner"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/rules/notices.md",
+     "title": "Notices — the rules page"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+     "title": "Founding note (source)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+     "title": "Decision register"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/i18n/ko/decision-register.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ],
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md",
+     "title": "Standing approval (retired)"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/i18n/ko/overview.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ],
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/entities/owner.md",
+     "title": "The owner"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/rules/notices.md",
+     "title": "Notices — the rules page"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+     "title": "Founding note (source)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+     "title": "Decision register"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/i18n/zh/overview.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ],
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/entities/owner.md",
+     "title": "The owner"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/rules/notices.md",
+     "title": "Notices — the rules page"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+     "title": "Founding note (source)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+     "title": "Decision register"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/index.md",
+   "https://wikicitadel.example.org/vocab#grounds": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+     "title": "Founding note (source)"
+    }
+   ],
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/capture-pipeline-extensions.md",
+     "title": "Capture pipeline extensions (Marathon Round 3, TA4)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md",
+     "title": "Capture and triage machinery"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md",
+     "title": "デモガイド（日本語）"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md",
+     "title": "데모 가이드 (한국어)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/did-webvh.md",
+     "title": "did:webvh — a reading lead, not a build"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/eval-judging-machinery-r3.md",
+     "title": "Eval & judging machinery (Marathon Round 3, TB6)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/memory-and-retrieval-designs.md",
+     "title": "Memory and retrieval designs"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md",
+     "title": "Progressive retrieval — dual-level routing, layered disclosure, proposed lenses"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md",
+     "title": "Standing approval (retired)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/entities/owner.md",
+     "title": "The owner"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/i18n/de/overview.md",
+     "title": "Überblick"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md",
+     "title": "決定レジスタ"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/ideas.md",
+     "title": "Ideas"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/rules/curation-workarounds.md",
+     "title": "Curation activities and workarounds register — the rules page"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/rules/evidence-ttl.md",
+     "title": "Evidence TTL — the rules page"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/rules/notices.md",
+     "title": "Notices — the rules page"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/rules/share-publish-cite-ready.md",
+     "title": "Share, publish, cite-ready — a controlled vocabulary"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md",
+     "title": "Marathon Round 3, Lane TA5 — proposal machinery (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb7-retrieval.md",
+     "title": "Retrieval and ranking machinery — Marathon Round 3 (TB7)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md",
+     "title": "Five gated patterns — build notes (demo corpus)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-10-2026-10-21.md",
+     "title": "Marathon Round 10 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-11-2026-10-21.md",
+     "title": "Marathon Round 11 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-12-2026-10-21.md",
+     "title": "Marathon Round 12 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-13-2026-10-21.md",
+     "title": "Marathon Round 13 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+     "title": "Marathon Round 3 — TA7: doors and watch machinery"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-4-2026-10-21.md",
+     "title": "Marathon Round 4 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-5-2026-10-21.md",
+     "title": "Marathon Round 5 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-6-2026-10-21.md",
+     "title": "Marathon Round 6 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-7-2026-10-21.md",
+     "title": "Marathon Round 7 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-8-2026-10-21.md",
+     "title": "Marathon Round 8 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-9-2026-10-21.md",
+     "title": "Marathon Round 9 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/source-registry.md",
+     "title": "Source registry — one manifest over raw/sources"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/log.md",
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md",
+     "title": "Capture and triage machinery"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md",
+     "title": "デモガイド（日本語）"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md",
+     "title": "데모 가이드 (한국어)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md",
+     "title": "Progressive retrieval — dual-level routing, layered disclosure, proposed lenses"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md",
+     "title": "Standing approval (retired)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/i18n/de/overview.md",
+     "title": "Überblick"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md",
+     "title": "決定レジスタ"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/ideas.md",
+     "title": "Ideas"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+     "title": "Founding note (source)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md",
+     "title": "Five gated patterns — build notes (demo corpus)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-10-2026-10-21.md",
+     "title": "Marathon Round 10 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-11-2026-10-21.md",
+     "title": "Marathon Round 11 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-12-2026-10-21.md",
+     "title": "Marathon Round 12 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-13-2026-10-21.md",
+     "title": "Marathon Round 13 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+     "title": "Marathon Round 3 — TA7: doors and watch machinery"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-4-2026-10-21.md",
+     "title": "Marathon Round 4 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-5-2026-10-21.md",
+     "title": "Marathon Round 5 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-6-2026-10-21.md",
+     "title": "Marathon Round 6 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-7-2026-10-21.md",
+     "title": "Marathon Round 7 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-8-2026-10-21.md",
+     "title": "Marathon Round 8 — record (2026-10-21)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-9-2026-10-21.md",
+     "title": "Marathon Round 9 — record (2026-10-21)"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/overview.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ],
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/entities/owner.md",
+     "title": "The owner"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/rules/notices.md",
+     "title": "Notices — the rules page"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+     "title": "Founding note (source)"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+     "title": "Decision register"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/sources/founding-note.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ],
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/overview.md",
+     "title": "Overview"
+    },
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+     "title": "Decision register"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/syntheses/decision-register.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ],
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md",
+     "title": "Standing approval (retired)"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/founding-note.md"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb7-retrieval.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/ideas.md"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/ideas.md"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/ideas.md"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/syntheses/marathon-round-4-2026-10-21.md",
+   "https://wikicitadel.example.org/vocab#mentions": [
+    {
+     "href": "https://wikicitadel.example.org/wiki/syntheses/source-registry.md",
+     "title": "Source registry — one manifest over raw/sources"
+    }
+   ]
+  },
+  {
+   "anchor": "https://wikicitadel.example.org/wiki/syntheses/source-registry.md",
+   "http://purl.org/spar/cito/cites": [
+    {
+     "href": "https://wikicitadel.example.org/raw/sources/provenance-manifest.json"
+    }
+   ]
+  }
+ ]
+}

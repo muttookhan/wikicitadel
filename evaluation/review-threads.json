@@ -1,0 +1,18 @@
+{
+ "counts": {
+  "anchored": 0,
+  "moved": 0,
+  "open": 0,
+  "orphaned": 0,
+  "page_level": 0,
+  "resolved": 0,
+  "threads": 0
+ },
+ "findings": [],
+ "kind": "review-threads",
+ "register": "evaluation/review-threads.jsonl",
+ "register_present": false,
+ "register_problems": [],
+ "threads": [],
+ "tool": "scripts/wiki_review_threads.py"
+}

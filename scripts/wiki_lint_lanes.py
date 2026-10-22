@@ -27,8 +27,8 @@ shape — six named lanes, one surfacing report:
     signal is the 30-day frontmatter clock (`updated`, else
     `created`) — kept, but labelled secondary: on a young wiki
     it cannot fire, and its zero means nothing on its own.
-    Two further eyes ride this lane (WikiCitadel v1):
-    owner attestations — the POSITIVE freshness signal:
+    Two further eyes ride this lane (added 2026-10-20, wave-3
+    set B): owner attestations — the POSITIVE freshness signal:
     a page carrying the owner's `verified_until` date
     (frontmatter, with `verified_by: owner`) counts as attested
     until that date and surfaces here as an "attestation
@@ -93,26 +93,44 @@ shape — six named lanes, one surfacing report:
     by kind with their locations: statement-level epistemic
     state, where page frontmatter only tracks page-level
     state; pattern: the Coppermind wiki's editorial notation,
-    via the survey).
+    via the wave-4 survey), and **statement labels** (the
+    label pack, build wave 5: bracketed kind labels
+    [SOURCE] / [INTERPRETATION] / [HYPOTHESIS] / [DECISION]
+    and verification labels [verified] / [non-verified] at a
+    statement's start — classification, where the markers
+    flag defects — counted with their locations under a
+    closed vocabulary, plus the claims-to-avoid census over
+    entity pages; idea sources: open-dossier, VitaeContext,
+    Local Contexts label states).
 
-Coaching (WikiCitadel v1):
+Coaching (added 2026-10-20, consolidated-queue item 41):
 every finding class that an agent can act on carries a
 "**To clear this:**" line in the filing — what failed, why it
 matters, and the concrete change that clears it, written for
-collaborating agents (whose filings pass through these
-lanes) as much as for the compiling agent. A lane that only
-rejects teaches its contributors to route around it
-(Halfaker et al., via the survey); the coaching line is
-the path back. Lines
+Grok and Hark (whose filings pass through these lanes) as
+much as for Mehmed. A lane that only rejects teaches its
+contributors to route around it (Halfaker et al., via the
+wave-8 survey); the coaching line is the path back. Lines
 appear only for classes with findings this run, and they
 change no count, verdict, or surfacing rule.
 
-Alongside the lanes, the report carries one further eye
-(WikiCitadel v1): **owner marks** — actionable marks
+Alongside the lanes, the report carries one further eye (added
+2026-10-20, wave-3 item C1): **owner marks** — actionable marks
 (correction / question) from the annotation layer over raw
 (scripts/wiki_annotate.py) that no compiled page accounts for.
 It is an eye on the report, not a seventh lane; the six-lane
 structure above is unchanged.
+
+A companion check rides the report (added 2026-10-22, build
+wave 2): the **COGA structure checklist** — the mechanically
+decidable part of the W3C Cognitive and Learning Disabilities
+Accessibility (COGA) guidance "Making Content Usable" (clean
+re-implementation, idea only): does a compiled page state its
+purpose at the top, chunk its content under headings, keep
+its heading hierarchy unbroken, introduce its lists and
+tables, keep paragraphs short, describe its links, and carry
+its page furniture. Structure only — the check measures
+against stated house budgets and never judges wording.
 
 The report is filed at wiki/filings/lint-lanes-<date>.md in the
 filings style of wiki/filings/observations.md
@@ -457,14 +475,15 @@ def lane_quotes():
             "divergences": report["divergences"],
             "caveats": caveat_findings(),
             "treatment": treatment.treatment_report(),
-            "markers": editorial_markers()}
+            "markers": editorial_markers(),
+            "labels": statement_labels()}
 
 
 # -- Lane 5 (continued): caveat carriage ---------------------------------
 #
 # The compilation-fidelity companion to the quotes check above:
 # quotes verify that wording survived compilation; this check
-# verifies that QUALIFICATIONS did (build; pattern: the
+# verifies that QUALIFICATIONS did (wave-3 build; pattern: the
 # Effortless Academic's caveat-stripping failure — a compiled
 # page dropped the conditions that made its source's claims
 # true, and later answers inherited the overstatement).
@@ -701,6 +720,236 @@ def editorial_markers(root=None):
             "locations": locations}
 
 
+# -- Lane 5 (continued): statement labels ---------------------------------
+#
+# Statement-level label pack (build wave 5, 2026-10-22; idea
+# sources: jpaarhuis/open-dossier's four-way statement label,
+# VitaeContext, and Local Contexts' consent / verification
+# label states, via the build list — the grammar and checker
+# here are this tree's own re-implementation). Where the
+# editorial markers above flag a statement's DEFECTS, labels
+# classify a statement's KIND and record its VERIFICATION
+# state — a complement to the frontmatter axes (status /
+# confidence / stage / work_type), which speak of whole
+# pages, never of single statements.
+#
+# Kind labels — a bracketed tag at the START of a statement
+# (a paragraph, or a list item after its list marker):
+#   [SOURCE]         the statement restates what a cited
+#                    source says; its citation rides with it.
+#   [INTERPRETATION] the compiler's reading of one or more
+#                    sources — synthesis, not restatement.
+#   [HYPOTHESIS]     a conjecture not yet settled. A
+#                    hypothesis is an OPEN item: it is
+#                    PROMOTED (relabelled [DECISION] when a
+#                    ruling settles it, or rewritten as a
+#                    settled labelled statement when evidence
+#                    settles it) or KILLED (the statement is
+#                    removed, or struck through with the kill
+#                    recorded on the page). It never ages
+#                    silently: this census lists every open
+#                    hypothesis by location.
+#   [DECISION]       the statement records a ruling (the
+#                    owner's, or an agent's under a delegation
+#                    tier), in force until superseded.
+#
+# Verification labels — a second bracketed tag after the
+# kind label, or standing alone at a statement's start. The
+# state is APPLIED, not inferred from absence:
+#   [verified]       this statement's representation has
+#                    been checked against its source (the
+#                    citation lockfile's quote check, or a
+#                    human read), recorded when it happens.
+#   [non-verified]   this statement's representation has
+#                    NOT been checked — recorded explicitly,
+#                    so the unchecked state is a fact on the
+#                    page rather than a missing mark a
+#                    reader must guess at.
+#
+# Contradictions between labelled statements are recorded
+# with BOTH source IDs: the statement carries {{disputed}}
+# and a Contradiction callout naming both sources (the
+# settled schema convention), and this census lists
+# labelled statements carrying {{disputed}} together with
+# the source IDs their own statement cites (^[cite: raw/...]
+# markers and [[...]] source-page links), so the pair stands
+# on the record at the statement itself.
+#
+# Closed vocabulary: a {{name}} flag outside
+# EDITORIAL_MARKERS, or an ALL-CAPS bracket token of 3+
+# letters in label position outside STATEMENT_KIND_LABELS,
+# is an UNKNOWN finding, named with its location — never a
+# silent pass. (Short sigla of 1–2 letters and lowercase
+# bracket tokens are not label-shaped and are not flagged:
+# the corpus's own [DR] citation sigil and [hawk-checked]
+# token are the standing evidence for that boundary.)
+# Counting rules mirror the markers': fenced code and inline
+# code never count (a mention in backticks is documentation,
+# not a use), the frontmatter is skipped, and a mention in
+# bare prose DOES count, its location showing which it is.
+#
+# Claims to avoid: person / context pages (wiki/entities/)
+# may carry a `## Claims to avoid` section — negative claims
+# an agent must not assert about the subject, each with its
+# reason, so the prohibition is on the page, not in an
+# agent's memory. The census reports which entity pages
+# carry the section and lists the avoided claims; a page
+# without one is a census fact, not a finding (there may
+# be nothing to avoid).
+
+STATEMENT_KIND_LABELS = ("SOURCE", "INTERPRETATION",
+                         "HYPOTHESIS", "DECISION")
+VERIFICATION_LABELS = ("verified", "non-verified")
+ANY_FLAG_RE = re.compile(r"\{\{([A-Za-z][A-Za-z0-9_-]*)\}\}")
+STATEMENT_LABEL_RE = re.compile(
+    r"^\s*(?:>\s*)?(?:[-*+]\s+|\d+[.)]\s+)?"
+    r"\[([A-Za-z][A-Za-z-]*)\](?=\s|$)"
+    r"(?:\s+\[([A-Za-z][A-Za-z-]*)\](?=\s|$))?")
+SOURCE_ID_RES = (
+    re.compile(r"\^\[cite:\s*([^\]#\s]+)"),
+    re.compile(r"\[\[([^\]|]*sources/[^\]|]*)\]\]"),
+)
+CLAIMS_AVOID_HEADING_RE = re.compile(
+    r"^##\s+Claims to avoid\s*$", re.IGNORECASE)
+HEADING_RE = re.compile(r"^#{1,6}\s")
+BULLET_RE = re.compile(r"^\s*[-*]\s+(.*)$")
+
+
+def _excerpt(original_lines, lineno, cap=120):
+    excerpt = original_lines[lineno - 1].strip()
+    if len(excerpt) > cap:
+        excerpt = excerpt[:cap - 1].rstrip() + "…"
+    return excerpt
+
+
+def claims_to_avoid(root=None):
+    """Claims-to-avoid census over wiki/entities/.
+
+    Returns {"pages_checked": n, "with_section": m,
+    "sections": [{"page", "claims": [...]}]} — sections in
+    page order, claims in page order."""
+    root = Path(root) if root is not None else ROOT
+    ent_dir = root / "wiki" / "entities"
+    checked = 0
+    sections = []
+    if ent_dir.is_dir():
+        for path in sorted(ent_dir.glob("*.md")):
+            checked += 1
+            rel = path.relative_to(root).as_posix()
+            lines = path.read_text(encoding="utf-8",
+                                   errors="ignore").splitlines()
+            claims = None
+            for line in lines:
+                if claims is None:
+                    if CLAIMS_AVOID_HEADING_RE.match(line):
+                        claims = []
+                    continue
+                if HEADING_RE.match(line):
+                    break
+                m = BULLET_RE.match(line)
+                if m:
+                    claim = m.group(1).strip()
+                    if len(claim) > 160:
+                        claim = claim[:159].rstrip() + "…"
+                    claims.append(claim)
+            if claims is not None:
+                sections.append({"page": rel,
+                                 "claims": claims})
+    return {"pages_checked": checked,
+            "with_section": len(sections),
+            "sections": sections}
+
+
+def statement_labels(root=None):
+    """Statement-label census over the compiled layer.
+
+    Returns kind / verification counts, the labelled
+    statements' locations, the open hypotheses, the
+    labelled statements carrying {{disputed}} with the
+    source IDs they cite, the unknown-vocabulary findings
+    (flags and labels, each named), and the claims-to-avoid
+    census — all in deterministic (page, line) order."""
+    root = Path(root) if root is not None else ROOT
+    wiki_dir = root / "wiki"
+    kind_counts = {k: 0 for k in STATEMENT_KIND_LABELS}
+    verification_counts = {k: 0 for k in VERIFICATION_LABELS}
+    locations = []
+    unknown_flags = []
+    unknown_labels = []
+    if wiki_dir.is_dir():
+        for path in sorted(wiki_dir.rglob("*.md")):
+            rel = path.relative_to(root).as_posix()
+            if rel in EXCLUDED_FILES \
+                    or rel.startswith(EXCLUDED_DIRS):
+                continue
+            text = path.read_text(encoding="utf-8",
+                                  errors="ignore")
+            original = text.splitlines()
+            for lineno, visible in _marker_visible_lines(text):
+                for m in ANY_FLAG_RE.finditer(visible):
+                    if m.group(1) not in EDITORIAL_MARKERS:
+                        unknown_flags.append({
+                            "page": rel, "line": lineno,
+                            "name": m.group(1),
+                            "excerpt": _excerpt(original,
+                                                lineno)})
+                m = STATEMENT_LABEL_RE.match(visible)
+                if not m:
+                    continue
+                kind = None
+                verification = None
+                for token in (m.group(1), m.group(2)):
+                    if token is None:
+                        continue
+                    if token in STATEMENT_KIND_LABELS:
+                        if kind is None:
+                            kind = token
+                            kind_counts[token] += 1
+                    elif token in VERIFICATION_LABELS:
+                        if verification is None:
+                            verification = token
+                            verification_counts[token] += 1
+                    elif len(token) >= 3 and token.isupper():
+                        unknown_labels.append({
+                            "page": rel, "line": lineno,
+                            "name": token,
+                            "excerpt": _excerpt(original,
+                                                lineno)})
+                if kind is not None or verification is not None:
+                    entry = {"page": rel, "line": lineno,
+                             "kind": kind,
+                             "verification": verification,
+                             "excerpt": _excerpt(original, lineno)}
+                    if "{{disputed}}" in visible:
+                        ids = []
+                        for rx in SOURCE_ID_RES:
+                            for hit in rx.finditer(visible):
+                                if hit.group(1) not in ids:
+                                    ids.append(hit.group(1))
+                        entry["source_ids"] = ids
+                    locations.append(entry)
+    locations.sort(key=lambda h: (h["page"], h["line"]))
+    unknown_flags.sort(key=lambda h: (h["page"], h["line"],
+                                      h["name"]))
+    unknown_labels.sort(key=lambda h: (h["page"], h["line"],
+                                       h["name"]))
+    return {
+        "kind_counts": kind_counts,
+        "verification_counts": verification_counts,
+        "labelled_total": len(locations),
+        "locations": locations,
+        "open_hypotheses": [
+            {"page": h["page"], "line": h["line"],
+             "excerpt": h["excerpt"]}
+            for h in locations if h["kind"] == "HYPOTHESIS"],
+        "disputed_labelled": [
+            h for h in locations if "source_ids" in h],
+        "unknown_flags": unknown_flags,
+        "unknown_labels": unknown_labels,
+        "claims_to_avoid": claims_to_avoid(root),
+    }
+
+
 # -- Rating-table legend check (Lane 5 companion) ---------------------------
 # Pattern: weijing143/llm-wiki-notes, via the feature survey —
 # tables carrying rating marks must include a legend, checked
@@ -791,6 +1040,373 @@ def rating_table_findings(root=None):
 
 def lane_rating_tables():
     return rating_table_findings()
+
+
+# -- COGA structure checklist (companion, added 2026-10-22) ------------------
+# Clean re-implementation from the W3C Cognitive and Learning
+# Disabilities Accessibility (COGA) guidance, "Making Content
+# Usable for People with Cognitive and Learning Disabilities"
+# — idea only, no text taken beyond short pattern names.
+# COGA's shape: a reader should not have to hold state across
+# a scroll — the purpose is clear at the top, content is
+# chunked under descriptive headings, the layout is
+# consistent, blocks arrive in context. Only the mechanically
+# decidable part is checked here, over page structure alone;
+# anything needing judgement of wording or meaning is out of
+# scope by design — the check reports structure, never taste.
+# COGA states the patterns, not numbers: every budget below
+# is a HOUSE constant, named as such in each finding's
+# evidence ("measured vs house budget"), never dressed as the
+# standard. ATX headings only (the corpus's convention).
+# Report-only, like every lane: nothing is rewritten.
+
+COGA_LONG_PAGE_WORDS = 600    # body words at which a page is
+                              # "long" for the summary-lead
+                              # check (COGA pattern: make the
+                              # purpose clear / provide a
+                              # summary at the top)
+COGA_SECTION_WORDS = 800      # words one heading's own text
+                              # may run before the next
+                              # heading (COGA pattern: chunk
+                              # content into short sections)
+COGA_PARAGRAPH_WORDS = 150    # words in one paragraph
+                              # (COGA clear-content guidance:
+                              # short paragraphs)
+COGA_VAGUE_LINK_TEXTS = {
+    "click here", "here", "link", "this", "this link",
+    "this page", "read more", "more", "details", "see here",
+}                             # COGA pattern: link purpose
+                              # clear from its text
+
+COGA_CHECKS = (
+    ("no-summary-lead",
+     "Long page with no summary paragraph before its first"
+     " section heading (COGA: purpose clear at the top)"),
+    ("heading-level-skip",
+     "Heading hierarchy skips a level (COGA: clear,"
+     " consistent structure)"),
+    ("unbroken-section",
+     "Section runs long with no sub-heading (COGA: chunk"
+     " content)"),
+    ("unintroduced-block",
+     "List or table with no introducing sentence (COGA:"
+     " content arrives in context)"),
+    ("long-paragraph",
+     "Paragraph over the house word budget (COGA: short"
+     " paragraphs)"),
+    ("non-descriptive-link",
+     "Link whose text does not say where it goes (COGA:"
+     " link purpose clear)"),
+    ("missing-frontmatter-field",
+     "Page furniture incomplete: no title / type recorded"
+     " (COGA: consistent layout; fields per AGENTS.md)"),
+)
+
+_COGA_LIST_RE = re.compile(r"^\s{0,6}([-*+]|\d{1,3}[.)])\s")
+_COGA_HR_RE = re.compile(r"^\s*(-{3,}|\*{3,}|_{3,})\s*$")
+_COGA_LINK_RE = re.compile(r"(?<!!)\[([^\]]*)\]\(([^)\s]+)"
+                           r"(?:\s+[^)]*)?\)")
+_COGA_MARKER_RE = re.compile(
+    r"^\s*(#{1,6}\s+|[-*+]\s+|\d{1,3}[.)]\s+|>\s?)")
+
+
+def _coga_words(line):
+    return len(_COGA_MARKER_RE.sub("", line).split())
+
+
+def _coga_blocks(body_lines, first_line_no):
+    """Group body lines into structural blocks.
+
+    Returns a list of {"kind", "line", "words", "lines",
+    "items", "level", "text"} — kind one of heading / para /
+    quote / list / table / code / other; `line` is the
+    1-based line number of the block's first line in the
+    FILE (the caller passes the body's first line number);
+    `items` counts list markers / table rows. Markdown
+    reading rules apply: a plain line inside a list or quote
+    is its lazy continuation, and a loose list (items split
+    by blank lines) is one list — consecutive blocks of kind
+    list / table / quote merge, paragraphs never do (a
+    paragraph boundary is real). Fenced code is one block
+    with 0 words: code is not prose a reader holds in
+    memory, and it never introduces or summarises."""
+    blocks = []
+    in_fence = False
+    cur = None
+
+    def flush():
+        nonlocal cur
+        if cur is not None:
+            if blocks and cur["kind"] in ("list", "table",
+                                          "quote") \
+                    and blocks[-1]["kind"] == cur["kind"]:
+                blocks[-1]["words"] += cur["words"]
+                blocks[-1]["lines"] += cur["lines"]
+                blocks[-1]["items"] += cur["items"]
+            else:
+                blocks.append(cur)
+            cur = None
+
+    for i, raw in enumerate(body_lines):
+        line_no = first_line_no + i
+        stripped = raw.strip()
+        lstripped = raw.lstrip()
+        if lstripped.startswith("```") \
+                or lstripped.startswith("~~~"):
+            if cur is not None and cur["kind"] == "code":
+                cur["lines"] += 1
+                flush()
+                in_fence = False
+            else:
+                flush()
+                cur = {"kind": "code", "line": line_no,
+                       "words": 0, "lines": 1, "items": 0,
+                       "level": 0, "text": ""}
+                in_fence = True
+            continue
+        if in_fence:
+            cur["lines"] += 1
+            continue
+        if not stripped:
+            flush()
+            continue
+        m = HEADING_LINE_RE.match(raw)
+        if m:
+            flush()
+            level = len(raw) - len(raw.lstrip("#"))
+            blocks.append({
+                "kind": "heading", "line": line_no, "words": 0,
+                "lines": 1, "items": 0, "level": level,
+                "text": raw.lstrip("#").strip()})
+            continue
+        if lstripped.startswith("|"):
+            kind = "table"
+        elif _COGA_LIST_RE.match(raw):
+            kind = "list"
+        elif lstripped.startswith(">"):
+            kind = "quote"
+        elif _COGA_HR_RE.match(raw) or lstripped.startswith("<"):
+            kind = "other"
+        elif cur is not None and cur["kind"] in ("list",
+                                                 "quote"):
+            kind = cur["kind"]     # lazy continuation
+        else:
+            kind = "para"
+        if cur is not None and cur["kind"] == kind:
+            cur["lines"] += 1
+            if kind in ("para", "quote", "list"):
+                cur["words"] += _coga_words(raw)
+            if kind == "list" and _COGA_LIST_RE.match(raw):
+                cur["items"] += 1
+            if kind == "table":
+                cur["items"] += 1
+        else:
+            flush()
+            cur = {"kind": kind, "line": line_no,
+                   "words": _coga_words(raw)
+                   if kind in ("para", "quote", "list") else 0,
+                   "lines": 1,
+                   "items": 1 if kind in ("list", "table")
+                   else 0,
+                   "level": 0, "text": ""}
+    flush()
+    return blocks
+
+
+def _coga_page_findings(rel, text):
+    """All COGA findings for one page: a list of
+    {"page", "check", "line", "evidence"} (unsorted)."""
+    findings = []
+
+    def add(check, line, evidence):
+        findings.append({"page": rel, "check": check,
+                         "line": line, "evidence": evidence})
+
+    fields, _body = parse_frontmatter(text)
+    lines = text.splitlines()
+    body_start = 0
+    if lines and lines[0].strip() == "---":
+        for j in range(1, len(lines)):
+            if lines[j].strip() == "---":
+                body_start = j + 1
+                break
+    body_lines = lines[body_start:]
+
+    # Furniture (check 7): tombstones are exempt — their
+    # shape is prescribed by the tombstone convention.
+    if str(fields.get("status", "")).strip() == "tombstoned":
+        return findings
+    if not fields:
+        add("missing-frontmatter-field", 1,
+            "no parseable frontmatter block — title and type"
+            " unrecorded (AGENTS.md page conventions require"
+            " both on every page)")
+    else:
+        for field in ("title", "type"):
+            value = fields.get(field)
+            if value is None \
+                    or not str(value).strip():
+                add("missing-frontmatter-field", 1,
+                    f"frontmatter carries no `{field}`"
+                    " (AGENTS.md page conventions require"
+                    " title and type on every page)")
+
+    blocks = _coga_blocks(body_lines, body_start + 1)
+    headings = [b for b in blocks if b["kind"] == "heading"]
+    body_words = sum(b["words"] for b in blocks
+                     if b["kind"] in ("para", "quote", "list"))
+
+    # Summary lead (check 1): a long page owes prose — a
+    # paragraph or a blockquote — before its first section
+    # heading (level 2+); the title heading does not count
+    # as orientation, and neither do lists or tables.
+    if body_words >= COGA_LONG_PAGE_WORDS:
+        first_section = next(
+            (b for b in headings if b["level"] >= 2), None)
+        lead = blocks[:blocks.index(first_section)] \
+            if first_section is not None else blocks
+        if not any(b["kind"] in ("para", "quote")
+                   for b in lead):
+            where = (f"first section heading"
+                     f" '{first_section['text'][:60]}'"
+                     if first_section is not None
+                     else "no section headings")
+            add("no-summary-lead",
+                first_section["line"] if first_section else 1,
+                f"long page ({body_words} body words; house"
+                f" budget {COGA_LONG_PAGE_WORDS}) reaches its"
+                f" {where} with no summary paragraph before it")
+
+    # Heading hierarchy (check 2).
+    prev = None
+    for h in headings:
+        if prev is not None \
+                and h["level"] > prev["level"] + 1:
+            add("heading-level-skip", h["line"],
+                f"heading level jumps H{prev['level']} (line"
+                f" {prev['line']}) to H{h['level']} —"
+                f" '{h['text'][:60]}'")
+        prev = h
+
+    # Unbroken sections (check 3): each heading's own text —
+    # the blocks after it, up to the next heading of any
+    # level — plus the page lead as a segment of its own.
+    segments = []
+    label, seg_line, seg_words = "(page lead)", 1, 0
+    for b in blocks:
+        if b["kind"] == "heading":
+            segments.append((label, seg_line, seg_words))
+            label, seg_line, seg_words = \
+                b["text"][:60], b["line"], 0
+        elif b["kind"] in ("para", "quote", "list"):
+            seg_words += b["words"]
+    segments.append((label, seg_line, seg_words))
+    for label, seg_line, seg_words in segments:
+        if seg_words > COGA_SECTION_WORDS:
+            add("unbroken-section", seg_line,
+                f"section '{label}' runs {seg_words} words"
+                f" before the next heading (house budget"
+                f" {COGA_SECTION_WORDS})")
+
+    # Unintroduced blocks (check 4): a list or table whose
+    # immediately preceding block is not prose (paragraph or
+    # blockquote) arrives without context.
+    for i, b in enumerate(blocks):
+        if b["kind"] in ("list", "table"):
+            prev = blocks[i - 1] if i else None
+            if prev is None or prev["kind"] not in (
+                    "para", "quote"):
+                if prev is None:
+                    desc = "the start of the page"
+                elif prev["kind"] == "heading":
+                    desc = f"heading '{prev['text'][:60]}'"
+                else:
+                    desc = f"a {prev['kind']} block"
+                unit = "items" if b["kind"] == "list" \
+                    else "rows"
+                add("unintroduced-block", b["line"],
+                    f"{b['kind']} of {b['items']} {unit}"
+                    f" directly follows {desc} with no"
+                    " introducing sentence")
+
+    # Long paragraphs (check 5): paragraphs only — a
+    # quotation cannot be chunked without breaking it, and
+    # a list is chunked by its items.
+    for b in blocks:
+        if b["kind"] == "para" \
+                and b["words"] > COGA_PARAGRAPH_WORDS:
+            add("long-paragraph", b["line"],
+                f"paragraph of {b['words']} words (house"
+                f" budget {COGA_PARAGRAPH_WORDS})")
+
+    # Non-descriptive links (check 6): markdown links only —
+    # a wikilink's text is its target page's name, which is
+    # descriptive by construction. Fenced code is skipped.
+    in_fence = False
+    for i, raw in enumerate(body_lines):
+        lstripped = raw.lstrip()
+        if lstripped.startswith("```") \
+                or lstripped.startswith("~~~"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        for m in _COGA_LINK_RE.finditer(raw):
+            label_text = m.group(1).strip()
+            url = m.group(2)
+            norm = re.sub(r"[^a-z0-9 ]", "",
+                          label_text.lower()).strip()
+            norm = re.sub(r"\s+", " ", norm)
+            if not label_text \
+                    or norm in COGA_VAGUE_LINK_TEXTS \
+                    or label_text.lower().startswith(
+                        ("http://", "https://")) \
+                    or label_text == url:
+                shown = label_text[:60] if label_text \
+                    else "(empty)"
+                add("non-descriptive-link", body_start + 1 + i,
+                    f"link text '{shown}' for {url[:80]} does"
+                    " not say where the link goes")
+    return findings
+
+
+def coga_findings(root=None):
+    """COGA structure findings over the compiled layer.
+
+    Returns {"findings": [{"page", "check", "line",
+    "evidence"}], "count": n, "by_check": {check: n for
+    every check, in COGA_CHECKS order}, "pages_checked": n,
+    "pages_with_findings": n} — findings in deterministic
+    (page, check, line) order. The other lanes' exclusions
+    apply (filings, talk pages, index, log)."""
+    root = Path(root) if root is not None else ROOT
+    wiki_dir = root / "wiki"
+    findings = []
+    pages_checked = 0
+    if wiki_dir.is_dir():
+        for path in sorted(wiki_dir.rglob("*.md")):
+            rel = path.relative_to(root).as_posix()
+            if rel in EXCLUDED_FILES \
+                    or rel.startswith(EXCLUDED_DIRS):
+                continue
+            pages_checked += 1
+            text = path.read_text(encoding="utf-8",
+                                  errors="ignore")
+            findings.extend(_coga_page_findings(rel, text))
+    findings.sort(key=lambda f: (f["page"], f["check"],
+                                 f["line"], f["evidence"]))
+    by_check = {check: 0 for check, _ in COGA_CHECKS}
+    for f in findings:
+        by_check[f["check"]] += 1
+    return {"findings": findings, "count": len(findings),
+            "by_check": by_check,
+            "pages_checked": pages_checked,
+            "pages_with_findings":
+                len({f["page"] for f in findings})}
+
+
+def lane_coga():
+    return coga_findings()
 
 
 # -- Lane 6: superseded decisions ------------------------------------------
@@ -1371,6 +1987,110 @@ def render(lanes, run_date, lens_note):
     else:
         lines += ["No editorial markers on the compiled layer"
                   " this run.", ""]
+    lab = l5.get("labels") or {
+        "kind_counts": {k: 0 for k in
+                        ("SOURCE", "INTERPRETATION",
+                         "HYPOTHESIS", "DECISION")},
+        "verification_counts": {"verified": 0,
+                                "non-verified": 0},
+        "labelled_total": 0, "locations": [],
+        "open_hypotheses": [], "disputed_labelled": [],
+        "unknown_flags": [], "unknown_labels": [],
+        "claims_to_avoid": {"pages_checked": 0,
+                            "with_section": 0, "sections": []}}
+    kc = lab["kind_counts"]
+    vc = lab["verification_counts"]
+    lines += [
+        "### Statement labels (Lane 5, continued)",
+        "",
+        f"Statement-level label pack (idea sources:"
+        f" open-dossier's four-way statement label,"
+        f" VitaeContext, and Local Contexts' verification"
+        f" label states, via the build list): where the"
+        f" editorial markers flag a statement's defects,"
+        f" labels classify its KIND — `[SOURCE]` (restates"
+        f" a cited source), `[INTERPRETATION]` (the"
+        f" compiler's reading), `[HYPOTHESIS]` (a conjecture"
+        f" not yet settled — promoted or killed on the"
+        f" record, never aged silently), `[DECISION]` (a"
+        f" ruling in force) — and record its verification"
+        f" as an APPLIED state: `[verified]` /"
+        f" `[non-verified]`, never a mere absence."
+        f" **{lab['labelled_total']}** labelled statement(s)"
+        f" on the compiled layer: SOURCE"
+        f" {kc.get('SOURCE', 0)} · INTERPRETATION"
+        f" {kc.get('INTERPRETATION', 0)} · HYPOTHESIS"
+        f" {kc.get('HYPOTHESIS', 0)} · DECISION"
+        f" {kc.get('DECISION', 0)} · verified"
+        f" {vc.get('verified', 0)} · non-verified"
+        f" {vc.get('non-verified', 0)}. The vocabulary is"
+        f" closed: a flag or label outside it is an unknown"
+        f" finding below, named — never a silent pass.",
+        "",
+    ]
+    if lab["locations"]:
+        lines += ["Label locations (page line — kind /"
+                  " verification):", ""]
+        for h in lab["locations"]:
+            bits = h["kind"] or "—"
+            if h["verification"]:
+                bits += f" / {h['verification']}"
+            lines.append(f"- `{h['page']}` line {h['line']} —"
+                         f" [{bits}]: {h['excerpt']}")
+        lines.append("")
+    if lab["open_hypotheses"]:
+        lines += ["Open hypotheses (promote or kill each on"
+                  " the record — a hypothesis never ages"
+                  " silently):", ""]
+        for h in lab["open_hypotheses"]:
+            lines.append(f"- `{h['page']}` line {h['line']} —"
+                         f" {h['excerpt']}")
+        lines.append("")
+    if lab["disputed_labelled"]:
+        lines += ["Labelled statements under dispute"
+                  " (contradiction recorded with both source"
+                  " IDs):", ""]
+        for h in lab["disputed_labelled"]:
+            ids = ", ".join(f"`{i}`" for i in h["source_ids"])
+            lines.append(f"- `{h['page']}` line {h['line']} —"
+                         f" [{h['kind']}] cites: {ids}")
+        lines.append("")
+    if lab["unknown_flags"] or lab["unknown_labels"]:
+        lines += ["Unknown vocabulary (outside the closed"
+                  " label / flag sets — findings, named):", ""]
+        for h in lab["unknown_flags"]:
+            lines.append(f"- `{h['page']}` line {h['line']} —"
+                         f" flag {{{{{h['name']}}}}}")
+        for h in lab["unknown_labels"]:
+            lines.append(f"- `{h['page']}` line {h['line']} —"
+                         f" label [{h['name']}]")
+        lines += [
+            "",
+            "**To clear these:** an unknown flag or label is"
+            " either a typo for a vocabulary member (fix the"
+            " statement to use it) or a proposal for a new"
+            " member (which enters only by amending the"
+            " schema, on the record) — never leave a flag"
+            " the checker cannot read.",
+            "",
+        ]
+    cta = lab["claims_to_avoid"]
+    lines += [
+        f"Claims to avoid: **{cta['with_section']}** of"
+        f" {cta['pages_checked']} entity page(s) carry a"
+        f" `## Claims to avoid` section — the negative claims"
+        f" an agent must not assert about the subject, on"
+        f" the page rather than in memory. A page without"
+        f" one is a census fact, not a finding.",
+        "",
+    ]
+    for s in cta["sections"]:
+        lines.append(f"- `{s['page']}` —"
+                     f" {len(s['claims'])} claim(s) to avoid:")
+        for claim in s["claims"]:
+            lines.append(f"  - {claim}")
+    if cta["sections"]:
+        lines.append("")
     rt = lanes.get("rating_tables") or {"count": 0,
                                          "findings": [],
                                          "tables_checked": 0,
@@ -1455,6 +2175,79 @@ def render(lanes, run_date, lens_note):
     else:
         lines += ["No live references to a superseded decision"
                   " form this run.", ""]
+    cg = lanes.get("coga") or {"count": 0, "findings": [],
+                               "by_check": {},
+                               "pages_checked": 0,
+                               "pages_with_findings": 0}
+    lines += [
+        "## COGA structure checklist (companion check)",
+        "",
+        "The mechanically decidable part of the W3C Cognitive"
+        " and Learning Disabilities Accessibility (COGA)"
+        " guidance \u201cMaking Content Usable\u201d (clean"
+        " re-implementation, idea only), over the compiled"
+        f" layer: **{cg['count']}** finding(s) on"
+        f" {cg['pages_with_findings']} page(s), of"
+        f" {cg['pages_checked']} checked. A reader should not"
+        " have to hold state across a scroll: the purpose"
+        " clear at the top, content chunked under headings,"
+        " blocks arriving in context. COGA states the"
+        " patterns, not numbers — every budget named in an"
+        " evidence line is a house constant, and the check"
+        " judges structure only, never wording.",
+        "",
+    ]
+    _coga_clear = {
+        "no-summary-lead":
+            "open the page with a short paragraph saying"
+            " what the page is and what it concludes, before"
+            " the first section heading — added structure at"
+            " the top; nothing below it needs to move.",
+        "heading-level-skip":
+            "give the skipped level a heading of its own, or"
+            " promote the deep heading to the next level down"
+            " from its parent — the hierarchy a reader scans"
+            " must deepen one step at a time.",
+        "unbroken-section":
+            "break the run with descriptive sub-headings at"
+            " its natural joints — added structure, never"
+            " removal of content to fit the budget.",
+        "unintroduced-block":
+            "add one sentence before the list or table saying"
+            " what it collects and how to read it.",
+        "long-paragraph":
+            "split the paragraph at its idea boundaries —"
+            " one idea per paragraph, each short enough to"
+            " hold in one reading.",
+        "non-descriptive-link":
+            "rewrite the link text to name its destination —"
+            " what the reader will find, not that a link is"
+            " here.",
+        "missing-frontmatter-field":
+            "complete the page's frontmatter (title and type"
+            " per AGENTS.md) so every page carries the same"
+            " furniture.",
+    }
+    for check, blurb in COGA_CHECKS:
+        group = [f for f in cg["findings"]
+                 if f["check"] == check]
+        lines += [
+            f"### {check} — {cg['by_check'].get(check, 0)}",
+            "",
+            f"{blurb}.",
+            "",
+        ]
+        if group:
+            for f in group:
+                lines.append(f"- `{f['page']}` line"
+                             f" {f['line']} — {f['evidence']}")
+            lines.append("")
+            lines += [
+                f"**To clear this:** {_coga_clear[check]}",
+                "",
+            ]
+        else:
+            lines += ["No findings this run.", ""]
     lines += [
         "## Owner marks — unaddressed annotations",
         "",
@@ -1539,6 +2332,7 @@ def main(argv):
         "decision_gate": lane_decision_gate(),
         "annotations": lane_annotations(),
         "rating_tables": lane_rating_tables(),
+        "coga": lane_coga(),
     }
     out = WIKI / "filings" / f"lint-lanes-{run_date}.md"
     out.write_text(render(lanes, run_date, lens_note), encoding="utf-8")
@@ -1572,7 +2366,10 @@ def main(argv):
           f"   rating tables: {lanes['rating_tables']['count']}"
           f" without a legend (of"
           f" {lanes['rating_tables']['tables_with_marks']}"
-          f" with marks)")
+          f" with marks)"
+          f"   coga: {lanes['coga']['count']} findings on"
+          f" {lanes['coga']['pages_with_findings']} pages (of"
+          f" {lanes['coga']['pages_checked']} checked)")
     return 0
 
 

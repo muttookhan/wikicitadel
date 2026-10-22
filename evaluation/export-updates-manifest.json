@@ -2,7 +2,7 @@
   "ledger_entries": [],
   "pattern": "Crossref Crossmark (pattern only; no DOI registration)",
   "sources": {
-    "corrections_ledger": "absent",
+    "corrections_ledger": "present",
     "treatment_register": "present"
   },
   "tool": "wiki_updates_manifest",
