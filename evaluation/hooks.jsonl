@@ -1,0 +1,3 @@
+{"check": {"argv": ["python3", "scripts/wiki_session_guards.py", "precompact"], "kind": "command", "surface_output": true}, "hook_id": "h-precompact-propose-filing", "on_fail": "halt", "phase": "pre", "step": "precompact"}
+{"check": {"argv": ["python3", "scripts/wiki_session_guards.py", "session-clean"], "kind": "command", "surface_output": true}, "hook_id": "h-session-end-clean-tree", "on_fail": "halt", "phase": "pre", "step": "session-end"}
+{"check": {"argv": ["python3", "scripts/wiki_session_guards.py", "raw-audit"], "kind": "command", "surface_output": true}, "hook_id": "h-raw-layer-append-only", "on_fail": "halt", "phase": "pre", "step": "session-end"}

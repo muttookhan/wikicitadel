@@ -1,0 +1,52 @@
+{
+  "as_of": "2026-10-22",
+  "by_grade": {
+    "ci-verified": 0,
+    "field-proven": 0,
+    "landed": 0,
+    "measured-heeded": 0,
+    "recorded": 0,
+    "reproduced": 0,
+    "reuse-observed": 0
+  },
+  "by_state": {
+    "acted-on": 0,
+    "open": 0,
+    "promoted-to-rule": 0,
+    "superseded-by-later-entry": 0,
+    "unstated": 0
+  },
+  "entries": [],
+  "entries_total": 0,
+  "kind": "corrections-lifecycle-report",
+  "ledger": "wiki/rules/corrections-ledger.md",
+  "ledger_sha256": "2d8fcf2f79bd0baff124262c76633b0ebc0878c528cac81ecaf0aef4e3b6d9ac",
+  "orphan_classification_rows": [],
+  "promotion_candidates": [],
+  "rules_gate": {},
+  "surfaces_searched": [
+    "/home/hatch/workspace/wikicitadel/AGENTS.md",
+    "/home/hatch/workspace/wikicitadel/wiki/rules/curation-workarounds.md",
+    "/home/hatch/workspace/wikicitadel/wiki/rules/evidence-ttl.md",
+    "/home/hatch/workspace/wikicitadel/wiki/rules/notices.md",
+    "/home/hatch/workspace/wikicitadel/wiki/rules/share-publish-cite-ready.md"
+  ],
+  "tool": "scripts/wiki_corrections_lifecycle.py",
+  "trends": {
+    "by_month": {},
+    "by_week": {},
+    "cumulative_by_kind": {},
+    "repeat_offence_rules": {},
+    "repeated_since_ruled": [],
+    "span": {
+      "days_since_latest": null,
+      "first": null,
+      "last": null
+    },
+    "velocity": {
+      "entries_last_7_days_as_of_today": 0,
+      "entries_total": 0
+    }
+  },
+  "unclassified": []
+}

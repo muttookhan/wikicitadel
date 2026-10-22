@@ -1,0 +1,66 @@
+{
+  "by_form": {
+    "tool-skill": 2
+  },
+  "by_state": {
+    "undeclared": 2
+  },
+  "content_hash": "9efc13bd254648938ad9e7fdaa2605fa05ee506c07327cc24cdfd58d08056344",
+  "governed_total": 0,
+  "kind": "skill-register",
+  "records": [
+    {
+      "description": true,
+      "form": "tool-skill",
+      "governance": "undeclared",
+      "name": "wikicitadel-mcp-read",
+      "path": "tools/mcp-read/SKILL.md",
+      "proposed_by": null,
+      "review_state": null,
+      "scope": null,
+      "sha256": "5b82f0036e0046b8299cb11c460b9598cff1dcfd76d9251e636a62de015edec3",
+      "state": null,
+      "version": null,
+      "violations": []
+    },
+    {
+      "description": true,
+      "form": "tool-skill",
+      "governance": "undeclared",
+      "name": "wiki-traverse",
+      "path": "tools/traverse/SKILL.md",
+      "proposed_by": null,
+      "review_state": null,
+      "scope": null,
+      "sha256": "e29f820231477a383889b57fa26f4e831663a32ee5089b67cccbb370db552b16",
+      "state": null,
+      "version": null,
+      "violations": []
+    }
+  ],
+  "records_total": 2,
+  "review_states": [
+    "unreviewed",
+    "current",
+    "stale"
+  ],
+  "schema": "skill-governance/1",
+  "states": [
+    "proposed",
+    "active",
+    "deprecated",
+    "retired"
+  ],
+  "tool": "scripts/wiki_skill_governance.py",
+  "transitions": [
+    "active->deprecated",
+    "active->retired",
+    "birth->proposed",
+    "deprecated->active",
+    "deprecated->retired",
+    "proposed->active",
+    "proposed->retired"
+  ],
+  "violations": [],
+  "violations_total": 0
+}
