@@ -9,6 +9,7 @@ const PAGES = window.LENS_PAGES || {};
 const GRAPH = window.LENS_GRAPH || { nodes: [], edges: [], communities: [], insights: { surprising: [], gaps: [] }, cocitations: {}, missing_links: [] };
 const GRAPH_REPORT = window.LENS_GRAPH_REPORT || { god_nodes: [], communities: [], missing_links: [], typed_edges: { counts: {} }, suggested_questions: [] };
 const MODES = window.LENS_MODES || {};
+const MINDMAPS = (window.LENS_MINDMAPS && window.LENS_MINDMAPS.pages) || {};
 const SEARCH = window.LENS_SEARCH || { docs: [], texts: [], plain: [], sections: [], index: { n: 0, avgdl: 1, df: {}, doc_len: [], postings: {} }, index_entries: [], exact: { pages: [], raw: [] }, graph_adj: [], facets: [], severance: null, vocab: [], tags: { resolve: {}, broader: {}, concepts: [] } };
 const TIMELINE = MODES.timeline || { events: [] };
 const DECISIONS = MODES.decisions || { decisions: [], open_items: [], refinements: "" };
@@ -23,6 +24,7 @@ const PROPOSALS = window.LENS_PROPOSALS || { proposals: [], skipped: [], exclude
 const TRAILS = window.LENS_TRAILS || { trails: [], dropped: [], note: "" };
 const MEMORY = window.LENS_MEMORY || { claims: [], claim_history: {}, connections: [], ask_events: [] };
 const FEEDBACK = window.LENS_FEEDBACK || { total: 0, pages: [], corrections: [] };
+const REVIEW = window.LENS_REVIEW || { worklist: [], in_review: [], census: { population: {}, by_effective: {}, findings: [] }, stats: {}, history: { owner_attestations: [], declared_page_reviews: [], reverify_events: [] }, note: "" };
 const PAGE_BY_PATH = {};
 for (const _pid of Object.keys(PAGES)) PAGE_BY_PATH[PAGES[_pid].path] = _pid;
 function pageLinkByPath(path, label) {
@@ -56,7 +58,11 @@ for (const e of GRAPH.edges) {
 for (const k of Object.keys(ADJ)) ADJ[k].sort((x, y) => y.weight - x.weight);
 function signalWords(e) {
   const parts = [];
-  if (e.epistemic) parts.push(e.epistemic);
+  // W1.8: the three-way provenance label + confidence, when the
+  // build emitted them; the older two-way epistemic tag is the
+  // fallback for data built before the labels existed.
+  if (e.provenance) parts.push(`${e.provenance.toLowerCase()}${typeof e.confidence === "number" ? ` · conf ${e.confidence}` : ""}`);
+  else if (e.epistemic) parts.push(e.epistemic);
   parts.push(e.direct ? "linked directly" : "no direct link");
   if (e.types) {
     const ts = Object.entries(e.types).sort((x, y) => y[1] - x[1] || (x[0] < y[0] ? -1 : 1))
@@ -112,9 +118,16 @@ function firstTermOffset(lineLower, qset) {
  * as contiguous token subsequences; distinctive terms at 4/5
  * presence for a TEXT match, at >= half (min 3) for a QUERY
  * match), and the exclusion is recorded on LAST_SEVERANCE —
- * reported, never silent. */
+ * reported, never silent. Truth-aware governance (W1.5) rides
+ * the same pass: the governance artefact (SEARCH.governance)
+ * names each severed claim's successor pages, which are exempt
+ * from that claim's text-match exclusion, and applyGovernance
+ * below withholds pages in a withheld governance state — both
+ * recorded on LAST_GOVERNANCE, never silent. */
 let LAST_SEVERANCE = { applied: false, excluded: [] };
 function lensLastSeverance() { return LAST_SEVERANCE; }
+let LAST_GOVERNANCE = { applied: false, withheld: [], exempted: [] };
+function lensLastGovernance() { return LAST_GOVERNANCE; }
 const _sevTokCache = new Map();
 function _sevDocTokens(di) {
   if (!_sevTokCache.has(di)) _sevTokCache.set(di, tokenize(SEARCH.texts[di] || ""));
@@ -149,7 +162,9 @@ function _sevQueryMatches(queryTerms, entry) {
 }
 function applySeverance(ranked, queryTerms) {
   const sev = SEARCH.severance;
+  const gov = SEARCH.governance;
   LAST_SEVERANCE = { applied: !!sev, excluded: [] };
+  LAST_GOVERNANCE = { applied: !!gov, withheld: [], exempted: [] };
   if (!sev || !Array.isArray(sev.entries)) return ranked;
   const pageEntries = sev.entries.filter(e => e.kind === "page");
   const claimEntries = sev.entries.filter(e => e.kind !== "page");
@@ -157,12 +172,42 @@ function applySeverance(ranked, queryTerms) {
   const kept = [];
   for (const r of ranked) {
     let hitIds = pageEntries.filter(e => e.page === r.path).map(e => e.id);
+    let exemptedIds = [];
     if (!hitIds.length && qMatched.length) {
       const toks = _sevDocTokens(r.di);
-      hitIds = qMatched.filter(e => _sevTextMatches(toks, e)).map(e => e.id);
+      for (const e of qMatched) {
+        if (!_sevTextMatches(toks, e)) continue;
+        const chain = gov && gov.chains ? gov.chains[e.id] : null;
+        const successors = chain && chain.successors ? chain.successors : [];
+        if (successors.indexOf(r.path) >= 0) exemptedIds.push(e.id);
+        else hitIds.push(e.id);
+      }
     }
     if (hitIds.length) LAST_SEVERANCE.excluded.push({ path: r.path, entries: hitIds });
-    else kept.push(r);
+    else {
+      kept.push(r);
+      if (exemptedIds.length) LAST_GOVERNANCE.exempted.push({ path: r.path, entries: exemptedIds });
+    }
+  }
+  return kept;
+}
+/* Truth-aware governance (W1.5), stage 6: withhold a result
+ * whose page the governance artefact records in a withheld
+ * state, with the named reasons recorded on LAST_GOVERNANCE.
+ * A page with no record is UNGOVERNED and passes through —
+ * absence of state is never read as superseded. Mirrors
+ * scripts/wiki_search.py apply_governance. */
+function applyGovernance(ranked) {
+  const gov = SEARCH.governance;
+  LAST_GOVERNANCE.applied = !!gov;
+  LAST_GOVERNANCE.withheld = [];
+  if (!gov || !gov.pages) return ranked;
+  const kept = [];
+  for (const r of ranked) {
+    const record = gov.pages[r.path];
+    if (record && record.state === "withheld") {
+      LAST_GOVERNANCE.withheld.push({ path: r.path, reasons: record.reasons || [] });
+    } else kept.push(r);
   }
   return kept;
 }
@@ -186,7 +231,7 @@ function bm25Raw(queryTerms) {
     .map(([di, s]) => ({ score: s, di, path: SEARCH.docs[di].path }))
     .sort((a, b) => (b.score - a.score) || (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 }
-function bm25Rank(queryTerms) { return applySeverance(bm25Raw(queryTerms), queryTerms); }
+function bm25Rank(queryTerms) { return applyGovernance(applySeverance(bm25Raw(queryTerms), queryTerms)); }
 /* Hybrid ranking: BM25 + personalized PageRank over the wikilink
  * graph — a mirror of scripts/wiki_search.py hybrid_rank() (same
  * constants, same combination). The build parity-checks the Python
@@ -278,7 +323,7 @@ function hybridRank(queryTerms) {
                via: b > 0 && pr > 0 ? "both" : (b > 0 ? "bm25" : "graph") });
   }
   const ranked = out.sort((a, b2) => (b2.score - a.score) || (a.path < b2.path ? -1 : a.path > b2.path ? 1 : 0));
-  return applySeverance(ranked, queryTerms);
+  return applyGovernance(applySeverance(ranked, queryTerms));
 }
 function makeSnippet(text, queryTerms, width) {
   width = width || 170;
@@ -1198,6 +1243,164 @@ function renderBriefing() {
 }
 
 /* ---------------- Mode: Reading ---------------- */
+/* ---------------- Page mindmap (W2) ----------------
+   The page's own heading outline as an expandable mindmap —
+   the Markmap pattern (markmap.js.org, MIT; the idea and the
+   foldable-branch interaction are adapted with credit, this
+   renderer is the Lens's own code). Data ships at build time
+   in LENS_MINDMAPS (mindmapview.py): the tree is the page's
+   actual headings nested by level — nothing re-outlined —
+   with the wikilinks written under each heading as leaves.
+   A resolved leaf links to its page; an unresolved one is a
+   boundary reference, drawn dashed and never a link. All
+   interaction runs over the shipped data. */
+const MM_PALETTE = ["#C9A24B", "#7CB35C", "#6FA8C9", "#A583C7",
+                    "#5FA88F", "#D9A441", "#C9713A", "#9A927F"];
+const MM_ROW = 38, MM_COL = 258, MM_CHIP_W = 228;
+
+function mmSubtreeCount(node) {
+  let n = 1;
+  for (const c of node.children || []) n += mmSubtreeCount(c);
+  return n;
+}
+
+/* First paint must stay readable on heading-rich pages: start
+   with the shallowest fold depth whose visible count fits. */
+function mmDefaultCollapsed(root, budget) {
+  if (mmSubtreeCount(root) <= budget) return new Set();
+  for (const foldDepth of [3, 2, 1]) {
+    const paths = new Set();
+    let visible = 0;
+    (function walk(node, path, depth) {
+      visible += 1;
+      if (depth >= foldDepth) {
+        if ((node.children || []).length) paths.add(path);
+        return;
+      }
+      (node.children || []).forEach((c, i) => walk(c, path + "/" + i, depth + 1));
+    })(root, "r", 0);
+    if (visible <= budget || foldDepth === 1) return paths;
+  }
+  return new Set();
+}
+
+function mmLayout(root, collapsed) {
+  const pos = {};
+  let maxDepth = 0;
+  const kids = (node, path) => (collapsed.has(path) ? [] : (node.children || []));
+  function measure(node, path, depth, branch) {
+    maxDepth = Math.max(maxDepth, depth);
+    const ks = kids(node, path);
+    let span = 1;
+    if (ks.length) {
+      span = 0;
+      ks.forEach((c, i) => {
+        span += measure(c, path + "/" + i, depth + 1, depth === 0 ? i : branch);
+      });
+    }
+    pos[path] = { node, depth, span, branch };
+    return span;
+  }
+  const total = measure(root, "r", 0, 0);
+  function place(node, path, y0) {
+    const rec = pos[path];
+    rec.y = y0 + rec.span / 2;
+    let y = y0;
+    kids(node, path).forEach((c, i) => {
+      const cp = path + "/" + i;
+      place(c, cp, y);
+      y += pos[cp].span;
+    });
+  }
+  place(root, "r", 0);
+  return { pos, total, maxDepth };
+}
+
+function mmChipHtml(path, rec, collapsed) {
+  const n = rec.node;
+  const style = `left:${12 + rec.depth * MM_COL}px;top:${10 + rec.y * MM_ROW}px`;
+  const colour = MM_PALETTE[rec.branch % MM_PALETTE.length];
+  if (n.kind === "link") {
+    const label = esc(n.text) + (n.count > 1 ? ` <span class="mm-count">×${n.count}</span>` : "");
+    if (n.missing) {
+      return `<span class="mm-node mm-leaf mm-missing" style="${style}" title="No page exists for this link yet">${label}</span>`;
+    }
+    const href = "#/read/" + n.page + (n.anchor ? "#" + n.anchor : "");
+    return `<a class="mm-node mm-leaf" style="${style};border-color:${colour}" href="${href}">${label}</a>`;
+  }
+  const kidCount = (n.children || []).length;
+  const cls = n.kind === "root" ? "mm-node mm-root" : "mm-node mm-heading";
+  const text = `<span class="mm-text">${esc(n.text)}</span>`;
+  if (!kidCount) {
+    return `<span class="${cls}" style="${style};border-color:${colour}" title="${esc(n.text)}">${text}</span>`;
+  }
+  const folded = collapsed.has(path);
+  const badge = folded ? `<span class="mm-count">+${mmSubtreeCount(n) - 1} hidden</span>` : "";
+  return `<button type="button" class="${cls}" style="${style};border-color:${colour}" data-mmpath="${path}" title="${esc(n.text)}"><span class="mm-toggle" aria-hidden="true">${folded ? "▸" : "▾"}</span>${text}${badge}</button>`;
+}
+
+function setupMindmap(panel, p) {
+  const mm = MINDMAPS[p.id];
+  if (!mm) {
+    panel.innerHTML = `<h2 style="font-family:var(--font-display)">Mindmap</h2><p class="caption">No mindmap data for this page in this build.</p>`;
+    return;
+  }
+  const counts = mm.counts || { headings: 0, links: 0, missing: 0 };
+  const rootKids = (mm.root.children || []).length;
+  if (mm.empty && !rootKids) {
+    panel.innerHTML = `<h2 style="font-family:var(--font-display)">Mindmap</h2><p class="caption">This page has no headings, so there is no outline to map.</p>`;
+    return;
+  }
+  const collapsed = mmDefaultCollapsed(mm.root, 140);
+  function draw() {
+    const { pos, total, maxDepth } = mmLayout(mm.root, collapsed);
+    const W = (maxDepth + 1) * MM_COL + 36;
+    const H = total * MM_ROW + 20;
+    let paths = "";
+    for (const path of Object.keys(pos)) {
+      if (path === "r") continue;
+      const parentPath = path.slice(0, path.lastIndexOf("/"));
+      const a = pos[parentPath], b = pos[path];
+      const x1 = 12 + a.depth * MM_COL + MM_CHIP_W, y1 = 10 + a.y * MM_ROW;
+      const x2 = 12 + b.depth * MM_COL, y2 = 10 + b.y * MM_ROW;
+      const mx = (x1 + x2) / 2;
+      paths += `<path d="M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}" stroke="${MM_PALETTE[b.branch % MM_PALETTE.length]}"/>`;
+    }
+    let chips = "";
+    for (const [path, rec] of Object.entries(pos)) chips += mmChipHtml(path, rec, collapsed);
+    const host = panel.querySelector(".mm-canvas");
+    host.style.width = W + "px";
+    host.style.height = H + "px";
+    host.innerHTML = `<svg width="${W}" height="${H}" aria-hidden="true">${paths}</svg>${chips}`;
+  }
+  panel.innerHTML = `
+    <h2 style="font-family:var(--font-display)">Mindmap</h2>
+    <p class="caption">This page's own outline as a map — its headings exactly as written, nested as written, with the pages it links to hanging off the heading each link appears under. A dashed leaf is a link whose page does not exist in this build. Click a heading to fold or unfold its branch.</p>
+    ${mm.empty ? `<p class="caption">This page has no headings; its links hang off the title.</p>` : ""}
+    <div class="mm-controls" role="group" aria-label="Mindmap folding">
+      <button class="chip" data-mmexpand>Expand all</button>
+      <button class="chip" data-mmcollapse>Fold to top level</button>
+      <span class="caption">${counts.headings} heading${counts.headings === 1 ? "" : "s"} · ${counts.links} link leaf${counts.links === 1 ? "" : "s"}${counts.missing ? ` · ${counts.missing} pointing nowhere yet` : ""}</span>
+    </div>
+    <div class="mm-scroll"><div class="mm-canvas"></div></div>`;
+  draw();
+  panel.querySelector("[data-mmexpand]").addEventListener("click", () => { collapsed.clear(); draw(); });
+  panel.querySelector("[data-mmcollapse]").addEventListener("click", () => {
+    collapsed.clear();
+    (mm.root.children || []).forEach((c, i) => {
+      if ((c.children || []).length) collapsed.add("r/" + i);
+    });
+    draw();
+  });
+  panel.querySelector(".mm-canvas").addEventListener("click", ev => {
+    const t = ev.target.closest("[data-mmpath]");
+    if (!t) return;
+    const path = t.getAttribute("data-mmpath");
+    if (collapsed.has(path)) collapsed.delete(path); else collapsed.add(path);
+    draw();
+  });
+}
+
 function renderRead(id, anchor) {
   const p = PAGES[id];
   if (!p) {
@@ -1219,7 +1422,9 @@ function renderRead(id, anchor) {
         <button class="chip" data-ptab="content" aria-pressed="true">Content</button>
         <button class="chip" data-ptab="history" aria-pressed="false">History</button>
         <button class="chip" data-ptab="diff" aria-pressed="false">Diff</button>
+        <button class="chip" data-ptab="mindmap" aria-pressed="false">Mindmap</button>
       </div>`;
+  const mindmapPanel = `<div id="page-mindmap-panel" hidden></div>`;
   const historyPanel = `<div id="page-history-panel" hidden>
       <h2 style="font-family:var(--font-display)">History</h2>
       ${histRows.length ? `<ul>${histRows.map(hx => `<li><span class="mono">${esc(String(hx.commit || "").slice(0, 7))}</span> · ${esc(hx.date || "")}${hx.author ? ` · ${esc(hx.author)}` : ""}<br>${esc(hx.subject || "")}</li>`).join("")}</ul>` : `<p class="caption">No history recorded for this page in evaluation/page-history.json.</p>`}
@@ -1247,10 +1452,14 @@ function renderRead(id, anchor) {
       ${tabsHtml}
       <div id="page-content-panel">
       ${toc}
+      <div class="reader-controls" role="group" aria-label="Reader view">
+        <button class="chip" id="reader-toggle" data-readview aria-pressed="false">Read</button>
+        <span class="caption">Read view shows just this page, in one clean column, in your saved reading type. Press Read again — or the Esc key — to bring the rest back.</span>
+      </div>
       <div class="lf-controls" role="group" aria-label="Line focus">
         <span class="caption">Line focus:</span>
         ${[0, 1, 3, 5].map(n => `<button class="chip" data-lf="${n}" aria-pressed="false">${n === 0 ? "Off" : n + (n === 1 ? " line" : " lines")}</button>`).join("")}
-        <span class="caption">dims the rest; arrow keys or the pointer move the band</span>
+        <span class="caption">Line focus dims the rest of the page so a few lines stay bright and easy to follow. Move the bright lines with the ↑ and ↓ arrow keys, or by moving the pointer.</span>
       </div>
       <div class="lf-mask" style="display:none"></div>
       <div class="lf-mask" style="display:none"></div>
@@ -1267,9 +1476,11 @@ function renderRead(id, anchor) {
       </div>`).join("")}` : ""}
       <h2 style="font-family:var(--font-display)">Linked from</h2>
       ${p.backlinks.length ? `<ul>${p.backlinks.map(b => `<li>${pageLink(b.from)}</li>`).join("")}</ul>` : `<p class="caption">No page links here yet.</p>`}
+      ${marginNotesHtml(p)}
       </div>
       ${historyPanel}
       ${diffPanel}
+      ${mindmapPanel}
       ${feedbackControlsHtml(p)}
     </div>`;
   canvas.querySelectorAll("[data-anchor]").forEach(a => {
@@ -1285,11 +1496,17 @@ function renderRead(id, anchor) {
     const cp = document.getElementById("page-content-panel"); if (cp) cp.hidden = which !== "content";
     const hp = document.getElementById("page-history-panel"); if (hp) hp.hidden = which !== "history";
     const dp = document.getElementById("page-diff-panel"); if (dp) dp.hidden = which !== "diff";
+    const mp = document.getElementById("page-mindmap-panel"); if (mp) mp.hidden = which !== "mindmap";
   }));
+  const mmPanelEl = document.getElementById("page-mindmap-panel");
+  if (mmPanelEl) setupMindmap(mmPanelEl, p);
   wireFeedbackControls(p);
   const lfWrap = canvas.querySelector(".reading-focus-wrap");
   const lfArticle = canvas.querySelector(".reading-body");
   if (lfWrap && lfArticle) setupLineFocus(lfWrap, lfArticle);
+  const rvBtn = canvas.querySelector("[data-readview]");
+  if (rvBtn && lfWrap) setupReaderView(rvBtn, lfWrap);
+  if (lfArticle) setupMarginNotes(p, lfArticle);
   if (anchor) {
     const t = document.getElementById(anchor);
     if (t) t.scrollIntoView();
@@ -1311,6 +1528,238 @@ let graphCommFilter = null;     // community id, or null
 let graphInsightsOpen = true;
 let graphNodeQuery = "";
 let graphEdgeTypeFilter = null;   // relation-map edge type, or null (TB4 wiring point 1)
+let graphAsOf = "";   // W2 time-travel: "" = present day, else "YYYY-MM-DD"
+
+/* W2: per-node grounded dates ship on the graph artefact
+   (GRAPH.temporal + node.created/updated, built by lenslib's
+   temporal section — the date rules live there and on the
+   artefact). Mirrors of lenslib's node_exists_at / freshness_band:
+   a node is visible as of a date when its grounded creation date
+   is on or before it (no grounded date => present-day view
+   only); freshness age is measured at the build date, never at
+   the scrub date. */
+const TEMPORAL = GRAPH.temporal || null;
+function nodeExistsAt(node) { return !graphAsOf || !!(node && node.created && node.created <= graphAsOf); }
+function freshnessBandKey(node) {
+  if (!TEMPORAL || !node.updated) return "unknown";
+  const age = Math.max(0, Math.floor((Date.parse(TEMPORAL.built_on) - Date.parse(node.updated)) / 86400000));
+  for (const b of TEMPORAL.bands) if (b.max_days !== null && age <= b.max_days) return b.key;
+  return "stale";
+}
+function freshnessColour(node) {
+  if (!TEMPORAL) return "#CFC9BB";
+  const band = TEMPORAL.bands.find(b => b.key === freshnessBandKey(node));
+  return band ? band.colour : "#CFC9BB";
+}
+
+/* W2 semantic zoom: the multilevel view's levels ship in the
+   graph artefact (GRAPH.zoom, built by lenslib's zoom section —
+   the level and interaction rules live there and on the
+   artefact). "pages" is the full graph and the default;
+   "overview" draws one supernode per community at the shipped
+   centroid; "community" expands graphZoomCommunity's member
+   pages at their page positions and keeps the other communities
+   collapsed. The partition is the artefact's — this code never
+   re-clusters; it only folds the As-of filter over the shipped
+   edge table, mirroring the build's aggregation. */
+let graphZoom = "pages";         // "overview" | "community" | "pages"
+let graphZoomCommunity = null;   // community id expanded at the community level
+let graphZoomSelected = null;    // community id selected at the zoom levels
+const ZOOM = GRAPH.zoom || null;
+const ZOOM_BY_ID = {};
+if (ZOOM) for (const c of ZOOM.communities) ZOOM_BY_ID[c.id] = c;
+const ZOOM_MAXTW = ZOOM ? Math.max(1, ...ZOOM.communities.map(c => c.total_wdegree || 0)) : 1;
+/* W2 deterministic hierarchical layout option: a second set of
+   node positions computed at build by the house layered-layout
+   engine (tools/lens/graphlayout.py — the artefact's
+   GRAPH.layouts.hierarchical block names the engine and the
+   rules; the item's Graphviz-WASM route is doored, see that
+   module's header). "force" (the default) uses the positions
+   shipped on the nodes themselves — the seeded force layout;
+   "hierarchical" swaps in the layered positions, which are
+   byte-identical on every rebuild of the same graph.
+   Community supernodes follow the same centroid rule under
+   both layouts (the hierarchical centroids ship in the block
+   as zoom_positions). Absent block => force only, and every
+   renderer below falls back to the shipped positions. */
+let graphLayout = "force";   // "force" | "hierarchical"
+const HLAY = (GRAPH.layouts && GRAPH.layouts.hierarchical) || null;
+function dispNode(n) {
+  if (graphLayout === "hierarchical" && HLAY && HLAY.positions[n.id])
+    return Object.assign({}, n, { x: HLAY.positions[n.id][0], y: HLAY.positions[n.id][1] });
+  return n;
+}
+function supPos(sup) {
+  if (graphLayout === "hierarchical" && HLAY && HLAY.zoom_positions && HLAY.zoom_positions[sup.id])
+    return HLAY.zoom_positions[sup.id];
+  return [sup.x, sup.y];
+}
+function zoomRadius(sup) { return Math.round((12 + 18 * Math.sqrt((sup.total_wdegree || 0) / ZOOM_MAXTW)) * 10) / 10; }
+function zoomMedianUpdated(cid) {
+  const ds = GRAPH.nodes.filter(n => n.community === cid && n.updated).map(n => n.updated).sort();
+  return ds.length ? ds[(ds.length - 1) >> 1] : null;
+}
+function zoomFill(sup) {
+  if (graphColourMode === "freshness") return freshnessColour({ updated: zoomMedianUpdated(sup.id) });
+  if (graphColourMode === "community") return COMMUNITY_COLOURS[sup.id % COMMUNITY_COLOURS.length];
+  return typeColour(sup.plurality_group || "other");
+}
+function zoomExisting(sup, nodeById) { return sup.members.filter(id => nodeExistsAt(nodeById[id])); }
+function zoomMatchesType(sup, key) { return (sup.group_counts || {})[key] > 0; }
+/* The As-of fold over the shipped edge table: cross-community
+   aggregates recomputed over pairs whose two pages both
+   existed — the same aggregation the build shipped for the
+   unscrubbed view (lenslib graph_zoom_levels). */
+function zoomFoldEdges(nodeById) {
+  const acc = {};
+  for (const e of GRAPH.edges) {
+    const a = nodeById[e.a], b = nodeById[e.b];
+    if (!a || !b || a.community === b.community) continue;
+    if (!nodeExistsAt(a) || !nodeExistsAt(b)) continue;
+    const lo = Math.min(a.community, b.community), hi = Math.max(a.community, b.community);
+    const k = lo + "|" + hi;
+    const row = acc[k] || (acc[k] = { a: lo, b: hi, weight: 0, pairs: 0, direct_pairs: 0, rm_types: new Set() });
+    row.weight += e.weight; row.pairs += 1;
+    if (e.direct) row.direct_pairs += 1;
+    for (const t of (e.rm_types || [])) row.rm_types.add(t);
+  }
+  return Object.values(acc)
+    .map(r => ({ a: r.a, b: r.b, weight: Math.round(r.weight * 100) / 100, pairs: r.pairs, direct_pairs: r.direct_pairs, rm_types: [...r.rm_types].sort() }))
+    .sort((x, y) => (y.weight - x.weight) || (x.a - y.a) || (x.b - y.b));
+}
+function zoomSupernodeHtml(sup, nodeById, baseOpacity) {
+  const existing = zoomExisting(sup, nodeById);
+  if (graphAsOf && !existing.length) return "";
+  const grow = (GRAPH.communities || []).find(c => c.id === sup.id) || {};
+  let op = baseOpacity;
+  if (graphCommFilter !== null && sup.id !== graphCommFilter) op = Math.min(op, 0.15);
+  if (graphTypeFilter && !zoomMatchesType(sup, graphTypeFilter)) op = Math.min(op, 0.15);
+  const r = zoomRadius(sup);
+  const [sx, sy] = supPos(sup);
+  const label = sup.label.length > 34 ? sup.label.slice(0, 33) + "…" : sup.label;
+  const counts = graphAsOf
+    ? `${existing.length} of ${sup.member_count} pages existed`
+    : `${sup.member_count} pages · ${grow.share !== undefined ? grow.share : "?"}% of the wiki`;
+  return `<g class="graph-supernode ${graphZoomSelected === sup.id ? "selected" : ""}" data-community="${sup.id}" style="opacity:${op}">
+    <circle cx="${sx}" cy="${sy}" r="${r}" fill="${zoomFill(sup)}" stroke="#0E0D0B" stroke-width="1" class="node-shape"></circle>
+    <text x="${sx}" y="${sy + r + 14}" text-anchor="middle">${esc(label)}</text>
+    <text class="zoom-count" x="${sx}" y="${sy + r + 27}" text-anchor="middle">${esc(counts)}</text></g>`;
+}
+function zoomOverviewHtml(nodeById, asOfNote) {
+  const edges = graphAsOf ? zoomFoldEdges(nodeById) : ZOOM.edges;
+  const edgeLines = edges.map(e => {
+    const a = ZOOM_BY_ID[e.a], b = ZOOM_BY_ID[e.b];
+    if (!a || !b) return "";
+    const dim = (graphCommFilter !== null && e.a !== graphCommFilter && e.b !== graphCommFilter)
+      || (graphEdgeTypeFilter && !(e.rm_types || []).includes(graphEdgeTypeFilter))
+      || (graphTypeFilter && !zoomMatchesType(a, graphTypeFilter) && !zoomMatchesType(b, graphTypeFilter));
+    const w = 0.8 + Math.min(3.5, Math.sqrt(e.weight) / 2);
+    const [ax, ay] = supPos(a), [bx, by] = supPos(b);
+    return `<line class="graph-edge" x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke-width="${w.toFixed(1)}" style="opacity:${dim ? 0.05 : 0.35}"></line>`;
+  }).join("");
+  const nodes = ZOOM.communities.map(sup => zoomSupernodeHtml(sup, nodeById, 1)).join("");
+  const colourNote = graphColourMode === "community"
+    ? "Node colour encodes community."
+    : graphColourMode === "freshness"
+      ? "Node colour encodes freshness: the band of the community's median member update date at the build date (see the legend)."
+      : "Node colour encodes each community's most common member type.";
+  return `<div class="graph-stage"><div class="graph-wrap"><svg viewBox="0 0 1000 660" role="img" aria-label="Knowledge graph — community overview">${edgeLines}${nodes}</svg></div>
+    ${graphLegendHtml()}
+    ${graphInsightsOpen ? graphInsightsPanelHtml() : ""}
+    </div>
+    <p class="caption">Semantic zoom — Overview: one node per community, placed at the centroid of its member pages and sized by their total link weight. Edges aggregate every weighted relation between two communities — the same relation weights the communities were computed from, not only direct links. ${colourNote} Click a community to see its digest; double-click it (or use Expand in the inspector) to open it.${asOfNote}</p>`;
+}
+function zoomCommunityHtml(nodeById, asOfNote) {
+  const sup = ZOOM_BY_ID[graphZoomCommunity];
+  const memberSet = new Set(sup.members);
+  /* Boundary: direct links between this community's members and
+     each other community, aggregated per community; the line
+     runs from the other community's centroid to the centroid of
+     the member pages it touches. */
+  const boundary = {};
+  for (const e of GRAPH.edges) {
+    if (!e.direct) continue;
+    const a = nodeById[e.a], b = nodeById[e.b];
+    if (!a || !b) continue;
+    const inA = memberSet.has(e.a), inB = memberSet.has(e.b);
+    if (inA === inB) continue;
+    if (!nodeExistsAt(a) || !nodeExistsAt(b)) continue;
+    const other = inA ? b.community : a.community;
+    const row = boundary[other] || (boundary[other] = { weight: 0, pairs: 0, rm_types: new Set(), members: new Set() });
+    row.weight += e.weight; row.pairs += 1;
+    row.members.add(inA ? e.a : e.b);
+    for (const t of (e.rm_types || [])) row.rm_types.add(t);
+  }
+  const boundaryLines = Object.entries(boundary).map(([ocid, row]) => {
+    const osup = ZOOM_BY_ID[ocid];
+    if (!osup) return "";
+    const pts = [...row.members].map(id => nodeById[id]).filter(Boolean);
+    if (!pts.length) return "";
+    const cx = Math.round(pts.reduce((s, n) => s + n.x, 0) / pts.length * 10) / 10;
+    const cy = Math.round(pts.reduce((s, n) => s + n.y, 0) / pts.length * 10) / 10;
+    const dim = graphEdgeTypeFilter && !row.rm_types.has(graphEdgeTypeFilter);
+    const w = 0.8 + Math.min(3.5, Math.sqrt(row.weight) / 2);
+    const [ox, oy] = supPos(osup);
+    return `<line class="graph-edge" x1="${ox}" y1="${oy}" x2="${cx}" y2="${cy}" stroke-width="${w.toFixed(1)}" style="opacity:${dim ? 0.05 : 0.3}"></line>`;
+  }).join("");
+  const edgeLines = GRAPH.edges.filter(e => e.direct && memberSet.has(e.a) && memberSet.has(e.b) && nodeExistsAt(nodeById[e.a]) && nodeExistsAt(nodeById[e.b])).map(e => {
+    const a = nodeById[e.a], b = nodeById[e.b];
+    if (!a || !b) return "";
+    const w = 0.8 + Math.min(2.7, e.weight / 3);
+    const incident = graphSelected && (e.a === graphSelected || e.b === graphSelected);
+    const dim = (graphSelected && !incident)
+      || (graphEdgeTypeFilter && !(e.rm_types || []).includes(graphEdgeTypeFilter))
+      || (graphTypeFilter && groupOf(a) !== graphTypeFilter && groupOf(b) !== graphTypeFilter)
+      || (graphCommFilter !== null && a.community !== graphCommFilter && b.community !== graphCommFilter);
+    return `<line class="graph-edge ${incident ? "incident" : ""}${e.provenance ? ` prov-${e.provenance.toLowerCase()}` : ""}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke-width="${w.toFixed(1)}" style="opacity:${dim ? 0.05 : incident ? 0.95 : 0.35}"></line>`;
+  }).join("");
+  const memberNodes = Object.values(nodeById).filter(n => memberSet.has(n.id) && nodeExistsAt(n)).map(n => {
+    let op = 1;
+    if (graphTypeFilter && groupOf(n) !== graphTypeFilter) op = 0.15;
+    if (graphCommFilter !== null && n.community !== graphCommFilter) op = 0.15;
+    if (graphSelected && n.id !== graphSelected && !(ADJ[graphSelected] || []).some(r => r.other === n.id)) op = Math.min(op, 0.25);
+    return `<g class="graph-node ${n.id === graphSelected ? "selected" : ""}" data-node="${esc(n.id)}" style="opacity:${op}">
+      ${shapeFor(n)}<text x="${n.x}" y="${n.y + 24}" text-anchor="middle">${esc(n.title.length > 34 ? n.title.slice(0, 33) + "…" : n.title)}</text></g>`;
+  }).join("");
+  const others = ZOOM.communities.filter(c => c.id !== sup.id).map(c => zoomSupernodeHtml(c, nodeById, 0.5)).join("");
+  const existingCount = zoomExisting(sup, nodeById).length;
+  const emptyNote = graphAsOf && !existingCount ? ` No member page of this community existed by ${graphAsOf}.` : "";
+  return `<div class="graph-stage"><div class="graph-wrap"><svg viewBox="0 0 1000 660" role="img" aria-label="Knowledge graph — one community expanded">${boundaryLines}${edgeLines}${memberNodes}${others}</svg></div>
+    ${graphLegendHtml()}
+    ${graphInsightsOpen ? graphInsightsPanelHtml() : ""}
+    </div>
+    <p class="caption">Semantic zoom — Community: ${esc(sup.label)} expanded into its member pages — direct links drawn, as at the Pages level; the other communities stay collapsed, and the lines to them aggregate their direct links to this community's members.${emptyNote}${asOfNote}</p>`;
+}
+function graphCommunityInspector(cid) {
+  const sup = ZOOM_BY_ID[cid];
+  if (!sup) return;
+  const grow = (GRAPH.communities || []).find(c => c.id === cid) || {};
+  const nodeById = {};
+  for (const n of GRAPH.nodes) nodeById[n.id] = n;
+  const existing = zoomExisting(sup, nodeById);
+  const cd = window.LENS_CLUSTER_DIGESTS || null;
+  const digest = cd ? (cd.clusters || []).find(c => c.id === cid) : null;
+  const topMembers = digest && digest.members.length ? `
+    <h4>Strongest members (cluster digest)</h4>
+    <ul>${digest.members.slice(0, 6).map(m => `<li>${pageLink(m.id)} <span class="caption">— internal strength ${m.internal_strength}</span></li>`).join("")}</ul>` : "";
+  const nbrs = (ZOOM.edges || []).filter(e => e.a === cid || e.b === cid).slice(0, 3).map(e => {
+    const other = ZOOM_BY_ID[e.a === cid ? e.b : e.a];
+    return other ? `<li>${esc(other.label)} <span class="caption">— relation weight ${e.weight} over ${e.pairs} pair(s)</span></li>` : "";
+  }).join("");
+  const mu = zoomMedianUpdated(cid);
+  const expanded = graphZoom === "community" && graphZoomCommunity === cid;
+  setInspector(`
+    <h3>${esc(sup.label)}</h3>
+    <p class="caption">Community · ${graphAsOf ? `${existing.length} of ` : ""}${sup.member_count} pages (${esc(grow.share !== undefined ? grow.share : "?")}% of the wiki) · hub: ${pageLink(sup.hub_id, sup.hub_title)} · ${esc(grow.cohesion !== undefined ? grow.cohesion : "?")}% of link weight stays inside · median member update ${mu ? esc(mu) : "no grounded date"}</p>
+    <p>${expanded ? `<button class="chip" id="zoom-collapse-btn">Collapse to overview</button>` : `<button class="chip" id="zoom-expand-btn">Expand community</button>`} <a class="btn btn-primary" href="#/read/${encodeURIComponent(sup.hub_id)}">Open hub page</a></p>
+    ${topMembers}
+    ${nbrs ? `<h4>Strongest neighbouring communities</h4><ul>${nbrs}</ul>` : ""}
+    <p class="caption">Computed at build from the link graph — a lens, never a canonical category. The digest is crawled from the hub over links and backlinks (depth ${digest ? digest.crawl_depth : 2}).</p>`);
+  const eb = document.getElementById("zoom-expand-btn");
+  if (eb) eb.addEventListener("click", () => { graphZoomCommunity = cid; graphZoomSelected = cid; graphZoom = "community"; graphView = "canvas"; renderGraph(); });
+  const cb = document.getElementById("zoom-collapse-btn");
+  if (cb) cb.addEventListener("click", () => { graphZoom = "overview"; renderGraph(); });
+}
 
 const FALLBACK_TYPE_COLOURS = { overview: "#F2C94C", source: "#F2994A", entity: "#5B8DEF", concept: "#A06CD5", synthesis: "#5FA88F", query: "#95A5A6", other: "#95A5A6" };
 const TYPE_COLOUR = {};
@@ -1321,6 +1770,7 @@ const COMMUNITY_COLOURS = (GRAPH.community_colours && GRAPH.community_colours.le
   : ["#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#999999"];
 function groupOf(node) { return node.group || (node.id === "overview" ? "overview" : (FALLBACK_TYPE_COLOURS[node.type] ? node.type : "other")); }
 function nodeFill(node) {
+  if (graphColourMode === "freshness") return freshnessColour(node);
   if (graphColourMode === "community") return COMMUNITY_COLOURS[node.community % COMMUNITY_COLOURS.length];
   const g = groupOf(node);
   if (g === "query") return "none";
@@ -1352,6 +1802,17 @@ function insightItemHtml(it, n) {
   return `<div class="insight-item"><span class="insight-n">${n}.</span> ${esc(it.text)}${links ? `<br>${links}` : ""}</div>`;
 }
 function graphLegendHtml() {
+  if (graphColourMode === "freshness" && TEMPORAL) {
+    const rows = TEMPORAL.bands.map(b => `
+      <div class="legend-row" style="cursor:default">
+        <span class="swatch" style="background:${esc(b.colour)}"></span>
+        <span class="legend-label">${esc(b.label)}</span>
+        <span class="legend-count">${b.count}</span>
+      </div>`).join("");
+    const ranges = TEMPORAL.bands.map(b => `${b.label.toLowerCase()} = ${b.meaning}`).join("; ");
+    return `<div class="legend-panel"><h4>Freshness at ${esc(TEMPORAL.built_on)}</h4>${rows}
+      <p class="caption">Node colour = the age of the page's last substantive update at the build date (${esc(TEMPORAL.built_on)}): ${esc(ranges)}. The update date is the frontmatter <code>tended</code> date when the page carries one, else its <code>updated</code> date, else its last git commit. Age says how long ago a page last changed — nothing about whether it is correct. Shape and label still encode page type.</p></div>`;
+  }
   if (graphColourMode === "community") {
     const rows = GRAPH.communities.map(c => `
       <button class="legend-row" data-comm-filter="${c.id}" aria-pressed="${graphCommFilter === c.id}">
@@ -1368,8 +1829,10 @@ function graphLegendHtml() {
       <span class="legend-label">${esc(g.singular || g.label)}</span>
       <span class="legend-count">${g.count}</span>
     </button>`).join("");
+  const provNote = (GRAPH.edges || []).some(e => e.provenance)
+    ? `<p class="caption">Edge lines (W1.8 labels): solid = extracted, dashed = inferred type, rust dotted = ambiguous — one pair asserting two typed relations. Each edge's confidence rides in its inspector text.</p>` : "";
   return `<div class="legend-panel"><h4>Node Types</h4>${rows}
-    <p class="caption">Colour, shape, and label all encode the same type. Select a row to fade the other types.</p></div>`;
+    <p class="caption">Colour, shape, and label all encode the same type. Select a row to fade the other types.</p>${provNote}</div>`;
 }
 function graphInsightsPanelHtml() {
   const cats = insightCategories();
@@ -1398,11 +1861,18 @@ function hoistingPanelHtml() {
 function renderGraph() {
   const mode = graphView;
   const stats = GRAPH.stats || { pages: GRAPH.nodes.length, direct_links: GRAPH.edges.filter(e => e.direct).length, relations: GRAPH.edges.length };
+  const dispNodes = GRAPH.nodes.map(dispNode);
   const nodeById = {};
-  for (const n of GRAPH.nodes) nodeById[n.id] = n;
+  for (const n of dispNodes) nodeById[n.id] = n;
+  const visibleCount = GRAPH.nodes.filter(n => nodeExistsAt(n)).length;
+  const asOfNote = graphAsOf
+    ? ` As of ${graphAsOf}: ${visibleCount} of ${GRAPH.nodes.length} pages existed by then${TEMPORAL && TEMPORAL.counts.without_created ? `; ${TEMPORAL.counts.without_created} page(s) have no grounded creation date and appear only in the present-day view` : ""}. Scrubbing filters which pages existed — earlier versions of a page are not reconstructed.`
+    : "";
   let main = "";
-  if (mode === "canvas") {
-    const edgeLines = GRAPH.edges.filter(e => e.direct).map(e => {
+  if (mode === "canvas" && ZOOM && graphZoom === "overview") main = zoomOverviewHtml(nodeById, asOfNote);
+  else if (mode === "canvas" && ZOOM && graphZoom === "community" && graphZoomCommunity !== null && ZOOM_BY_ID[graphZoomCommunity]) main = zoomCommunityHtml(nodeById, asOfNote);
+  if (mode === "canvas" && !main) {
+    const edgeLines = GRAPH.edges.filter(e => e.direct && nodeExistsAt(nodeById[e.a]) && nodeExistsAt(nodeById[e.b])).map(e => {
       const a = nodeById[e.a], b = nodeById[e.b];
       if (!a || !b) return "";
       const w = 0.8 + Math.min(2.7, e.weight / 3);
@@ -1411,9 +1881,9 @@ function renderGraph() {
         || (graphEdgeTypeFilter && !(e.rm_types || []).includes(graphEdgeTypeFilter))
         || (graphTypeFilter && groupOf(a) !== graphTypeFilter && groupOf(b) !== graphTypeFilter)
         || (graphCommFilter !== null && a.community !== graphCommFilter && b.community !== graphCommFilter);
-      return `<line class="graph-edge ${incident ? "incident" : ""}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke-width="${w.toFixed(1)}" style="opacity:${dim ? 0.05 : incident ? 0.95 : 0.35}"></line>`;
+      return `<line class="graph-edge ${incident ? "incident" : ""}${e.provenance ? ` prov-${e.provenance.toLowerCase()}` : ""}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke-width="${w.toFixed(1)}" style="opacity:${dim ? 0.05 : incident ? 0.95 : 0.35}"></line>`;
     }).join("");
-    const nodes = GRAPH.nodes.map(n => {
+    const nodes = dispNodes.filter(n => nodeExistsAt(n)).map(n => {
       let op = 1;
       if (graphTypeFilter && groupOf(n) !== graphTypeFilter) op = 0.15;
       if (graphCommFilter !== null && n.community !== graphCommFilter) op = 0.15;
@@ -1425,11 +1895,12 @@ function renderGraph() {
       ${graphLegendHtml()}
       ${graphInsightsOpen ? graphInsightsPanelHtml() : ""}
       </div>
-      <p class="caption">Graph image — the same data is available as a list (toggle above). ${graphColourMode === "community" ? "Node colour encodes community; shape and label still encode page type." : "Node colour and shape encode page type."} Node size scales with total link weight (√ scaling, biggest hub full size). Communities are generated clusters, not canonical categories.</p>`;
+      <p class="caption">Graph image — the same data is available as a list (toggle above). ${graphColourMode === "community" ? "Node colour encodes community; shape and label still encode page type." : graphColourMode === "freshness" ? "Node colour encodes freshness (see the legend); shape and label still encode page type." : "Node colour and shape encode page type."} Node size scales with total link weight (√ scaling, biggest hub full size). Communities are generated clusters, not canonical categories.${graphLayout === "hierarchical" && HLAY ? ` Layout: hierarchical — pages layered by link direction over ${HLAY.ranks} ranks (${esc(HLAY.engine)}), computed at build; the same graph rebuilds to the same positions byte-for-byte.` : ""}${asOfNote}</p>`;
   } else {
-    main = GRAPH.communities.map(c => `
-      <div class="card"><h3>${esc(c.label)}</h3><p class="caption">${c.members.length} pages (${esc(c.share)}% of the wiki) · hub: ${pageLink(c.hub_id, c.hub_title)} · ${esc(c.cohesion)}% of link weight stays inside</p>
-      <ul>${c.members.map(id => { const n = nodeById[id]; return `<li>${pageLink(id)} <span class="caption">(${esc(n ? n.type : "")} · ${n ? n.degree : 0} links)</span></li>`; }).join("")}</ul></div>`).join("")
+    main = (graphAsOf ? `<p class="caption">${asOfNote} Member lists below are filtered to those pages; community shares and cohesion remain build-time values over the full graph.</p>` : "")
+      + GRAPH.communities.map(c => { const members = c.members.filter(id => nodeExistsAt(nodeById[id])); return `
+      <div class="card"><h3>${esc(c.label)}</h3><p class="caption">${graphAsOf ? `${members.length} of ` : ""}${c.members.length} pages (${esc(c.share)}% of the wiki) · hub: ${pageLink(c.hub_id, c.hub_title)} · ${esc(c.cohesion)}% of link weight stays inside</p>
+      <ul>${members.map(id => { const n = nodeById[id]; return `<li>${pageLink(id)} <span class="caption">(${esc(n ? n.type : "")} · ${n ? n.degree : 0} links)</span></li>`; }).join("")}</ul></div>`; }).join("")
       + graphInsightsSectionHtml() + graphReportSectionHtml();
   }
   canvas.innerHTML = `
@@ -1440,8 +1911,23 @@ function renderGraph() {
       <span class="toolbar-group" role="group" aria-label="Colour by">
         <button class="chip" data-colour="type" aria-pressed="${graphColourMode === "type"}">Type</button>
         <button class="chip" data-colour="community" aria-pressed="${graphColourMode === "community"}">Community</button>
+        ${TEMPORAL ? `<button class="chip" data-colour="freshness" aria-pressed="${graphColourMode === "freshness"}">Freshness</button>` : ""}
       </span>
+      ${TEMPORAL ? `<span class="toolbar-group" role="group" aria-label="Graph as of date">
+        <label class="caption" for="graph-asof">As of</label>
+        <input type="date" id="graph-asof" min="${esc(TEMPORAL.earliest_created || "")}" max="${esc(TEMPORAL.built_on)}" value="${esc(graphAsOf)}" aria-label="Show the graph as of this date" style="padding:6px 8px;background:var(--surface-2);color:var(--ink-1);border:1px solid var(--line-2);border-radius:6px">
+        <button class="chip" id="graph-asof-now" aria-pressed="${!graphAsOf}">Now</button>
+      </span>` : ""}
       <button class="chip" id="insights-toggle" aria-pressed="${graphInsightsOpen}">Insights ${insightTotal()}</button>
+      ${ZOOM ? `<span class="toolbar-group" role="group" aria-label="Semantic zoom">
+        <button class="chip" data-zoom="overview" aria-pressed="${graphZoom === "overview"}">Overview</button>
+        <button class="chip" data-zoom="community" aria-pressed="${graphZoom === "community"}">Community</button>
+        <button class="chip" data-zoom="pages" aria-pressed="${graphZoom === "pages"}">Pages</button>
+      </span>` : ""}
+      ${HLAY ? `<span class="toolbar-group" role="group" aria-label="Graph layout">
+        <button class="chip" data-layout="force" aria-pressed="${graphLayout === "force"}">Force layout</button>
+        <button class="chip" data-layout="hierarchical" aria-pressed="${graphLayout === "hierarchical"}">Hierarchical</button>
+      </span>` : ""}
       <span class="toolbar-group" role="group" aria-label="View">
         <button class="chip" data-gview="canvas" aria-pressed="${mode === "canvas"}">Graph</button>
         <button class="chip" data-gview="list" aria-pressed="${mode === "list"}">Graph as list</button>
@@ -1459,7 +1945,24 @@ function renderGraph() {
     renderGraph();
   }));
   canvas.querySelectorAll("[data-gview]").forEach(b => b.addEventListener("click", () => { graphView = b.getAttribute("data-gview"); renderGraph(); }));
+  canvas.querySelectorAll("[data-layout]").forEach(b => b.addEventListener("click", () => { graphLayout = b.getAttribute("data-layout"); renderGraph(); }));
   canvas.querySelectorAll("[data-colour]").forEach(b => b.addEventListener("click", () => { graphColourMode = b.getAttribute("data-colour"); renderGraph(); }));
+  canvas.querySelectorAll("[data-zoom]").forEach(b => b.addEventListener("click", () => {
+    const z = b.getAttribute("data-zoom");
+    if (z === "community" && (graphZoomCommunity === null || !ZOOM_BY_ID[graphZoomCommunity])) {
+      const big = ZOOM.communities.slice().sort((a, b2) => (b2.member_count - a.member_count) || (a.id - b2.id))[0];
+      if (big) { graphZoomCommunity = big.id; graphZoomSelected = big.id; }
+    }
+    graphZoom = z; graphView = "canvas"; renderGraph();
+  }));
+  canvas.querySelectorAll(".graph-supernode").forEach(g => {
+    g.addEventListener("click", () => { graphZoomSelected = parseInt(g.getAttribute("data-community"), 10); renderGraph(); });
+    g.addEventListener("dblclick", () => { const cid = parseInt(g.getAttribute("data-community"), 10); graphZoomCommunity = cid; graphZoomSelected = cid; graphZoom = "community"; graphView = "canvas"; renderGraph(); });
+  });
+  const asofInput = document.getElementById("graph-asof");
+  if (asofInput) asofInput.addEventListener("change", () => { graphAsOf = asofInput.value || ""; renderGraph(); });
+  const asofNow = document.getElementById("graph-asof-now");
+  if (asofNow) asofNow.addEventListener("click", () => { graphAsOf = ""; renderGraph(); });
   const it = document.getElementById("insights-toggle");
   if (it) it.addEventListener("click", () => { graphInsightsOpen = !graphInsightsOpen; renderGraph(); });
   const ic = document.getElementById("insights-close");
@@ -1481,17 +1984,19 @@ function renderGraph() {
     if (graphNodeQuery) {
       const hit = GRAPH.nodes.filter(n => n.title.toLowerCase().includes(graphNodeQuery))
         .sort((a, b) => (b.wdegree || 0) - (a.wdegree || 0))[0];
-      if (hit) { graphSelected = hit.id; graphView = "canvas"; }
+      if (hit) { graphSelected = hit.id; graphView = "canvas"; graphZoom = "pages"; }
     }
     renderGraph();
     if (graphSelected && PAGES[graphSelected]) graphInspector(graphSelected);
   });
   canvas.querySelectorAll(".graph-node").forEach(g => g.addEventListener("click", () => {
     graphSelected = g.getAttribute("data-node");
+    graphZoomSelected = null;
     renderGraph();
     graphInspector(graphSelected);
   }));
-  if (graphSelected && PAGES[graphSelected]) graphInspector(graphSelected);
+  if (ZOOM && graphZoom !== "pages" && graphZoomSelected !== null && ZOOM_BY_ID[graphZoomSelected]) graphCommunityInspector(graphZoomSelected);
+  else if (graphSelected && PAGES[graphSelected]) graphInspector(graphSelected);
   else defaultInspector(`<p class="caption">Select a node to see its related pages and the signals behind each relation. A score is never shown alone — the signals are listed in words.</p>`);
 }
 function graphInspector(id) {
@@ -1506,6 +2011,7 @@ function graphInspector(id) {
   setInspector(`
     <h3>${esc(PAGES[id] ? PAGES[id].title : id)}</h3>
     <p class="caption">${esc(n ? n.type : "")} · ${n ? n.degree : 0} neighbours · total link weight ${n ? n.wdegree : 0} · ${esc(comm ? comm.label : "")}</p>
+    ${n && (n.created || n.updated) ? `<p class="caption">${n.created ? `Created ${esc(n.created)} (${esc(n.created_from || "recorded")})` : "No grounded creation date"} · ${n.updated ? `last substantive update ${esc(n.updated)} (${esc(n.updated_from || "recorded")})` : "no grounded update date"}</p>` : ""}
     <p><a class="btn btn-primary" href="#/read/${encodeURIComponent(id)}">Open page</a></p>
     <h4>Related — and why</h4>
     ${rel.length ? `<ul>${rel.map(r => `<li>${pageLink(r.other)}<br><span class="caption">${esc(signalWords(r))} · weight ${r.weight}</span></li>`).join("")}</ul>` : `<p class="caption">No relations.</p>`}${cocitHtml}`);
@@ -1519,11 +2025,25 @@ function graphReportSectionHtml() {
   const types = typeEntries.map(([t, c]) => `${esc(t)} ${c}`).join(" · ");
   const qs = (r.suggested_questions || []).map(q => `<div class="insight-item">${esc(q.question)}<br><span class="caption">${esc(q.basis)}</span></div>`).join("");
   const methods = r.community_methods
-    ? `<p class="caption">Community detection, measured at build: the rendered clusters are the ${esc(r.community_methods.rendered)} partition (${r.community_methods.louvain.communities} communities, largest ${r.community_methods.louvain.largest_share}% of the wiki). Label propagation — the Graph Analysis plugin's algorithm — finds ${r.community_methods.label_propagation.communities} communities here, its largest swallowing ${r.community_methods.label_propagation.largest_share}% around the super-hubs, so it is reported, not rendered.</p>` : "";
+    ? `<p class="caption">Community detection, measured at build: the rendered clusters are the ${esc(r.community_methods.rendered)} partition (${r.community_methods.louvain.communities} communities, largest ${r.community_methods.louvain.largest_share}% of the wiki). Label propagation — the Graph Analysis plugin's algorithm — finds ${r.community_methods.label_propagation.communities} communities here, its largest swallowing ${r.community_methods.label_propagation.largest_share}% around the super-hubs, so it is reported, not rendered.${r.community_methods.louvain_full ? ` The full two-phase Louvain (graphology family, W1.7) finds ${r.community_methods.louvain_full.communities} communities at modularity ${r.community_methods.louvain_full.modularity}.` : ""}</p>` : "";
+  const gm = window.LENS_GRAPH_METRICS || null;
+  const analytics = gm && gm.top ? `<div class="card"><h3>Graph analytics — centrality &amp; metrics, precomputed at build</h3>
+    <p class="caption">Over the relation graph: density ${gm.graph.density} · ${gm.graph.components} component(s) · diameter ${gm.graph.diameter} (largest component) · average clustering ${gm.graph.average_clustering} · modularity ${gm.graph.modularity}.</p>
+    <p>PageRank leaders: ${gm.top.pagerank.slice(0, 5).map(t => `${pageLink(t.id)} <span class="caption">${t.value}</span>`).join(" · ")}</p>
+    <p>Bridges (betweenness): ${gm.top.betweenness.slice(0, 5).map(t => `${pageLink(t.id)} <span class="caption">${t.value}</span>`).join(" · ")}</p>
+    ${(gm.link_prediction && gm.link_prediction.by_common_neighbours || []).length ? `<p class="caption">Missing link? — the Common Neighbours lane ranks ${(gm.link_prediction.by_common_neighbours).length} further pair(s) by shared-neighbour count (top: ${gm.link_prediction.by_common_neighbours.slice(0, 3).map(m => `${pageLink(m.a)} · ${pageLink(m.b)} (${m.common_neighbours})`).join("; ")}). Computed suggestions only.</p>` : ""}</div>` : "";
+  const cd = window.LENS_CLUSTER_DIGESTS || null;
+  const digests = cd && (cd.clusters || []).length ? `<div class="card"><h3>Cluster digests — crawled from each hub over links and backlinks, depth ${cd.crawl_depth}</h3>
+    ${cd.clusters.map(c => `<div class="insight-item"><span class="insight-n">◆</span> <strong>${esc(c.label)}</strong> <span class="caption">— ${c.size} page(s); hub ${pageLink(c.hub_id)}</span><br>
+    <span class="caption">${c.members.slice(0, 6).map(m => `${pageLink(m.id)} (d${m.depth === null ? "—" : m.depth})`).join(" · ")}${c.members_omitted ? ` · +${c.members_omitted} more` : ""}</span>
+    ${c.boundary && c.boundary.length ? `<br><span class="caption">Boundary: ${c.boundary.slice(0, 3).map(b => `${pageLink(b.from)} → ${pageLink(b.to)}`).join("; ")}</span>` : ""}
+    ${c.cocited_pair ? `<br><span class="caption">Co-cited inside: ${pageLink(c.cocited_pair.a)} · ${pageLink(c.cocited_pair.b)} (by ${c.cocited_pair.shared_citers} page(s))${c.cocited_pair.sentence ? ` — “${esc(c.cocited_pair.sentence)}”` : ""}</span>` : ""}</div>`).join("")}</div>` : "";
   return `<h2 style="font-family:var(--font-display)">Graph report</h2>
     <div class="card"><h3>God nodes — pages carrying the most link weight</h3>${gods}${methods}</div>
     ${miss ? `<div class="card"><h3>Missing link? — computed suggestions, never written to pages</h3>${miss}</div>` : ""}
     ${types ? `<div class="card"><h3>Typed link edges</h3><p class="caption">Every edge in the edge table carries a type. A wikilink's type is inferred from the heading it sits under (grounds / contradicts / extends / exemplifies / supersedes / mentions); a frontmatter-declared link keeps its declared relation; a citation is "cites". Census at this build: ${types}.</p></div>` : ""}
+    ${analytics}
+    ${digests}
     ${qs ? `<div class="card"><h3>Suggested questions</h3>${qs}</div>` : ""}`;
 }
 
@@ -1540,7 +2060,7 @@ function renderTimeline() {
     lastDate = e.date;
     return `${sep}<div class="timeline-item stream-${esc(e.stream.replace(/ /g, ""))}">
       <p class="timeline-date">${esc(e.date)} · ${esc(e.stream)}${e.sha ? ` · <span class="mono">${esc(e.sha)}</span>` : ""}${e.actor ? ` · ${esc(e.actor)}` : ""}</p>
-      <p class="timeline-title">${esc(e.title)}</p>
+      <p class="timeline-title">${e.link ? `<a href="#/read/${encodeURIComponent(e.link)}">${esc(e.title)}</a>` : esc(e.title)}</p>
       ${e.summary ? `<p class="timeline-summary">${esc(e.summary)}</p>` : ""}
       ${e.files ? `<p class="caption">${e.files} file(s) changed</p>` : ""}
     </div>`;
@@ -1554,7 +2074,8 @@ function renderTimeline() {
   canvas.querySelectorAll("[data-stream]").forEach(b => b.addEventListener("click", () => { tlStream = b.getAttribute("data-stream"); renderTimeline(); }));
   const f = document.getElementById("tl-filter");
   f.addEventListener("input", () => { tlText = f.value.toLowerCase(); const pos = f.selectionStart; renderTimeline(); const nf = document.getElementById("tl-filter"); nf.focus(); nf.setSelectionRange(pos, pos); });
-  defaultInspector(`<p class="caption">${TIMELINE.events.length} events from wiki/log.md and this wiki's git commits. External repositories are not monitored.</p>`);
+  const tlSources = (TIMELINE.coverage || []).map(c => `${c.source} (${c.entries})`).join(", ");
+  defaultInspector(`<p class="caption">${TIMELINE.events.length} events${tlSources ? ` from ${esc(tlSources)}` : " from wiki/log.md and this wiki's git commits"}. External repositories are not monitored.</p>`);
 }
 
 /* ---------------- Mode: Decisions ---------------- */
@@ -2492,8 +3013,21 @@ function calFinish() {
    A mask that dims all but 1/3/5 lines around the current one
    (wave-7 reading find 9). Pointer or arrow keys move the band.
    The text is never rewritten — this is a reading aid laid over
-   the page, removed as cleanly as it is added. */
-let lfLines = 0, lfBandY = null;
+   the page, removed as cleanly as it is added.
+   Keyboard: the size chips are buttons (Tab to them, Enter or
+   Space to choose); the ↑ and ↓ arrow keys move the band one
+   line at a time (global keydown handler, bottom of file).
+   Reduced motion: the band repositions INSTANTLY — there is no
+   animated transition on it to begin with — and the
+   stylesheet's global prefers-reduced-motion block disables
+   transitions portal-wide besides.
+   Build-list W2 (2026-10-22): the controls carry a plain-words
+   explanation of what the dimming does (COGA: say what a
+   control does, in plain words, where the control is), the band
+   follows scrolling (setupLineFocus), and Line Focus composes
+   with Reader View below — it stays available, unchanged,
+   inside the clean column. */
+let lfLines = 0, lfBandY = null, lfScrollHandler = null;
 function lfLineHeight(article) {
   try {
     const p = article.querySelector("p");
@@ -2540,11 +3074,610 @@ function setupLineFocus(wrap, article) {
     if (!lfLines) return;
     try { const r = wrap.getBoundingClientRect(); lfBandY = ev.clientY - r.top; lfPosition(wrap, article); } catch (e) { /* ignore */ }
   });
+  /* Scroll-following: the masks live inside the wrap, so
+     ordinary scrolling carries band and text together and the
+     band stays on its lines. If scrolling carries the band
+     wholly out of the viewport, it re-centres on the middle of
+     the screen — the reader is never left facing a fully dimmed
+     page. One window listener at a time: each render replaces
+     the previous render's handler. */
+  if (lfScrollHandler) window.removeEventListener("scroll", lfScrollHandler, { capture: true });
+  lfScrollHandler = () => {
+    if (!lfLines || lfBandY === null) return;
+    try {
+      const r = wrap.getBoundingClientRect();
+      const bandViewportY = r.top + lfBandY;
+      if (bandViewportY < 0 || bandViewportY > window.innerHeight) {
+        lfBandY = (window.innerHeight / 2) - r.top;
+        lfPosition(wrap, article);
+      }
+    } catch (e) { /* ignore */ }
+  };
+  window.addEventListener("scroll", lfScrollHandler, { passive: true, capture: true });
   paint();
 }
 
+/* ---------------- Reader View (build-list W2, 2026-10-22) -------
+   A "Read" toggle re-presenting the compiled page in one clean
+   column under the owner's saved typography profile. No
+   extraction runs here, and none is needed: the Lens build
+   already extracted and sanitised the article (lenslib's
+   render), so the Reader View contract — show the article,
+   only the article, in the reader's own type — is met by
+   PRESENTATION: a class on the reading wrap. lens.css hides
+   the page furniture and the portal chrome (via :has on the
+   wrap's class) and centres the column. Typography is NOT
+   forked: the column consumes the same --read-* variables as
+   every reading surface, so the saved profile — the Comfort
+   preset included — applies inside Reader View exactly as
+   outside, and the WCAG typography gate keeps measuring the
+   same properties. The Immersive Reader cloud service stays
+   rejected on custody grounds; this is a native
+   re-implementation of the idea (Firefox Reader View /
+   Readability.js, Microsoft Line Focus), no code taken.
+   State is a view preference in this browser only
+   (lens.readerview); nothing is written into pages or build
+   artefacts, and with the toggle off the render is the
+   pre-existing one. Fully keyboard-operable: the toggle is a
+   button, and Esc leaves Reader View (global keydown, below). */
+let readerOn = false;
+function setupReaderView(btn, wrap) {
+  readerOn = store("lens.readerview") === "1";
+  const paint = () => {
+    wrap.classList.toggle("reader-on", readerOn);
+    btn.setAttribute("aria-pressed", String(readerOn));
+  };
+  btn.addEventListener("click", () => {
+    readerOn = !readerOn;
+    store("lens.readerview", readerOn ? "1" : "0");
+    paint();
+  });
+  paint();
+}
+
+/* ---------------- Margin notes (Build-list W2, 2026-10-22) ----------------
+   Margin notes on Lens pages, on the W3C Web Annotation Data
+   Model (https://www.w3.org/TR/annotation-model/): a note is
+   an Annotation whose body is a TextualBody and whose target
+   is the page (its canonical path), optionally refined by
+   selectors — TextQuoteSelector, TextPositionSelector and a
+   FragmentSelector carrying the text fragment — the model's
+   own shapes. Clean re-implementation from the W3C
+   Recommendation (a public standard); the browser-annotation
+   pattern was evidenced by the Round 10 Annotorious prototype
+   trial and by Hypothesis, which stand as research evidence
+   inside this item — no code is taken from either, no
+   annotation service is contacted, and there is no network
+   path anywhere in this section.
+
+   THE STORE, AND THE PRIVACY BOUNDARY. Notes live only in
+   this browser's localStorage ("lens-annotations") — the
+   house store the feedback log already uses, here holding the
+   reader's own records rather than a capped log. A note is
+   the reader's private working layer: the build never sees
+   notes, so no build artefact, shipped page, or corpus file
+   can contain one; a note is never written into the page it
+   annotates; and the only way a note leaves this browser is
+   the export file its reader downloads (a JSON-LD
+   AnnotationCollection) and carries somewhere themselves.
+
+   SELECTORS THIS BUILD CREATES are the text selectors above.
+   An imported annotation carrying another selector kind (an
+   SVGSelector from an image annotation, say — the IIIF-aware
+   case) is stored and re-exported verbatim, but this surface
+   does not create or resolve those: it lists as a page note.
+
+   ANCHOR HONESTY. A passage note stores its exact words and
+   their context, plus its offsets over the article's
+   whitespace-normalised text. On render, the words must be
+   found — at the stored offsets, or uniquely elsewhere
+   (stored context disambiguates repeats) — before the note
+   shows as attached. If the words are gone, or no longer
+   unique, the note is ORPHANED: listed under its own heading
+   with its quoted words preserved, attached to nothing. A
+   note is never silently re-attached to different words. */
+
+/* MARGIN-NOTES-MODEL-BEGIN
+   Pure model: no DOM, no storage, no clock. Extracted and
+   exercised directly by tools/lens/tests/test_margin_notes.py
+   (round-trip, anchoring, orphaning). */
+const MARGIN_NOTES_CONTEXT = "http://www.w3.org/ns/anno.jsonld";
+function marginNormalizeText(s) {
+  return String(s).replace(/\s+/g, " ");
+}
+function marginNormalizeWithMap(text) {
+  /* The normalised text, plus for each normalised character
+     the index of the raw character it came from (a collapsed
+     whitespace run maps to its first raw character). */
+  const raw = String(text);
+  let norm = "";
+  const map = [];
+  let inWs = false;
+  for (let i = 0; i < raw.length; i++) {
+    if (/\s/.test(raw[i])) {
+      if (!inWs) { norm += " "; map.push(i); inWs = true; }
+    } else { norm += raw[i]; map.push(i); inWs = false; }
+  }
+  return { text: norm, map: map, rawLength: raw.length };
+}
+function marginRawOffset(map, rawLength, normOffset) {
+  if (normOffset >= map.length) return rawLength;
+  return map[normOffset];
+}
+function marginSelectorsFor(normDoc, start, end) {
+  const exact = normDoc.slice(start, end);
+  return [
+    { type: "TextQuoteSelector", exact: exact,
+      prefix: normDoc.slice(Math.max(0, start - 32), start),
+      suffix: normDoc.slice(end, end + 32) },
+    { type: "TextPositionSelector", start: start, end: end },
+    { type: "FragmentSelector",
+      conformsTo: "https://www.w3.org/TR/media-frags/",
+      value: ":~:text=" + encodeURIComponent(exact) },
+  ];
+}
+function marginMakeAnnotation(o) {
+  /* o: {id, created, source, noteText, creatorName, selector} */
+  const anno = {
+    "@context": MARGIN_NOTES_CONTEXT,
+    id: o.id,
+    type: "Annotation",
+    created: o.created,
+    creator: { type: "Person",
+               name: o.creatorName || "Lens reader (this browser)" },
+    motivation: "commenting",
+    body: { type: "TextualBody", value: o.noteText,
+            purpose: "commenting", format: "text/plain",
+            language: "en" },
+    target: o.source,
+  };
+  if (o.selector) {
+    anno.target = { type: "SpecificResource", source: o.source,
+                    selector: o.selector };
+  }
+  return anno;
+}
+function marginTargetSource(anno) {
+  if (!anno || anno.target == null) return null;
+  if (typeof anno.target === "string") return anno.target;
+  return anno.target.source || null;
+}
+function marginSelectors(anno) {
+  if (!anno || typeof anno.target !== "object" || !anno.target) return [];
+  const s = anno.target.selector;
+  if (!s) return [];
+  return Array.isArray(s) ? s : [s];
+}
+function marginQuote(anno) {
+  const q = marginSelectors(anno)
+    .find(s => s && s.type === "TextQuoteSelector");
+  return q ? (q.exact || "") : null;
+}
+function marginBodyText(anno) {
+  if (!anno || anno.body == null) return "";
+  const bodies = Array.isArray(anno.body) ? anno.body : [anno.body];
+  const b = bodies.find(x => x && typeof x.value === "string");
+  return b ? b.value : "";
+}
+function marginResolve(anno, normDoc) {
+  /* Where does this note attach in normDoc, the article's
+     normalised text? States: "page" (no selector — the note
+     is on the page as a whole); "anchored" (the quote verified
+     at the stored offsets); "moved" (the quote found at new
+     offsets — once in the page, or once its stored context is
+     applied to the repeats); "orphaned" (the words are gone
+     or ambiguous — the note keeps its quote and attaches to
+     nothing). */
+  const sels = marginSelectors(anno);
+  if (!sels.length) return { state: "page", start: null, end: null };
+  const quote = marginQuote(anno);
+  const pos = sels.find(s => s && s.type === "TextPositionSelector");
+  if (!quote && !pos) {
+    /* Selectors exist, but none is a text selector this
+       surface resolves (an imported SVGSelector, say): the
+       note stands on the page as a whole here, and its
+       selectors are carried verbatim for a surface that does
+       resolve them. Not an orphan — nothing was lost. */
+    return { state: "page", start: null, end: null };
+  }
+  if (quote) {
+    if (pos && normDoc.slice(pos.start, pos.end) === quote) {
+      return { state: "anchored", start: pos.start, end: pos.end };
+    }
+    const hits = [];
+    let i = normDoc.indexOf(quote);
+    while (i >= 0) { hits.push(i); i = normDoc.indexOf(quote, i + 1); }
+    if (!hits.length) return { state: "orphaned", start: null, end: null };
+    if (hits.length === 1) {
+      return { state: "moved", start: hits[0],
+               end: hits[0] + quote.length };
+    }
+    const q = sels.find(s => s && s.type === "TextQuoteSelector");
+    const ctx = hits.filter(h =>
+      normDoc.slice(Math.max(0, h - (q.prefix || "").length), h)
+        .endsWith(q.prefix || "") &&
+      normDoc.slice(h + quote.length,
+                    h + quote.length + (q.suffix || "").length)
+        === (q.suffix || ""));
+    if (ctx.length === 1) {
+      return { state: "moved", start: ctx[0],
+               end: ctx[0] + quote.length };
+    }
+    return { state: "orphaned", start: null, end: null };
+  }
+  if (pos && pos.start >= 0 && pos.end > pos.start &&
+      pos.end <= normDoc.length) {
+    return { state: "anchored", start: pos.start, end: pos.end };
+  }
+  return { state: "orphaned", start: null, end: null };
+}
+function marginExportCollection(annotations) {
+  return {
+    "@context": MARGIN_NOTES_CONTEXT,
+    id: "urn:lens:margin-notes:export",
+    type: "AnnotationCollection",
+    label: "Lens margin notes — this browser's private notes, " +
+           "exported by their reader",
+    total: annotations.length,
+    first: { type: "AnnotationPage",
+             items: annotations.map(a => JSON.parse(JSON.stringify(a))) },
+  };
+}
+function marginParseImport(text) {
+  /* Accepts an AnnotationCollection, an AnnotationPage, a bare
+     array, or a single Annotation. Returns the annotations it
+     could honestly take (type Annotation, with an id, a body
+     and a target) and the count it refused. Taken annotations
+     are carried verbatim — selector kinds this build does not
+     create survive the round trip untouched. */
+  let data;
+  try { data = JSON.parse(text); }
+  catch (e) { return { annotations: [], refused: 1 }; }
+  let items = null;
+  if (Array.isArray(data)) items = data;
+  else if (data && data.type === "Annotation") items = [data];
+  else if (data && data.type === "AnnotationCollection") {
+    const first = data.first;
+    if (Array.isArray(first)) items = first;
+    else if (first && Array.isArray(first.items)) items = first.items;
+    else if (Array.isArray(data.items)) items = data.items;
+  } else if (data && data.type === "AnnotationPage" &&
+             Array.isArray(data.items)) items = data.items;
+  if (!items) return { annotations: [], refused: 1 };
+  const ok = [];
+  let refused = 0;
+  for (const it of items) {
+    if (it && it.type === "Annotation" && it.id &&
+        it.body != null && it.target != null) {
+      ok.push(JSON.parse(JSON.stringify(it)));
+    } else refused++;
+  }
+  return { annotations: ok, refused: refused };
+}
+/* MARGIN-NOTES-MODEL-END */
+
+const MARGIN_NOTES_KEY = "lens-annotations";
+function loadMarginNotes() {
+  try {
+    const v = JSON.parse(localStorage.getItem(MARGIN_NOTES_KEY) || "[]");
+    return Array.isArray(v) ? v : [];
+  } catch (e) { return []; }
+}
+function saveMarginNotes(rows) {
+  /* No row cap: a note is its reader's record, and silently
+     dropping one at a limit is the failure this layer exists
+     to avoid. A storage failure (quota, private mode) returns
+     false and surfaces on the panel's status line. */
+  try {
+    localStorage.setItem(MARGIN_NOTES_KEY, JSON.stringify(rows));
+    return true;
+  } catch (e) { return false; }
+}
+function marginNoteId() {
+  return "urn:lens:anno:" + Date.now().toString(36) + "-" +
+    Math.floor(Math.random() * 1e9).toString(36);
+}
+function marginNotesHtml(p) {
+  return `
+      <section class="margin-notes" aria-label="Margin notes on this page">
+        <h2 style="font-family:var(--font-display)">Margin notes</h2>
+        <p class="caption">Your notes on this page, in the W3C Web Annotation shape. They are kept only in this browser — never in the wiki, never sent anywhere — and they never change the page. A note on a passage keeps the exact words it was made on; if those words change, the note is marked orphaned below and keeps its words, instead of attaching to different ones.</p>
+        <div class="margin-notes-list"></div>
+        <div class="chip-row margin-notes-actions">
+          <button class="chip" type="button" data-mn="page">Note this page</button>
+          <button class="chip" type="button" data-mn="passage">Note the selected passage</button>
+          <button class="chip" type="button" data-mn="export">Export all notes (JSON-LD)</button>
+          <button class="chip" type="button" data-mn="import">Import notes</button>
+          <input type="file" data-mn="file" accept=".json,application/json" hidden>
+        </div>
+        <div class="margin-notes-editor" hidden>
+          <blockquote class="margin-note-quote" data-mn="quote" hidden></blockquote>
+          <label class="visually-hidden" for="mn-text">Note text</label>
+          <textarea id="mn-text" data-mn="text" rows="3" placeholder="Write your note…"></textarea>
+          <div class="chip-row">
+            <button class="chip" type="button" data-mn="save">Save note</button>
+            <button class="chip" type="button" data-mn="cancel">Cancel</button>
+          </div>
+        </div>
+        <p class="caption" data-mn="status" role="status"></p>
+      </section>`;
+}
+function setupMarginNotes(p, article) {
+  const section = canvas.querySelector(".margin-notes");
+  if (!section || !article) return;
+  const listEl = section.querySelector(".margin-notes-list");
+  const editor = section.querySelector(".margin-notes-editor");
+  const quoteEl = section.querySelector("[data-mn='quote']");
+  const textEl = section.querySelector("[data-mn='text']");
+  const statusEl = section.querySelector("[data-mn='status']");
+  const fileEl = section.querySelector("[data-mn='file']");
+  const setStatus = msg => { statusEl.textContent = msg || ""; };
+  let pendingSelector = null;
+
+  function markPassage(normInfo, res, annoId) {
+    const rawStart = marginRawOffset(normInfo.map, normInfo.rawLength,
+                                     res.start);
+    const rawEnd = marginRawOffset(normInfo.map, normInfo.rawLength,
+                                   res.end);
+    const walker = document.createTreeWalker(article,
+                                             NodeFilter.SHOW_TEXT);
+    const segs = [];
+    let acc = 0;
+    let node;
+    while ((node = walker.nextNode())) {
+      const len = node.nodeValue.length;
+      if (acc + len > rawStart && acc < rawEnd) {
+        segs.push({ node: node,
+                    from: Math.max(0, rawStart - acc),
+                    to: Math.min(len, rawEnd - acc) });
+      }
+      acc += len;
+      if (acc >= rawEnd) break;
+    }
+    /* Wrap last segment first so earlier offsets stay valid. */
+    for (let i = segs.length - 1; i >= 0; i--) {
+      const s = segs[i];
+      let n = s.node;
+      if (s.to < n.nodeValue.length) n.splitText(s.to);
+      if (s.from > 0) n = n.splitText(s.from);
+      const mark = document.createElement("mark");
+      mark.className = "margin-note-mark";
+      mark.setAttribute("data-anno", annoId);
+      n.parentNode.replaceChild(mark, n);
+      mark.appendChild(n);
+    }
+  }
+
+  function noteItemHtml(a, res) {
+    const when = esc(String(a.created || "").slice(0, 10));
+    const body = esc(marginBodyText(a));
+    const del = `<button class="chip" type="button" data-mn-del="${esc(a.id)}">Delete</button>`;
+    if (res.state === "orphaned") {
+      return `<div class="margin-note margin-note-orphan">
+        <p class="caption">Orphaned — the passage this note was made on has changed. The words are kept here; the note is attached to nothing.</p>
+        <blockquote class="margin-note-quote">${esc(marginQuote(a) || "")}</blockquote>
+        <p>${body}</p>
+        <p class="caption">${when}</p>${del}</div>`;
+    }
+    if (res.state === "page") {
+      return `<div class="margin-note">
+        <p>${body}</p>
+        <p class="caption">Page note · ${when}</p>${del}</div>`;
+    }
+    const moved = res.state === "moved"
+      ? " · the passage has moved on the page since; the same words were found and the note follows them" : "";
+    return `<div class="margin-note">
+      <blockquote class="margin-note-quote">${esc(marginQuote(a) || "")}</blockquote>
+      <p>${body}</p>
+      <p class="caption">Passage note · ${when}${moved}</p>${del}</div>`;
+  }
+
+  function paint() {
+    article.querySelectorAll("mark.margin-note-mark").forEach(m => {
+      m.replaceWith(document.createTextNode(m.textContent));
+    });
+    article.normalize();
+    const normInfo = marginNormalizeWithMap(article.textContent || "");
+    const rows = loadMarginNotes()
+      .filter(a => marginTargetSource(a) === p.path);
+    const shown = [], orphaned = [];
+    for (const a of rows) {
+      const res = marginResolve(a, normInfo.text);
+      if (res.state === "orphaned") orphaned.push({ a: a, res: res });
+      else {
+        if (res.state === "anchored" || res.state === "moved") {
+          markPassage(normInfo, res, a.id);
+        }
+        shown.push({ a: a, res: res });
+      }
+    }
+    if (!rows.length) {
+      listEl.innerHTML =
+        `<p class="caption">No notes on this page yet.</p>`;
+    } else {
+      listEl.innerHTML =
+        shown.map(x => noteItemHtml(x.a, x.res)).join("") +
+        (orphaned.length
+          ? `<h3 class="margin-notes-orphan-head">Orphaned notes</h3>` +
+            orphaned.map(x => noteItemHtml(x.a, x.res)).join("")
+          : "");
+    }
+    listEl.querySelectorAll("[data-mn-del]").forEach(b => {
+      b.addEventListener("click", () => {
+        const rest = loadMarginNotes()
+          .filter(x => x.id !== b.getAttribute("data-mn-del"));
+        if (saveMarginNotes(rest)) {
+          setStatus("Note deleted — from this browser only.");
+        } else setStatus("This browser refused the change; the note is still here.");
+        paint();
+      });
+    });
+  }
+
+  function openEditor(selector, quoteText) {
+    pendingSelector = selector;
+    if (quoteText) {
+      quoteEl.textContent = quoteText;
+      quoteEl.hidden = false;
+    } else quoteEl.hidden = true;
+    editor.hidden = false;
+    textEl.value = "";
+    textEl.focus();
+  }
+  function closeEditor() {
+    editor.hidden = true;
+    pendingSelector = null;
+  }
+
+  function selectionSelector() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+    const range = sel.getRangeAt(0);
+    if (!article.contains(range.commonAncestorContainer)) return null;
+    const normInfo = marginNormalizeWithMap(article.textContent || "");
+    const pre = document.createRange();
+    pre.setStart(article, 0);
+    pre.setEnd(range.startContainer, range.startOffset);
+    const rawStart = pre.toString().length;
+    const rawEnd = rawStart + range.toString().length;
+    const map = normInfo.map;
+    let nStart = map.findIndex(x => x >= rawStart);
+    if (nStart < 0) nStart = map.length;
+    let nEnd = map.findIndex(x => x >= rawEnd);
+    if (nEnd < 0) nEnd = map.length;
+    const slice = normInfo.text.slice(nStart, nEnd);
+    const trimmed = slice.trim();
+    if (!trimmed) return null;
+    nStart += slice.indexOf(trimmed);
+    nEnd = nStart + trimmed.length;
+    return marginSelectorsFor(normInfo.text, nStart, nEnd);
+  }
+
+  section.querySelector("[data-mn='page']")
+    .addEventListener("click", () => openEditor(null, null));
+  section.querySelector("[data-mn='passage']")
+    .addEventListener("click", () => {
+      const selector = selectionSelector();
+      if (!selector) {
+        setStatus("Select some words in the page first, then press this again.");
+        return;
+      }
+      setStatus("");
+      openEditor(selector,
+                 selector[0] ? selector[0].exact : null);
+    });
+  section.querySelector("[data-mn='cancel']")
+    .addEventListener("click", closeEditor);
+  section.querySelector("[data-mn='save']")
+    .addEventListener("click", () => {
+      const text = textEl.value.trim();
+      if (!text) { setStatus("Write the note first."); return; }
+      const anno = marginMakeAnnotation({
+        id: marginNoteId(),
+        created: new Date().toISOString(),
+        source: p.path,
+        noteText: text,
+        selector: pendingSelector,
+      });
+      const rows = loadMarginNotes();
+      rows.push(anno);
+      if (!saveMarginNotes(rows)) {
+        setStatus("This browser refused to store the note (storage full or blocked); it was not saved.");
+        return;
+      }
+      closeEditor();
+      setStatus("Saved — in this browser only.");
+      paint();
+    });
+  section.querySelector("[data-mn='export']")
+    .addEventListener("click", () => {
+      const rows = loadMarginNotes();
+      const blob = new Blob(
+        [JSON.stringify(marginExportCollection(rows), null, 2) + "\n"],
+        { type: "application/ld+json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "lens-margin-notes.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+      setStatus(rows.length
+        ? `Exported ${rows.length} note${rows.length === 1 ? "" : "s"} (all pages) as W3C JSON-LD.`
+        : "No notes to export yet.");
+    });
+  section.querySelector("[data-mn='import']")
+    .addEventListener("click", () => fileEl.click());
+  fileEl.addEventListener("change", () => {
+    const f = fileEl.files && fileEl.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const got = marginParseImport(String(reader.result || ""));
+      const rows = loadMarginNotes();
+      const have = new Set(rows.map(x => x.id));
+      const fresh = got.annotations.filter(x => !have.has(x.id));
+      if (!fresh.length) {
+        setStatus(`Nothing new imported (${got.annotations.length} already here, ${got.refused} refused).`);
+      } else if (saveMarginNotes(rows.concat(fresh))) {
+        setStatus(`Imported ${fresh.length} note${fresh.length === 1 ? "" : "s"} (${got.refused} refused). Notes for other pages appear on those pages.`);
+        paint();
+      } else setStatus("This browser refused to store the imported notes.");
+      fileEl.value = "";
+    };
+    reader.readAsText(f);
+  });
+
+  paint();
+}
+
+/* ---------------- Mode: Review Center (Wave-5 item) ----------------
+   What needs review, in one prioritised worklist, computed at
+   build by scripts/wiki_review_state.py: the periodic review
+   layer's queue (attestation expiry, FSRS re-verification,
+   evidence TTL, Pending Review sections, source changes,
+   cadence) merged with the pages' declared review_state
+   frontmatter (a review that went stale, an invalid review
+   record). Display only — a review is a recorded act on the
+   page itself; nothing here marks anything reviewed. */
+function renderReview() {
+  const pop = (REVIEW.census && REVIEW.census.population) || {};
+  const eff = (REVIEW.census && REVIEW.census.by_effective) || {};
+  const effLine = Object.keys(eff).sort().map(k => `${esc(k)} ${eff[k]}`).join(" · ");
+  const itemCard = item => {
+    const link = PAGES[item.page_id]
+      ? `<p><a href="#/read/${encodeURIComponent(item.page_id)}">Open the page</a></p>` : "";
+    const reasons = (item.reasons || []).map(r => `
+      <p>${chip("open", esc(r.reason))} ${esc(r.detail || "")}${r.due ? ` <span class="caption">due ${esc(r.due)}</span>` : ""}</p>`).join("");
+    const claim = item.claim ? `<p class="caption">Claim: ${esc(item.claim.claim)} — ${esc(item.claim.outcome_status || "")}</p>` : "";
+    const state = item.review_state ? `<span class="chip mono">${esc(item.review_state)}</span>` : "";
+    return `
+    <div class="card">
+      <div class="chip-row">${chip(item.priority === 1 ? "broken" : "open", `P${item.priority}`)} ${state} <span class="chip mono">${esc(item.page)}</span></div>
+      <h3>${esc(item.title || item.page)}</h3>
+      ${reasons}${claim}
+      <p class="caption">${item.max_days_overdue != null ? `${item.max_days_overdue}d overdue · ` : ""}last change ${esc(item.last_change || "undated")} · if reviewed today, next due ${esc(item.next_due_if_reviewed_today || "")} (${esc(item.next_due_basis || "")})</p>
+      ${link}
+    </div>`;
+  };
+  const hist = REVIEW.history || {};
+  const histLines = [
+    `<p class="caption">Owner attestations on record: ${(hist.owner_attestations || []).length} · declared page reviews: ${(hist.declared_page_reviews || []).length} · re-verification events: ${(hist.reverify_events || []).length}. History is assembled from the registers only — an edit is not a review.</p>`,
+    ...(hist.owner_attestations || []).map(a => `<p class="caption">Attested: <span class="mono">${esc(a.page)}</span> — ${esc(a.state)} (verified until ${esc(a.verified_until || "")})</p>`),
+    ...(hist.declared_page_reviews || []).map(d => `<p class="caption">Reviewed: <span class="mono">${esc(d.page)}</span> — ${esc(d.reviewed_on)} by ${esc(d.reviewed_by || "")}</p>`),
+  ].join("");
+  canvas.innerHTML = `
+    <h1 class="mode-title">Review Center</h1>
+    <p class="caption">Computed at build from the review layer's queue, the pages' own review_state frontmatter, and the review registers. Ordered by priority band, then most overdue, then page path. This view only displays — recording a review is an act on the page.</p>
+    ${REVIEW.note ? `<div class="empty-note">${esc(REVIEW.note)}</div>` : ""}
+    <p>Census: ${pop.in_population != null ? `${pop.in_population} pages in population` : "population unknown"} · carrying a declared review state: ${pop.carrying_review_state != null ? pop.carrying_review_state : "?"}${effLine ? ` · ${effLine}` : ""}</p>
+    ${(REVIEW.worklist || []).length ? REVIEW.worklist.map(itemCard).join("") : `<div class="empty-note">Nothing is due for review in this build.</div>`}
+    ${(REVIEW.in_review || []).length ? `<h2>In review</h2><p>${REVIEW.in_review.map(p => `<span class="chip mono">${esc(p)}</span>`).join(" ")}</p>` : ""}
+    <h2>Review history</h2>
+    ${histLines}`;
+  defaultInspector(`<p class="caption">Review state is a page's own frontmatter (review_state / reviewed_on / reviewed_by / review_due), declared by the review act itself. Owner attestations (verified_until) are read here, never written. The full record is evaluation/review-center.json in the repository.</p>`);
+}
+
 /* ---------------- Router ---------------- */
-const MORE_ROUTES = ["graph", "timeline", "decisions", "proposals", "trails", "cards", "blackbox", "state", "reading"];
+const MORE_ROUTES = ["graph", "timeline", "decisions", "proposals", "trails", "cards", "blackbox", "state", "reading", "review"];
 function setMore(open) {
   const mm = document.getElementById("more-modes");
   const mt = document.getElementById("more-toggle");
@@ -2599,6 +3732,7 @@ function route() {
   else if (head === "blackbox") { setRail("blackbox"); renderBlackBox(); }
   else if (head === "memory") { setRail("memory"); renderMemory(); }
   else if (head === "state") { setRail("state"); renderState(); }
+  else if (head === "review") { setRail("review"); renderReview(); }
   else if (head === "reading") { setRail("reading"); renderReading(); }
   else { setRail("briefing"); renderBriefing(); }
   canvas.scrollTop = 0;
@@ -2645,6 +3779,7 @@ if (pagesToggle) pagesToggle.addEventListener("click", () => {
 });
 document.addEventListener("keydown", ev => {
   if (ev.key === "Escape") setInspectorOpen(false);
+  if (ev.key === "Escape" && readerOn) { const rt = document.querySelector("[data-readview]"); if (rt) rt.click(); }
   if (lfLines && (ev.key === "ArrowDown" || ev.key === "ArrowUp") && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
     const wrap = canvas.querySelector(".reading-focus-wrap");
     const article = canvas.querySelector(".reading-body");

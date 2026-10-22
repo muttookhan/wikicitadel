@@ -95,6 +95,109 @@ relation as its type; a citation's type is `cites`. In
 and the inspector's "Related — and why" list — can reason about
 a link's meaning, not just its existence.
 
+**Edge provenance labels (W1.8).** Every edge row, and every
+pair edge in `graph.json`, also carries a three-way
+`provenance` label — EXTRACTED / INFERRED / AMBIGUOUS — plus a
+`confidence` in [0, 1] and a `polarity` (pattern: the
+legal-graphify-skill's EXTRACTED / INFERRED / AMBIGUOUS tag,
+dual-licensed MIT OR Apache-2.0, generalised in
+`lenslib.py`'s edge-label section, where the assignment table
+lives). Declared relations and citations are EXTRACTED at
+1.0; a heading-inferred type is INFERRED at 0.75; a pair
+asserting two distinct specific types is AMBIGUOUS at 0.5; a
+derived pair is INFERRED at a signal confidence. In the
+canvas, inferred pairs draw dashed and ambiguous pairs rust
+dotted; the inspector names the label and confidence. The
+labels are additive — the `epistemic` tag is unchanged, and
+an edge without labels is unlabeled, never invalid.
+`scripts/wiki_edge_labels.py` reports the labels the
+existing corpus's edges carry, rule by rule.
+
+**Page-outline mindmaps (W2).** Every page also ships as a
+mindmap: the reader's Mindmap tab renders the page's own
+heading outline — headings nested by level, exactly as
+written — with the wikilinks written under each heading as
+leaf references, computed at build time by `mindmapview.py`
+from the same lenslib parsing as the page artefacts and
+shipped as `data/mindmaps.json` / `data/mindmaps.js`. A
+resolved leaf links to its page; an unresolved one is a
+dashed boundary leaf, never a pretend link. A page with no
+headings shows an explicit empty state. The view adapts the
+Markmap pattern (markmap.js.org, MIT) — idea and foldable-
+branch interaction credited; the generator and renderer are
+this tree's own code.
+
+**Margin notes (W2).** The Read view carries a margin-notes
+layer on the W3C Web Annotation Data Model (clean
+re-implementation from the W3C Recommendation; the pattern was
+evidenced by the Round 10 Annotorious prototype trial and by
+Hypothesis, which stand as research evidence, no code taken).
+A note is an Annotation with a TextualBody, targeting the page
+by its canonical path — or, for a passage note, a
+SpecificResource refined by TextQuoteSelector +
+TextPositionSelector + a FragmentSelector text fragment. The
+store is this browser's localStorage (`lens-annotations`)
+only: the build never sees notes, no artefact or corpus file
+can contain one, a note never changes its page, and the only
+way out is the reader's own export — a JSON-LD
+AnnotationCollection file the Export button downloads and the
+Import button reads back (round-trip pinned by
+`tests/test_margin_notes.py`). Anchor honesty: on render, a
+passage note's quoted words must be found — at the stored
+offsets, or uniquely elsewhere with the stored context
+disambiguating repeats — before the note shows as attached;
+otherwise it lists as ORPHANED with its words preserved,
+attached to nothing, never silently re-anchored to different
+text. Selector kinds this surface does not create (an imported
+SVGSelector, the IIIF-aware case) are stored and re-exported
+verbatim and list as page notes.
+
+**Semantic zoom (W2).** The Graph mode's Zoom control moves
+between three levels whose content changes with scale, not
+just size (Sensecape pattern, re-implemented): *Overview* —
+one supernode per community, placed at the centroid of its
+member pages, sized by their total link weight, labelled and
+sized from the community summaries and cluster digests;
+*Community* — one community expanded into its member pages at
+their page positions (direct links drawn, as at page level),
+the other communities collapsed around it with their boundary
+links aggregated; *Pages* — the full graph, the default. The
+`zoom` block in `graph.json` is computed at build in
+`lenslib.py` (`graph_zoom_levels`) from the SAME rendered
+Louvain partition the nodes, summaries, and digests carry —
+zooming never re-clusters, in the build or the client; the
+client only renders the levels and folds the As-of filter
+over the shipped edge table. Overview edges aggregate every
+weighted relation pair between two communities (the weights
+the communities were computed from), the As-of scrub applies
+at every level (a community shows when at least one member
+existed by the date), freshness colour at Overview is the
+band of the median member update date, and type colour is
+the community's plurality member type. The full rule set is
+stated on the artefact itself (`zoom.rules`).
+
+**Deterministic hierarchical layout (W2).** The Graph mode's
+Layout control offers a second position set beside the
+default seeded force layout: a layered (hierarchical) layout
+over the DIRECTED link graph — pages ranked by longest path
+from the pages that link to them — computed at build by
+`graphlayout.py` and shipped as the `layouts.hierarchical`
+block in `graph.json`. The layout is deterministic: the same
+graph rebuilds to byte-identical positions, the property
+reviewable graph diffs need. The item's named engine,
+@hpcc-js/wasm-graphviz, is not available in this environment
+(no Graphviz binary; the package, though published on npm, is
+not vendored or installed here and installs are out of
+bounds), so the shipped engine is the house clean-room
+implementation of the published Sugiyama/dot layered method
+(Sugiyama et al. 1981; Gansner et al. 1993) — the artefact's
+`engine` field names it honestly, and the module header
+states the door for the real engine. Community supernodes
+keep the centroid rule under both layouts (the hierarchical
+centroids ship as `zoom_positions`), positions are computed
+over the full graph (the As-of filter only hides pages), and
+when the block is absent the view is force-only, unchanged.
+
 **Co-citation.** Two pages are co-cited when a third page links
 to both. Selecting a node in the Graph shows a "Co-cited with"
 panel: the co-cited pages, how many pages cite them together,
@@ -120,6 +223,33 @@ the super-hubs' whole neighbourhood), so the graph report
 carries both methods' community count and largest share, and
 the rendered partition stays Louvain until the corpus shape
 changes that measurement.
+
+**Graph analytics pack (W1.7, 2026-10-22).** The graphology
+algorithm family, cleanly re-implemented in `lenslib.py` from the
+published algorithms (no graphology code used; attributions in
+the section header there): full two-phase **Louvain** (Blondel
+et al. 2008) with Newman–Girvan **modularity**, the **centrality
+suite** — weighted PageRank (Brin & Page 1998), Brandes
+betweenness (2001), Wasserman–Faust closeness (1994),
+eigenvector centrality, Watts–Strogatz + Onnela weighted
+clustering — **graph-level metrics** (density, components,
+diameter/radius), a **link-prediction pack** publishing the
+Common Neighbours lane beside Adamic–Adar over the same
+"missing link?" pairs, and **per-cluster digest pages**: one
+precomputed digest per rendered community, crawled from its hub
+over links and backlinks to depth 2 (members with crawl depths,
+strongest internal edges, boundary edges, the cluster's top
+co-cited pair with its citing sentence). Two new artefacts:
+`data/graph-metrics.json` and `data/cluster-digests.json`
+(+ `.js` twins), rendered by the Graph report section. The
+full Louvain is measured against the rendered partition, not
+swapped in: at this build it finds 4 communities at modularity
+0.4597 against the rendered partition's 14 at 0.4261 — the
+comparison rides in `community_methods` beside label
+propagation's, and the rendered partition changes only by a
+separate decision. Tests: `scripts/tests/test_lens_graph_pack.py`
+(hand-computed fixtures: two triangles + bridge, a star, a path;
+determinism pinned for every function).
 
 **GRAPH_REPORT.** Each build emits `data/graph-report.json`
 (+ `.js` twin): god nodes (top pages by weighted degree), the
@@ -192,6 +322,27 @@ Build context: the deployment pipeline checks out the whole repo
 the checked-out tree. Only committed staging files are in that
 tree — drafts staged locally but never committed appear in local
 builds only, until an integration commit carries them.
+
+## Review Center (Wave-5 item)
+
+The `#/review` view shows what needs review in one prioritised
+worklist, computed at build time by `scripts/wiki_review_state.py`
+(loaded by the builder, never mirrored): the periodic review
+layer's queue (attestation expiry, FSRS re-verification, evidence
+TTL, Pending Review sections, source changes, cadence) merged
+with the pages' declared `review_state` frontmatter — the field
+set `review_state` (`unreviewed` / `in-review` / `reviewed`),
+`reviewed_on`, `reviewed_by`, `review_due` — whose effective
+state (current / stale / unverifiable) is derived, never stamped.
+Priorities: P1 attestation-expired / reverify-overdue /
+pending-review-open / invalid review record; P2 evidence-due /
+source-changed / review-state-stale; P3 the rest; then most
+overdue, then path. The view also carries the review-state census
+and a register-only review history (owner attestations are read,
+never written). Display only: recording a review is an act on the
+page itself. The same computation writes
+`evaluation/review-center.json` / `.md` and an AI-reviewer
+payload (`review-center-payload.jsonl`) when run as a CLI.
 
 ## Build
 

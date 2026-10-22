@@ -27,6 +27,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import lenslib as L  # noqa: E402
 import stateviews as SV  # noqa: E402  (Phase-8 items 63/65: state-shaped views, Briefing honesty)
+import mermaidview as MV  # noqa: E402  (Wave-2 item W2: build-time Mermaid rendering)
+import mindmapview as MM  # noqa: E402  (Wave-2 item W2: page-outline mindmaps)
+import graphlayout as GL  # noqa: E402  (Wave-2 item W2: deterministic hierarchical graph layout)
 
 BUILDER_VERSION = "lens-compiler 1.1 (FE-0..FE-6 local build + nashsu parity pass)"
 
@@ -471,6 +474,13 @@ def main():
     # and contradiction yields two typed edges, not one blurred
     # one. For a frontmatter `links:` edge the author declared the
     # relation, so type = that relation; for a citation, "cites".
+    #
+    # Provenance labels (build wave 1, item W1.8): every edge
+    # row ALSO carries lenslib.edge_label's three-way provenance
+    # (EXTRACTED / INFERRED / AMBIGUOUS) plus a confidence and a
+    # polarity — additive keys beside `epistemic`, which is
+    # unchanged. The graph bundle below aggregates them per
+    # pair via lenslib.pair_edge_label.
     edges = []
     broken_targets = Counter()
     for pg in content_pages:
@@ -482,7 +492,8 @@ def main():
                 edges.append({"src": pg["id"], "dst": dst, "kind": "wikilink",
                               "relation": "mentions", "type": ltype,
                               "section": section, "anchor": anchor,
-                              "epistemic": "extracted"})
+                              "epistemic": "extracted",
+                              **L.edge_label("wikilink", ltype)})
             elif not dst:
                 broken_targets[target] += 1
         for src in pg["sources_fm"]:
@@ -494,7 +505,8 @@ def main():
                 edges.append({"src": pg["id"], "dst": dst,
                               "kind": "citation", "relation": "cites",
                               "type": "cites", "section": None, "anchor": None,
-                              "epistemic": "extracted"})
+                              "epistemic": "extracted",
+                              **L.edge_label("citation", "cites")})
         links_fm = pg["fm"].get("links") or {}
         if isinstance(links_fm, dict):
             for relation, targets in links_fm.items():
@@ -507,7 +519,9 @@ def main():
                                       "relation": str(relation),
                                       "type": str(relation), "section": None,
                                       "anchor": None,
-                                      "epistemic": "extracted"})
+                                      "epistemic": "extracted",
+                                      **L.edge_label("typed",
+                                                     str(relation))})
 
     backlinks = defaultdict(list)
     neighbours = defaultdict(set)
@@ -672,6 +686,17 @@ def main():
     # placeholder paragraph; the figure (map + the source block,
     # kept as the source of truth) is substituted back after.
     argdown_census = {"blocks": 0, "pages": [], "unparsed": []}
+    # Mermaid (Wave-2 item W2): a fenced ```mermaid block in a page
+    # is compiled at build time to an inline SVG by our own subset
+    # renderer (mermaidview — nothing vendored; the syntax is
+    # Mermaid's, MIT, mermaid.js.org). Same lift-and-substitute
+    # pattern as Argdown: the block is lifted out before rendering,
+    # the figure (SVG + the source block, kept as the source of
+    # truth) is substituted back after; an unsupported diagram
+    # type renders the named unrendered state with its source
+    # shown as-is — never a dropped diagram.
+    mermaid_census = {"blocks": 0, "pages": [], "rendered": 0,
+                      "fallbacks": [], "unparsed": []}
     pages_json = {}
     for pg in pages_raw:
         argdown_figs = []
@@ -702,11 +727,31 @@ def main():
                     {"page": _pg["id"], "line": u})
             return f"\n\nLENSARGDOWNMAP{idx}\n\n"
 
+        body_src, mermaid_figs, mermaid_infos = MV.lift_mermaid(
+            pg["body"])
+        for info in mermaid_infos:
+            mermaid_census["blocks"] += 1
+            if pg["id"] not in mermaid_census["pages"]:
+                mermaid_census["pages"].append(pg["id"])
+            if info["rendered"]:
+                mermaid_census["rendered"] += 1
+            else:
+                mermaid_census["fallbacks"].append(
+                    {"page": pg["id"], "type": info["type"]})
+            for u in info["unparsed"]:
+                mermaid_census["unparsed"].append(
+                    {"page": pg["id"], "line": u})
         body_src = re.sub(r"(?ms)^```argdown[ \t]*\n(.*?)^```[ \t]*$",
-                          _argdown_sub, pg["body"])
+                          _argdown_sub, body_src)
         render_body = L.expand_wiki_queries(body_src, query_pages,
                                             self_id=pg["id"])
         html_body, wl = L.render_markdown(render_body)
+        for i, fig in enumerate(mermaid_figs):
+            token = f"<p>LENSMERMAIDFIG{i}</p>"
+            if token in html_body:
+                html_body = html_body.replace(token, fig)
+            elif f"LENSMERMAIDFIG{i}" in html_body:
+                html_body = html_body.replace(f"LENSMERMAIDFIG{i}", fig)
         for i, fig in enumerate(argdown_figs):
             token = f"<p>LENSARGDOWNMAP{i}</p>"
             if token in html_body:
@@ -786,6 +831,18 @@ def main():
     for old in pages_dir.iterdir():
         if old.is_file() and old.name not in expected:
             old.unlink()
+    # Page-outline mindmaps (Wave-2 item W2): each page's own
+    # headings nested by level, the wikilinks under each heading
+    # as leaf references — computed by mindmapview from the same
+    # lenslib parsing the page artefacts use; resolution is the
+    # build's route_by_stem lookup, so an unresolved leaf ships
+    # as a marked boundary reference. Pattern: Markmap (MIT),
+    # credited in mindmapview's header and the artefact itself.
+    mindmaps = MM.build_mindmaps(pages_raw,
+                                 MM.route_resolver(route_by_stem))
+    dump_json(out / "data" / "mindmaps.json", mindmaps)
+    dump_js(out / "data" / "mindmaps.js", "LENS_MINDMAPS", mindmaps)
+
     dump_json(out / "data" / "routes.json", routes)
     with open(out / "data" / "edges.jsonl", "w", encoding="utf-8") as fh:
         for e in edges:
@@ -872,11 +929,24 @@ def main():
         wdegree[k[1]] += v["weight"]
     wdegree = {n: round(w, 2) for n, w in wdegree.items()}
 
+    # Per-node grounded dates (W2: graph time-travel + freshness
+    # colouring). The precedence and the no-guesswork rule live in
+    # lenslib's temporal section; the dates ship on the nodes and
+    # the client filters/colours from them — no runtime fetching.
+    temporal_by_id = {n: L.page_temporal_dates(
+        page_by_id[n]["text"],
+        page_history_by_path.get(page_by_id[n]["path"]))
+        for n in node_ids}
+
     graph_nodes = [{"id": n, "title": page_by_id[n]["title"], "type": page_by_id[n]["type"],
                     "group": display_group(page_by_id[n]),
                     "degree": len(neighbours.get(n, set())),
                     "wdegree": wdegree[n],
                     "community": communities[n],
+                    "created": temporal_by_id[n]["created"],
+                    "created_from": temporal_by_id[n]["created_from"],
+                    "updated": temporal_by_id[n]["updated"],
+                    "updated_from": temporal_by_id[n]["updated_from"],
                     "x": layout[n][0], "y": layout[n][1]} for n in node_ids]
     # Typed relations per pair (the build): counts of the typed
     # edges between the pair's two pages, both directions summed,
@@ -885,12 +955,21 @@ def main():
     # is deterministic). Only direct pairs carry types — a derived
     # pair has no written link whose meaning could be typed.
     pair_types = {}
+    pair_members = {}
     for e in edges:
         if e["kind"] in ("wikilink", "typed") and e["src"] in page_by_id \
                 and e["dst"] in page_by_id:
             counts = pair_types.setdefault(pair_key(e["src"], e["dst"]),
                                            Counter())
             counts[e.get("type") or "mentions"] += 1
+            # W1.8: the pair's member labels, aggregated into the
+            # graph edge's provenance label just below.
+            pair_members.setdefault(pair_key(e["src"], e["dst"]),
+                                    []).append(
+                (e.get("type") or "mentions",
+                 {"provenance": e["provenance"],
+                  "confidence": e["confidence"],
+                  "polarity": e["polarity"]}))
 
     def dominant_type(counts):
         return sorted(counts.items(),
@@ -905,6 +984,13 @@ def main():
                     # a pair the build derived from shared sources /
                     # common neighbours alone is inferred.
                     "epistemic": "extracted" if v["direct"] else "inferred",
+                    # W1.8: the three-way provenance label +
+                    # confidence + polarity for the pair (additive;
+                    # `epistemic` above is unchanged).
+                    **L.pair_edge_label(pair_members.get(k, []),
+                                        v["direct"],
+                                        v["shared_sources"],
+                                        v["common_neighbours"]),
                     **({"types": dict(sorted(
                         pair_types[pair_key(k[0], k[1])].items())),
                         "relation": dominant_type(
@@ -997,6 +1083,28 @@ def main():
                                   / len(node_ids), 1)},
     }
 
+    # ---------------- Graph analytics pack (W1.7) ----------------
+    # The graphology family, re-implemented in lenslib (full
+    # two-phase Louvain, the centrality suite, graph-level
+    # metrics, Common Neighbours beside Adamic-Adar, per-cluster
+    # digests). Same discipline as label propagation above: the
+    # full Louvain is MEASURED against the rendered partition and
+    # published in the pack artefacts; the rendered partition does
+    # not change. All of it is build-time — the Lens renders the
+    # precomputed JSON, no runtime dependency is added.
+    full_partition = L.louvain_full(node_ids, weights)
+    full_sizes = Counter(full_partition.values())
+    q_rendered = L.modularity(node_ids, weights, communities)
+    q_full = L.modularity(node_ids, weights, full_partition)
+    community_methods["louvain_full"] = {
+        "communities": len(full_sizes),
+        "largest_share": round(100.0 * max(full_sizes.values())
+                                / len(node_ids), 1),
+        "modularity": round(q_full, 4)}
+    community_methods["modularity"] = {
+        "louvain_rendered": round(q_rendered, 4),
+        "louvain_full": round(q_full, 4)}
+
     # ---------------- Insights (all computed, none invented) ----------------
     surprising = []
     for e in graph_edges:
@@ -1088,6 +1196,59 @@ def main():
         rm = rm_types_by_pair.get(pair_key(ge["a"], ge["b"]))
         if rm:
             ge["rm_types"] = sorted(rm)
+    # Semantic zoom levels (W2): the multilevel view's build-time
+    # data — one supernode per community of the SAME rendered
+    # partition shipped on the nodes above (lenslib's zoom
+    # section states the rules), at the centroid of its members'
+    # layout positions, with the cross-community relation weights
+    # aggregated over the full weighted relation table. The
+    # client renders these levels and folds the As-of filter
+    # over them; it never re-clusters.
+    zoom = L.graph_zoom_levels(
+        node_ids, communities, pair_signals, layout,
+        {n: display_group(page_by_id[n]) for n in node_ids},
+        GROUP_ORDER, wdegree,
+        {c["id"]: c for c in comm_data},
+        rm_types_by_pair)
+    # Deterministic hierarchical layout option (W2): a second,
+    # layered position set beside the seeded force layout above,
+    # computed by graphlayout.py (the house Sugiyama/dot-method
+    # engine — the item's @hpcc-js/wasm-graphviz route is doored;
+    # the module header states the engine reality). Its input is
+    # the DIRECTED link graph: the same typed edges the direct
+    # pair table above is built from (kinds wikilink/typed, both
+    # endpoints graph nodes), deduplicated and self-loop-free.
+    # Community positions under this layout are the centroids of
+    # the members' hierarchical positions — computed by running
+    # the zoom builder itself over the hierarchical positions,
+    # so the centroid rule can never drift from the force one.
+    directed_pairs = sorted({(e["src"], e["dst"]) for e in edges
+                             if e["kind"] in ("wikilink", "typed")
+                             and e["src"] in node_set
+                             and e["dst"] in node_set
+                             and e["src"] != e["dst"]})
+    hpositions, hreport = GL.hierarchical_layout(node_ids,
+                                                 directed_pairs)
+    hzoom = L.graph_zoom_levels(
+        node_ids, communities, pair_signals, hpositions,
+        {n: display_group(page_by_id[n]) for n in node_ids},
+        GROUP_ORDER, wdegree,
+        {c["id"]: c for c in comm_data},
+        rm_types_by_pair)
+    hierarchical = {
+        "engine": GL.ENGINE_NAME,
+        "credit": GL.CREDIT,
+        "rules": GL.RULES,
+        "sweeps": hreport["sweeps"],
+        "ranks": hreport["ranks"],
+        "rank_sizes": hreport["rank_sizes"],
+        "crossings": hreport["crossings"],
+        "directed_edges": hreport["directed_edges"],
+        "reversed_edges": hreport["reversed_edges"],
+        "positions": {n: hpositions[n] for n in node_ids},
+        "zoom_positions": {str(c["id"]): [c["x"], c["y"]]
+                           for c in hzoom["communities"]},
+    }
     graph_relation_maps = {
         "edge_types": relation_maps.get("edge_types") or [],
         "hoisting": relation_maps.get("hoisting") or [],
@@ -1095,8 +1256,13 @@ def main():
     graph = {"nodes": graph_nodes, "edges": graph_edges,
              "relation_maps": graph_relation_maps,
              "communities": comm_data,
+             "zoom": zoom,
+             "layouts": {"hierarchical": hierarchical},
              "community_colours": COMMUNITY_COLOURS,
              "type_groups": type_groups,
+             "temporal": L.graph_temporal(
+                 [temporal_by_id[n] for n in node_ids],
+                 generated_at[:10]),
              "stats": graph_stats,
              "insights": {"categories": insight_categories,
                           "surprising": surprising[:6], "gaps": gaps},
@@ -1179,6 +1345,77 @@ def main():
     dump_js(out / "data" / "graph-report.js", "LENS_GRAPH_REPORT",
             graph_report)
 
+    # Graph analytics pack artefacts (W1.7): centrality suite +
+    # graph-level metrics + the Common Neighbours lane, and one
+    # digest per rendered community crawled from its hub over
+    # links/backlinks to depth 2. Precomputed here; the client
+    # only renders.
+    centralities = L.graph_centralities(node_ids, weights)
+    level_metrics = L.graph_level_metrics(node_ids, weights,
+                                          communities)
+    prediction_pack = L.link_prediction_pack(nb_content, top_n=12)
+
+    def _round_map(mapping):
+        return {k: (round(v, 6) if isinstance(v, float) else v)
+                for k, v in sorted(mapping.items())}
+
+    def _top_by(key, count=10):
+        return [{"id": x, "title": page_by_id[x]["title"],
+                 "value": round(centralities[x][key], 4)}
+                for x in sorted(node_ids,
+                                key=lambda x: (-centralities[x][key],
+                                               x))[:count]]
+
+    graph_metrics = {
+        "corpus": {"nodes": len(node_ids),
+                   "relation_pairs": len(pair_signals),
+                   "edge_records": len(edges)},
+        "graph": _round_map(level_metrics),
+        "nodes": {x: _round_map(centralities[x]) for x in node_ids},
+        "top": {"pagerank": _top_by("pagerank"),
+                "betweenness": _top_by("betweenness"),
+                "eigenvector": _top_by("eigenvector"),
+                "clustering": _top_by("clustering")},
+        "partitions": community_methods,
+        "link_prediction": {
+            "pairs_considered": prediction_pack["pairs_considered"],
+            "by_common_neighbours":
+                prediction_pack["by_common_neighbours"]},
+        "note": "Computed at build from the relation graph "
+                "(graphology algorithm family, re-implemented in "
+                "lenslib: Louvain, PageRank, Brandes betweenness, "
+                "Wasserman–Faust closeness, clustering). Suggestions "
+                "and clusters are computed, never canonical.",
+        **stamp}
+    dump_json(out / "data" / "graph-metrics.json", graph_metrics)
+    dump_js(out / "data" / "graph-metrics.js", "LENS_GRAPH_METRICS",
+            graph_metrics)
+
+    out_links = defaultdict(set)
+    for e in edges:
+        if e["kind"] in ("wikilink", "typed") and e["src"] in node_set \
+                and e["dst"] in node_set and e["src"] != e["dst"]:
+            out_links[e["src"]].add(e["dst"])
+    in_links = defaultdict(set)
+    for src, dsts in out_links.items():
+        for dst in dsts:
+            in_links[dst].add(src)
+    digests = L.cluster_digests(
+        node_ids, communities, out_links, in_links,
+        {n: page_by_id[n]["title"] for n in node_ids},
+        {n: page_by_id[n].get("lede", "") for n in node_ids},
+        weights, cocitations=cocitations, depth=2)
+    cluster_digests = {
+        "crawl_depth": 2,
+        "clusters": digests,
+        "note": "One digest per rendered community, crawled at "
+                "build from the cluster's hub over links and "
+                "backlinks to depth 2. Computed, never canonical.",
+        **stamp}
+    dump_json(out / "data" / "cluster-digests.json", cluster_digests)
+    dump_js(out / "data" / "cluster-digests.js",
+            "LENS_CLUSTER_DIGESTS", cluster_digests)
+
     # ---------------- Knowledge panel (type-grouped tree + Files) ----------------
     # The nashsu-style left panel: pages grouped by display group with
     # real counts, plus a Files view grouped by folder. The structural
@@ -1236,10 +1473,19 @@ def main():
     severance = None
     if sev_path.is_file():
         severance = json.loads(sev_path.read_text(encoding="utf-8"))
+    # Truth-aware governance (W1.5): the same artefact
+    # wiki_search.py loads by default, handed to the mirror so
+    # the parity check below exercises the successor exemption
+    # and page-state withholding on both implementations.
+    gov_path = repo / "evaluation" / "retrieval-governance.json"
+    governance = None
+    if gov_path.is_file():
+        governance = json.loads(gov_path.read_text(encoding="utf-8"))
     postings_index = L.PostingsIndex(
         [{"key": str(p), "text": t,
           "structural": str(p.relative_to(repo)) in ("wiki/index.md", "wiki/log.md")}
-         for p, t in ref_docs], severance=severance)
+         for p, t in ref_docs], severance=severance,
+        governance=governance)
     # Surfaces (the surfaces build): the tag registry (item 59's vocabulary +
     # item 56's tag resolution) and the freshness signals (item
     # 46's records, rendered by the results UI — fold-in 2). Both
@@ -1302,11 +1548,15 @@ def main():
              # Phase-8 surfaces: the facet schema over the corpus
              # (item 56), the severance list for the browser
              # ranker (fold-in 1 — the same list handed to the
-             # Python index above), and item 59's corpus
-             # vocabulary + registry maps for suggestions and
-             # the relaxation ladder.
+             # Python index above), the governance artefact for
+             # the browser ranker's truth-aware stage (W1.5 —
+             # the same artefact handed to the Python index
+             # above), and item 59's corpus vocabulary +
+             # registry maps for suggestions and the
+             # relaxation ladder.
              "facets": L.facet_schema([d["facets"] for d in doc_meta]),
              "severance": severance,
+             "governance": governance,
              "vocab": L.build_vocabulary(
                  [{"id": pg["id"], "title": pg["title"],
                    "headings": pg["headings"]} for pg in pages_raw],
@@ -1344,12 +1594,18 @@ def main():
 
     # ---------------- Timeline ----------------
     events = []
+    log_excluded = []
     log_pg = page_by_id.get("log")
     if log_pg:
         chunks = re.split(r"(?m)^## \[", log_pg["body"])
         for ch in chunks[1:]:
             m = re.match(r"(\d{4}-\d{2}-\d{2})\] (\w+) \| (.*?)\n(.*)", ch, re.S)
             if not m:
+                log_excluded.append({
+                    "source": "wiki/log.md",
+                    "reason": "log chunk without a '[date] kind | "
+                              "title' header in its own text",
+                    "detail": " ".join(ch.split())[:60]})
                 continue
             date, kind, title, bodytxt = m.groups()
             stream = {"ingest": "Ingests", "decision": "Decisions", "query": "Queries",
@@ -1362,6 +1618,15 @@ def main():
             events.append({"date": date, "kind": kind, "stream": stream,
                            "title": title.strip(), "summary": summary, "actor": actor,
                            "source": "wiki/log.md"})
+    log_parsed = len(events)
+
+    # Dated entries beyond the log (W2): the agents' filing
+    # ledgers and the decision record join the timeline. Each
+    # entry is dated from its own text (lenslib's timeline
+    # section); ungrounded candidates come back excluded with
+    # reasons and are counted on the artefact, never placed.
+    tl_extra, tl_coverage, tl_excluded = L.timeline_extra_entries(pages_raw)
+    events.extend(tl_extra)
     log_out = git(repo, "log", "-n", "80",
                   "--format=@@@%H%x09%cI%x09%s", "--numstat")
     cur = None
@@ -1375,12 +1640,33 @@ def main():
                 events.append(cur)
         elif cur is not None and "\t" in ln:
             cur["files"] += 1
-    events.sort(key=lambda e: e["date"], reverse=True)
+    L.sort_timeline(events)
+    for e in events:
+        e.setdefault("tkind", L.timeline_kind(e["kind"]))
+        if e["tkind"] == "other":
+            e.setdefault("tkind_reason",
+                         "git commit — not a dated markdown entry")
+        if e["source"] == "wiki/log.md":
+            e.setdefault("link", "log")
+    tl_excluded_all = log_excluded + tl_excluded
+    coverage = ([{"source": "wiki/log.md", "entries": log_parsed,
+                  "excluded": len(log_excluded)}]
+                + tl_coverage
+                + [{"source": "git log",
+                    "entries": sum(1 for e in events
+                                   if e["source"] == "git log"),
+                    "excluded": 0}])
     timeline = {"events": events,
-                "caption": "This is the history of this wiki — its own log and git "
-                           "commits. It is not a monitor of external repositories.",
+                "coverage": coverage,
+                "excluded": tl_excluded_all,
+                "caption": "This is the history of this wiki — its own log, the "
+                           "agents' filing ledgers, its decision records and its "
+                           "git commits. It is not a monitor of external repositories.",
                 **stamp}
     dump_json(out / "data" / "timeline.json", timeline)
+    print(f"Timeline: {len(events)} events from {len(coverage)} sources; "
+          f"{len(tl_excluded_all)} dated-entry candidate(s) excluded "
+          f"with reasons")
 
     # ---------------- Decisions ----------------
     decisions = []
@@ -1723,6 +2009,14 @@ def main():
                          "stateviews.parse_argdown). Pages carrying a "
                          "block are listed; zero blocks is a true count, "
                          "not a missing feature."),
+        "mermaid": mermaid_census,
+        "mermaid_note": ("Diagrams compile from ```mermaid fenced "
+                         "blocks inside pages (own subset renderer, "
+                         "mermaidview: flowchart, state diagrams, "
+                         "pie). Blocks outside the subset are listed "
+                         "as fallbacks and render their source as-is "
+                         "with the state named; zero blocks is a true "
+                         "count, not a missing feature."),
     }
     # --- Item 65: honesty stack on the Briefing ---
     lane_series = SV.lint_lane_series(repo)
@@ -1852,7 +2146,9 @@ def main():
     print(f"the surfaces build: matrix {matrix['total_pages']} pages × "
           f"{len(matrix['states'])} states · lifecycle "
           f"{lifecycle['record_count']} records · argdown "
-          f"{argdown_census['blocks']} block(s) · bullets "
+          f"{argdown_census['blocks']} block(s) · mermaid "
+          f"{mermaid_census['blocks']} block(s), "
+          f"{mermaid_census['rendered']} rendered · bullets "
           f"{len(bullets)} · forecast due-now "
           f"{forecast.get('due_now_count', 'n/a')}")
     dump_json(out / "data" / "state.json", state_data)
@@ -1939,6 +2235,42 @@ def main():
     dump_json(out / "data" / "feedback.json", feedback_data)
     dump_js(out / "data" / "feedback.js", "LENS_FEEDBACK", feedback_data)
     print(f"Feedback: {feedback_data.get('total', 0)} record(s) triaged")
+
+    # ---------------- Review Center (Wave-5 item) ----------------
+    # The review-state census + prioritised review worklist,
+    # computed at build by scripts/wiki_review_state.py (loaded,
+    # not mirrored — the Memory view's pattern). The tool merges
+    # the periodic review layer's queue with the pages' declared
+    # review_state frontmatter. If the computation fails, the
+    # view ships an honest empty center naming the failure —
+    # never a stale or invented queue.
+    try:
+        _rspec = importlib.util.spec_from_file_location(
+            "wiki_review_state",
+            repo / "scripts" / "wiki_review_state.py")
+        _rmod_rs = importlib.util.module_from_spec(_rspec)
+        _rspec.loader.exec_module(_rmod_rs)
+        review_data = _rmod_rs.build_review_center(repo, now.date())
+    except Exception as exc:  # honest degradation, stated on the artefact
+        review_data = {
+            "kind": "review-center", "as_of": now.date().isoformat(),
+            "note": f"Review Center computation failed in this "
+                    f"build: {type(exc).__name__}: {exc}",
+            "census": {"population": {}, "by_effective": {},
+                       "findings": []},
+            "stats": {"worklist": 0, "by_reason": {},
+                      "in_review": 0},
+            "worklist": [], "in_review": [],
+            "history": {"owner_attestations": [],
+                        "declared_page_reviews": [],
+                        "reverify_events": []},
+        }
+    review_data = {**review_data, **stamp}
+    dump_json(out / "data" / "review.json", review_data)
+    dump_js(out / "data" / "review.js", "LENS_REVIEW", review_data)
+    print(f"Review: {review_data.get('stats', {}).get('worklist', 0)} "
+          f"worklist item(s), census "
+          f"{review_data.get('census', {}).get('population', {})}")
 
     # ---------------- Staged proposals (diff view) ----------------
     # Wave-3 item C2: the gateway's staged proposals

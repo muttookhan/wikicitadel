@@ -20,6 +20,17 @@ inspection items report as WARN and never fail the lane.
 The gate REPORTS failures; it does not fix the palette. A failing
 pair is a finding for the owner, printed with the ratios of the
 obvious remediations so the ruling is informed.
+
+Build-list W2 (2026-10-22) extends the lane with the typography
+assertions proper — see typography_results(): §1.4.8's
+paragraph-spacing term on the reading surface, §1.4.12's override
+VALUES as stylesheet properties, §1.4.4 / §1.4.10 resize-and-
+reflow PROXIES (labelled proxies — rendered behaviour at 200% is
+a browser measurement this lane does not perform), the print
+template (the tree's one PDF/print surface: the @media print
+blocks of this same stylesheet), and the shipped reading presets
+— including the BDA Comfort preset's values — read off the built
+app.js.
 """
 
 from __future__ import annotations
@@ -132,6 +143,246 @@ def rule_height(rules, selector):
     lh_m = re.search(r"line-height\s*:\s*([\d.]+)", body)
     lh = float(lh_m.group(1)) if lh_m else 1.55
     return pad_v + (fs or 16.0) * lh
+
+
+def media_blocks(css, needle):
+    """Inner text of every @media block whose prelude contains
+    `needle` (balanced-brace scan, the strip_media pattern)."""
+    blocks, i, n = [], 0, len(css)
+    while True:
+        j = css.find("@media", i)
+        if j < 0:
+            return blocks
+        brace = css.index("{", j)
+        depth, k = 0, brace
+        while k < n:
+            if css[k] == "{":
+                depth += 1
+            elif css[k] == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+            k += 1
+        if needle in css[j:brace]:
+            blocks.append(css[brace + 1:k])
+        i = k + 1
+
+
+def merged_rules(css):
+    """selector -> concatenated declaration bodies. Unlike
+    parse_rules (last rule wins), this unions every rule for a
+    selector: the reading surface styles one selector across
+    several rules (font on one line, margin on the next), and a
+    typography check needs the union."""
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+    merged = {}
+    for sel, body in re.findall(r"([^{}]+){([^{}]*)}", css):
+        for s in sel.split(","):
+            s = s.strip()
+            if s and not s.startswith("@"):
+                merged[s] = merged.get(s, "") + ";" + body
+    return merged
+
+
+def _var_fallback(value, var_name):
+    """The numeric fallback of var(--x, N) in a declaration
+    value, or None."""
+    m = re.search(r"var\(\s*" + re.escape(var_name) +
+                  r"\s*,\s*([\d.]+)", value or "")
+    return float(m.group(1)) if m else None
+
+
+def _line_height_of(body):
+    """(raw, numeric) for a rule body's line-height: a var()
+    fallback wins, then a unitless literal. A fixed px value
+    returns numeric None with the raw string kept for the
+    report — fixed is exactly what the §1.4.12 check hunts."""
+    m = re.search(r"line-height\s*:\s*([^;]+)", body or "")
+    if not m:
+        return None, None
+    raw = m.group(1).strip()
+    fb = _var_fallback(raw, "--read-lh")
+    if fb is not None:
+        return raw, fb
+    if re.fullmatch(r"[\d.]+", raw):
+        return raw, float(raw)
+    return raw, None
+
+
+def typography_results(css, app_js):
+    """The build-list W2 typography assertions over the built
+    stylesheet (+ the built app.js for the preset checks).
+    Returns (level, name, ok, detail) rows in run()'s shape.
+
+    Honesty discipline, same as the rest of the lane: §1.4.8 is
+    the AAA standard the survey adopted, so its rows are WARN and
+    never fail the gate; the §1.4.4 / §1.4.10 rows are PROXIES —
+    they establish that the stylesheet carries none of the static
+    patterns that force horizontal scrolling or defeat zoom, and
+    are named as proxies because a stylesheet cannot prove
+    rendered behaviour; a stylesheet number that misses is a
+    FINDING with its numbers printed, never fixed here."""
+    results = []
+
+    def check(level, name, ok, detail):
+        results.append((level, name, ok, detail))
+
+    base = merged_rules(strip_media(css))
+    read_p = base.get(".reading-body p", "")
+
+    # ---- §1.4.8 on the reading surface itself ----
+    raw_lh, read_lh = _line_height_of(read_p)
+    fs_m = re.search(r"font-size\s*:\s*([^;]+)", read_p)
+    read_fs = None
+    if fs_m:
+        read_fs = _var_fallback(fs_m.group(1), "--read-size")
+        if read_fs is None:
+            read_fs = _px(fs_m.group(1))
+    check("WARN", "reading-surface line-height >= 1.5 (§1.4.8)",
+          read_lh is not None and read_lh >= 1.5,
+          f".reading-body p line-height: {raw_lh or 'unset'}")
+    # Paragraph spacing: adjacent paragraphs collapse their
+    # margins, so the gap is the single vertical margin; §1.4.8
+    # wants paragraph spacing >= 1.5x the line spacing, read here
+    # as the leading — (line-height - 1) x font-size, the space
+    # actually added between lines. The interpretation is
+    # printed with the numbers.
+    mar = re.search(r"margin\s*:\s*([\d.]+)px", read_p)
+    mar_b = re.search(r"margin-bottom\s*:\s*([\d.]+)px", read_p)
+    gap = None
+    if mar_b:
+        gap = float(mar_b.group(1))
+    elif mar:
+        gap = float(mar.group(1))
+    if gap is not None and read_lh is not None and read_fs:
+        leading = (read_lh - 1.0) * read_fs
+        need = 1.5 * leading
+        check("WARN", "reading paragraph spacing >= 1.5x line spacing (§1.4.8)",
+              gap >= need,
+              f"collapsed paragraph margin {gap:.0f}px vs 1.5 x leading "
+              f"({leading:.1f}px) = {need:.1f}px at the shipped default "
+              f"(font {read_fs:.0f}px, line-height {read_lh}) — a finding "
+              "for the owner; this lane does not change the stylesheet")
+    else:
+        check("WARN", "reading paragraph spacing >= 1.5x line spacing (§1.4.8)",
+              False,
+              f"inputs unset (margin gap: {gap}, line-height: {raw_lh}, "
+              f"font-size: {read_fs})")
+
+    # ---- §1.4.12 override values, as stylesheet properties ----
+    # §1.4.12: no loss of content or functionality when a user
+    # sets line-height >= 1.5, paragraph spacing >= 2em,
+    # letter-spacing >= 0.12em, word-spacing >= 0.16em. What a
+    # stylesheet can prove statically: it must not DEFEAT the
+    # overrides (!important on the spacing properties) and must
+    # not CLIP under them (fixed heights — the Phase-8 check in
+    # run() — or nowrap single-line truncation of reading text),
+    # and its own line-heights must be relative so enlarged
+    # spacing scales instead of overflowing a fixed box.
+    imp = re.findall(
+        r"(letter-spacing|word-spacing|line-height)\s*:[^;}]*!important", css)
+    check("WARN", "no !important on text-spacing properties (§1.4.12, inspected)",
+          not imp,
+          f"properties forced with !important: {sorted(set(imp)) or 'none'}")
+    nowrap = [sel for sel, b in base.items()
+              if sel.startswith(".reading-body")
+              and "white-space: nowrap" in b]
+    check("WARN", "no white-space: nowrap in the reading body (§1.4.12, inspected)",
+          not nowrap, f"offenders: {nowrap or 'none'}")
+    fixed_lh = []
+    for sel in ("body", ".reading-body p"):
+        raw, num = _line_height_of(base.get(sel, ""))
+        if raw is not None and num is None:
+            fixed_lh.append(f"{sel}: {raw}")
+    check("WARN", "reading line-heights relative, not fixed px (§1.4.12, inspected)",
+          not fixed_lh, f"fixed line-heights: {fixed_lh or 'none'}")
+
+    # ---- §1.4.4 (200% resize) / §1.4.10 (reflow) PROXIES ----
+    mw = [sel for sel in ("html", "body") if "min-width" in base.get(sel, "")]
+    check("WARN", "PROXY no min-width on html/body (§1.4.10 reflow)",
+          not mw, f"offenders: {mw or 'none'}")
+    narrow = "\n".join(media_blocks(css, "max-width: 820px"))
+    check("WARN", "PROXY narrow-viewport single-column restack (§1.4.10 reflow)",
+          "#app" in narrow and "grid-template-columns: 1fr" in narrow
+          and "#rail" in narrow and "display: none" in narrow,
+          "the <=820px block restacks #app to one column and hides the rail")
+    wide = [sel for sel in (".reading-body table", ".reading-body pre")
+            if "overflow-x: auto" not in base.get(sel, "")]
+    check("WARN", "PROXY wide reading content scrolls internally (§1.4.10 reflow)",
+          not wide,
+          f"reading blocks without overflow-x: auto: {wide or 'none'}")
+    img_ok = any(sel.startswith(".reading-body") and sel.endswith("img")
+                 and "max-width: 100%" in b for sel, b in base.items())
+    check("WARN", "PROXY reading images fluid (§1.4.10 reflow)",
+          img_ok, "a .reading-body img rule carries max-width: 100%")
+
+    # ---- Print template (the tree's PDF/print surface) ----
+    print_css = "\n".join(media_blocks(css, "print"))
+    if print_css:
+        pm = re.search(r"body\s*{([^}]*)}", print_css)
+        pbody = pm.group(1) if pm else ""
+        check("WARN", "print: light page, dark text (print template)",
+              "background: #fff" in pbody and "color: #111" in pbody,
+              f"print body rule: {pbody.strip()[:80]}")
+        check("WARN", "print: interactive chrome hidden (print template)",
+              "#rail" in print_css and "#inspector" in print_css
+              and "display: none" in print_css,
+              "the print block's display:none list names the rail "
+              "and the inspector")
+        cm = re.search(r"#canvas\s*{([^}]*)}", print_css)
+        pcanvas = cm.group(1) if cm else ""
+        check("WARN", "print: reading canvas unclipped (print template)",
+              "max-height: none" in pcanvas and "overflow: visible" in pcanvas,
+              f"print #canvas rule: {pcanvas.strip()[:80]}")
+        shrunk = re.findall(
+            r"(?:body|\.reading-body)[^{]*{[^}]*font-size\s*:\s*([\d.]+)px",
+            print_css)
+        check("WARN", "print: reading text not shrunk below screen size "
+                      "(print template)",
+              all(float(v) >= 16 for v in shrunk),
+              f"font sizes set on body/reading text in print: "
+              f"{shrunk or 'none (print inherits the screen typography)'}")
+    else:
+        check("WARN", "print template present (print template)", False,
+              "no @media print block in the built stylesheet")
+
+    # ---- Shipped reading presets (built app.js) ----
+    if app_js is None:
+        check("AA", "Comfort (BDA) reading preset shipped (build-list W2)",
+              False,
+              "built app.js not found beside lens.css — the preset "
+              "assertions did not run")
+    else:
+        pm = re.search(r"\{[^{}]*comfort-bda[^{}]*\}", app_js)
+        obj = pm.group(0) if pm else ""
+
+        def field(name, quoted=True):
+            pat = (name + r':\s*"([^"]*)"') if quoted else \
+                  (name + r":\s*([\d.]+)")
+            fm = re.search(pat, obj)
+            return fm.group(1) if fm else None
+
+        bg = field("bg")
+        lum = relative_luminance(bg) if bg and bg.startswith("#") else 0.0
+        ok = (field("ls") == "0.35ch" and field("ws") == "1.225ch"
+              and field("lig") == "none"
+              and field("lh", quoted=False) is not None
+              and float(field("lh", quoted=False)) == 2.0
+              and bg is not None and lum >= 0.75)
+        check("AA", "Comfort (BDA) reading preset shipped (build-list W2)",
+              ok,
+              f"comfort-bda: ls={field('ls')} ws={field('ws')} "
+              f"lh={field('lh', quoted=False)} lig={field('lig')} "
+              f"bg={bg} (luminance {lum:.2f}; BDA values: letter-spacing "
+              "0.35ch, word-spacing 1.225ch, line-height 2.0, ligatures "
+              "off, cream ground)")
+        arr = re.search(r"READ_PRESETS\s*=\s*\[(.*?)\];", app_js, re.S)
+        measures = [float(v) for v in re.findall(
+            r"measure:\s*([\d.]+)", arr.group(1))] if arr else []
+        check("WARN", "all shipped reading presets keep measure <= 80ch (§1.4.8)",
+              bool(measures) and all(v <= 80 for v in measures),
+              f"preset measures (ch): {measures or 'none parsed'}")
+    return results
 
 
 def run(site):
@@ -255,6 +506,12 @@ def run(site):
           (fonts / "atkinson-hyperlegible-400-latin.woff2").exists()
           and (fonts / "LICENSE-atkinson-hyperlegible.txt").exists(),
           "fonts/ carries the candidate face and its licence")
+
+    # ---- Typography assertions (build-list W2, 2026-10-22) ----
+    app_js_path = site / "app.js"
+    app_js = (app_js_path.read_text(encoding="utf-8")
+              if app_js_path.exists() else None)
+    results.extend(typography_results(css, app_js))
 
     fails = [r for r in results if r[0] == "AA" and not r[2]]
     warns = [r for r in results if r[0] == "WARN" and not r[2]]

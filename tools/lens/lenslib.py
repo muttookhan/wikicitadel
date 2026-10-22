@@ -196,7 +196,7 @@ class PostingsIndex:
     text (the exact text the reference script would tokenize).
     """
 
-    def __init__(self, docs, severance=None):
+    def __init__(self, docs, severance=None, governance=None):
         self.docs = docs
         # Retrieval severance (item 20): the parsed severance
         # list (evaluation/retrieval-severance.json) or None.
@@ -212,6 +212,26 @@ class PostingsIndex:
                     self._sev_claim_entries.append(e)
         self.last_severance = {"applied": bool(severance),
                                "excluded": []}
+        # Truth-aware governance (W1.5): the parsed governance
+        # artefact (evaluation/retrieval-governance.json) or
+        # None. hybrid_rank mirrors scripts/wiki_search.py: the
+        # artefact's chains exempt a severed claim's successor
+        # pages from that claim's stage-5 text-match exclusion,
+        # and stage 6 withholds pages in a withheld governance
+        # state (reasons recorded in last_governance). None
+        # keeps the pre-governance behaviour exactly.
+        self._gov_present = bool(governance)
+        self._gov_pages = {}
+        self._gov_successors = {}
+        if governance:
+            self._gov_pages = governance.get("pages") or {}
+            for eid, chain in (governance.get("chains")
+                               or {}).items():
+                pages = chain.get("successors") or []
+                if pages:
+                    self._gov_successors[eid] = set(pages)
+        self.last_governance = {"applied": self._gov_present,
+                                "withheld": [], "exempted": []}
         self.n = len(docs)
         self.df = Counter()
         self.postings = {}  # term -> list of [doc_idx, tf]
@@ -342,11 +362,16 @@ class PostingsIndex:
         # --- Stage 5: retrieval severance (item 20) ---
         # Mirror of wiki_search.py hybrid_rank stage 5: severed
         # pages, and carriers of a severed claim the query hunts,
-        # are excluded after every ranking stage.
+        # are excluded after every ranking stage. With
+        # governance present, its chains exempt a severed claim's
+        # successor pages from that claim's text-match exclusion
+        # (W1.5; the exemption is recorded, never silent).
         self.last_severance = {
             "applied": bool(self._sev_page_entries
                             or self._sev_claim_entries),
             "excluded": []}
+        self.last_governance = {"applied": self._gov_present,
+                                "withheld": [], "exempted": []}
         if self._sev_page_entries or self._sev_claim_entries:
             q_matched = [e for e in self._sev_claim_entries
                          if _sev_query_matches(query_terms, e)]
@@ -356,13 +381,44 @@ class PostingsIndex:
                 rel = _sev_relpath(self.docs[i]["key"])
                 hit_ids = [e["id"] for e in self._sev_page_entries
                            if e.get("page") == rel]
+                exempted_ids = []
                 if not hit_ids and q_matched:
                     tokens = tokenize(self.docs[i]["text"])
-                    hit_ids = [e["id"] for e in q_matched
-                               if _sev_text_matches(tokens, e)]
+                    for e in q_matched:
+                        if not _sev_text_matches(tokens, e):
+                            continue
+                        if rel in self._gov_successors.get(
+                                e["id"], ()):
+                            exempted_ids.append(e["id"])
+                        else:
+                            hit_ids.append(e["id"])
                 if hit_ids:
                     self.last_severance["excluded"].append(
                         {"path": rel, "entries": hit_ids})
+                else:
+                    kept.append(item)
+                    if exempted_ids:
+                        self.last_governance["exempted"].append(
+                            {"path": rel, "entries": exempted_ids})
+            final = kept
+
+        # --- Stage 6: truth-aware governance (W1.5) ---
+        # Mirror of wiki_search.py hybrid_rank stage 6: a page
+        # whose governance record is in a withheld state leaves
+        # the ranking, its named reasons recorded here. A page
+        # with no record is UNGOVERNED and passes through —
+        # absence of state is never read as superseded.
+        if self._gov_pages:
+            kept = []
+            for item in final:
+                _score, i, _detail = item
+                rel = _sev_relpath(self.docs[i]["key"])
+                record = self._gov_pages.get(rel)
+                if record is not None \
+                        and record.get("state") == "withheld":
+                    self.last_governance["withheld"].append(
+                        {"path": rel,
+                         "reasons": record.get("reasons") or []})
                 else:
                     kept.append(item)
             final = kept
@@ -1748,6 +1804,211 @@ def extract_wikilinks_typed(body: str):
     return out
 
 
+# --------------------------------------------------------------------------
+# Edge provenance labels (build wave 1, item W1.8): every typed
+# edge carries a three-way provenance label — EXTRACTED /
+# INFERRED / AMBIGUOUS — plus a confidence value in [0, 1] and,
+# for typed edges, a polarity.
+#
+# Patterns, re-implemented in our own code (no code copied):
+# - gauravmanandhar/legal-graphify-skill (dual-licensed MIT OR
+#   Apache-2.0 — adapt-with-credit): every node and relationship
+#   extracted from a legal document is tagged EXTRACTED
+#   (explicit in the text), INFERRED (derived by convention) or
+#   AMBIGUOUS (genuinely unclear), so stated text is never
+#   confused with interpretation. The three-way tag is the idea
+#   taken; the assignment rules below are ours.
+# - PENgram (surveyed in the research programme): a rich
+#   relation-type vocabulary only stays honest when each edge
+#   also says how its type was established — type and
+#   provenance travel together.
+# - Typed Graph (surveyed): signed relations — an edge can
+#   negate its target. In the house relation vocabulary
+#   (wiki/rules/relation-vocabulary.md — a CLOSED list this
+#   code does not extend) the negating types are `contradicts`
+#   (the two pages cannot both be right) and `supersedes`
+#   (the target no longer stands there). Polarity below is
+#   derived metadata over those existing types, never a new
+#   relation term.
+#
+# The label answers "how was this edge's type established, and
+# how far should a reader lean on it?" — a stricter discipline
+# than the binary cited/uncited split, and a different question
+# from the two-way `epistemic` tag the Lens build carries
+# (which classifies the edge's existence; `epistemic` is
+# unchanged by this section).
+#
+# Assignment rules (deterministic; this table is the whole
+# model):
+# - kind "citation" (a frontmatter `sources:` entry — the
+#   citation machinery's own edge): EXTRACTED, confidence 1.0.
+#   The citation is written in the page and hash-locked.
+# - kind "typed" (a frontmatter `links:` entry or a
+#   relation-vocabulary field — the author declared the
+#   relation): EXTRACTED, confidence 1.0.
+# - kind "wikilink", type "mentions": EXTRACTED, confidence
+#   1.0. The link is verbatim in the text and "mentions"
+#   asserts nothing beyond its presence, which is exact.
+# - kind "wikilink", any other type: the link is verbatim but
+#   its TYPE was inferred by the heading rules above, so
+#   INFERRED, confidence 0.75.
+# - A directed pair (src -> dst) carrying two or more DISTINCT
+#   specific types (anything but mentions/cites) asserts two
+#   different relations at once and neither reading governs:
+#   every specific typed edge in the pair is AMBIGUOUS,
+#   confidence 0.5 (apply_directed_pair_conflicts).
+# - An edge no page writes (a Lens graph pair with no direct
+#   link, a co-citation pair) is INFERRED at a signal
+#   confidence (derived_edge_confidence).
+#
+# Labels are ADDITIVE metadata: an edge without them is
+# unlabeled, never invalid, and every consumer works with or
+# without them. Nothing in this section writes to a page.
+# --------------------------------------------------------------------------
+
+EDGE_PROVENANCE_LABELS = ("EXTRACTED", "INFERRED", "AMBIGUOUS")
+
+# Relation types that negate their target (see header): a
+# derived polarity over the closed vocabulary — it adds no
+# relation term.
+NEGATIVE_EDGE_TYPES = ("contradicts", "supersedes")
+
+CONFIDENCE_DECLARED = 1.0
+CONFIDENCE_VERBATIM = 1.0
+CONFIDENCE_HEADING_INFERRED = 0.75
+CONFIDENCE_AMBIGUOUS = 0.5
+
+# Types that make no specific relation claim; a directed pair
+# carrying only these never conflicts.
+NON_SPECIFIC_EDGE_TYPES = ("mentions", "cites")
+
+
+def edge_polarity(type_):
+    """The sign of a typed edge: "negative" when the type
+    negates its target (contradicts / supersedes in the closed
+    relation vocabulary), "positive" otherwise."""
+    return "negative" if (type_ or "") in NEGATIVE_EDGE_TYPES \
+        else "positive"
+
+
+def derived_edge_confidence(shared_sources=0, common_neighbours=0,
+                            shared_citers=0):
+    """Confidence for an edge no page writes, from the signals
+    that derived it: 0.3 base, +0.1 per shared source or
+    shared citer, +0.05 per common neighbour, capped at 0.9 —
+    a derived edge never outranks a declared one (1.0)."""
+    c = 0.3 + 0.1 * (shared_sources + shared_citers) \
+        + 0.05 * common_neighbours
+    return round(min(0.9, c), 2)
+
+
+def edge_label(kind, type_):
+    """The provenance label of one directed edge read out of a
+    page, as {"provenance", "confidence", "polarity"} — the
+    assignment table in this section's header. `kind` is the
+    edge kind the doors/build emit ("wikilink" / "typed" /
+    "citation"); `type_` is the edge's relation type (for a
+    wikilink, its heading-inferred link type). An unknown kind
+    is derived by definition: INFERRED at base confidence."""
+    t = type_ or "mentions"
+    if kind in ("citation", "typed"):
+        provenance, confidence = "EXTRACTED", CONFIDENCE_DECLARED
+    elif kind == "wikilink" and t == "mentions":
+        provenance, confidence = "EXTRACTED", CONFIDENCE_VERBATIM
+    elif kind == "wikilink":
+        provenance, confidence = ("INFERRED",
+                                  CONFIDENCE_HEADING_INFERRED)
+    else:
+        provenance, confidence = "INFERRED", derived_edge_confidence()
+    return {"provenance": provenance, "confidence": confidence,
+            "polarity": edge_polarity(t)}
+
+
+def specific_edge_types(types):
+    """The distinct SPECIFIC types among `types`: every type
+    but the non-claims (mentions / cites). Two or more of
+    these on one directed pair is a conflict (header table)."""
+    return sorted({t for t in types
+                   if t and t not in NON_SPECIFIC_EDGE_TYPES})
+
+
+def apply_directed_pair_conflicts(edges, src_key="src",
+                                  dst_key="dst",
+                                  type_key="relation"):
+    """Relabel conflicting directed pairs AMBIGUOUS, in place:
+    when the edges from one src to one dst carry two or more
+    distinct specific types, every edge in the pair whose type
+    is specific is relabeled (provenance AMBIGUOUS, confidence
+    CONFIDENCE_AMBIGUOUS); non-specific edges (mentions/cites)
+    keep their labels — they assert nothing that can conflict.
+    Edges are dicts already carrying label fields (see
+    edge_label); an edge without them is skipped, so an
+    unlabeled edge table passes through untouched. Returns the
+    number of edges relabeled."""
+    by_pair = {}
+    for e in edges:
+        by_pair.setdefault((e.get(src_key), e.get(dst_key)),
+                           []).append(e)
+    relabeled = 0
+    for pair_edges in by_pair.values():
+        if len(specific_edge_types(
+                e.get(type_key) for e in pair_edges)) < 2:
+            continue
+        for e in pair_edges:
+            if e.get(type_key) in NON_SPECIFIC_EDGE_TYPES:
+                continue
+            if "provenance" not in e:
+                continue
+            e["provenance"] = "AMBIGUOUS"
+            e["confidence"] = CONFIDENCE_AMBIGUOUS
+            relabeled += 1
+    return relabeled
+
+
+def pair_edge_label(members, direct, shared_sources=0,
+                    common_neighbours=0):
+    """The label of one aggregated pair edge (the Lens graph
+    bundle's unit): `members` is the pair's direct edges as
+    (type, label) pairs — label as edge_label returns — in
+    either direction; `direct` says a written link joins the
+    pair at all.
+    - Not direct: the pair itself is derived — INFERRED at
+      the signal confidence, polarity "positive".
+    - Direct, with two or more distinct specific member
+      types: AMBIGUOUS (the corpus asserts two relations for
+      the pair), confidence CONFIDENCE_AMBIGUOUS, polarity
+      "mixed".
+    - Direct otherwise: INFERRED when any member's type was
+      heading-inferred, else EXTRACTED; the confidence is the
+      weakest member's (a bundle leans on its weakest edge);
+      the polarity is the single specific type's sign, or
+      "positive" when no member makes a specific claim."""
+    if not direct:
+        return {"provenance": "INFERRED",
+                "confidence": derived_edge_confidence(
+                    shared_sources, common_neighbours),
+                "polarity": "positive"}
+    members = list(members)
+    specific = specific_edge_types(t for t, _lab in members)
+    if len(specific) >= 2:
+        return {"provenance": "AMBIGUOUS",
+                "confidence": CONFIDENCE_AMBIGUOUS,
+                "polarity": "mixed"}
+    if not members:
+        return {"provenance": "EXTRACTED",
+                "confidence": CONFIDENCE_VERBATIM,
+                "polarity": "positive"}
+    provenance = "INFERRED" if any(
+        lab.get("provenance") == "INFERRED"
+        for _t, lab in members) else "EXTRACTED"
+    confidence = min(lab.get("confidence", 1.0)
+                     for _t, lab in members)
+    polarity = edge_polarity(specific[0]) if specific \
+        else "positive"
+    return {"provenance": provenance, "confidence": confidence,
+            "polarity": polarity}
+
+
 _SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
 
 
@@ -1925,6 +2186,548 @@ def link_suggestions(neighbours, top_n=12):
     out.sort(key=lambda e: (-e["adamic_adar"], -e["common_neighbours"],
                             e["a"], e["b"]))
     return out[:top_n]
+
+
+# --------------------------------------------------------------------------
+# Graph analytics pack (W1.7, 2026-10-22): the graphology algorithm
+# family, cleanly re-implemented in Python from the published
+# algorithms — no graphology code used (graphology and its Louvain /
+# metrics packages are MIT; the build list's route for this item is
+# re-implementation, and these are standard published methods):
+# - Louvain community detection, full two-phase (local moving +
+#   graph aggregation): Blondel, Guillaume, Lambiotte & Lefebvre,
+#   "Fast unfolding of communities in large networks", J. Stat.
+#   Mech. (2008). Modularity Q: Newman & Girvan (2004).
+# - PageRank: Brin & Page (1998), weighted power iteration.
+# - Betweenness centrality: Brandes, "A faster algorithm for
+#   betweenness centrality", J. Math. Sociol. (2001) — the
+#   unweighted BFS form over the pair graph.
+# - Closeness centrality: Wasserman & Faust (1994) normalisation,
+#   so nodes in small components are not inflated.
+# - Eigenvector centrality: power iteration (Bonacich, 1972).
+# - Local clustering coefficient: Watts & Strogatz (1998);
+#   weighted form: Onnela et al., Phys. Rev. E (2005).
+# - Link prediction: Adamic & Adar, "Friends and neighbours on
+#   the Web", Social Networks (2003); Common Neighbours, the plain
+#   shared-neighbour count (Newman, 2001).
+# - Per-cluster digests: the Vault Graph Summary pattern — one
+#   precomputed digest per community, crawled from the cluster's
+#   hub over links and backlinks to a chosen depth.
+#
+# Everything here is deterministic: sorted iteration everywhere,
+# fixed tie-breaks, no randomness, no wall clock. Same corpus in
+# => same numbers out. The pack reads the build's weighted pair
+# graph ({(a, b) sorted tuple: weight}) only; any label fields
+# other lanes add to edge records are ignored by design, never
+# required.
+# --------------------------------------------------------------------------
+
+def weighted_adjacency(nodes, weights):
+    """Symmetric weighted adjacency {node: {neighbour: weight}}
+    from the pair graph `weights` ({(a, b) sorted tuple: w}).
+    Every listed node appears; isolated nodes map to {}."""
+    adj = {n: {} for n in nodes}
+    for (a, b), w in sorted(weights.items()):
+        if a == b or a not in adj or b not in adj:
+            continue
+        adj[a][b] = adj[a].get(b, 0.0) + w
+        adj[b][a] = adj[b].get(a, 0.0) + w
+    return adj
+
+
+def modularity(nodes, weights, partition):
+    """Newman–Girvan modularity Q of `partition` ({node: cid})
+    on the weighted pair graph. 0.0 for an edgeless graph."""
+    deg = {n: 0.0 for n in nodes}
+    internal = {}
+    total = 0.0
+    for (a, b), w in sorted(weights.items()):
+        if a not in deg or b not in deg or a == b:
+            continue
+        deg[a] += w
+        deg[b] += w
+        total += w
+        if partition.get(a) == partition.get(b):
+            internal[partition[a]] = internal.get(partition[a], 0.0) + w
+    if total == 0:
+        return 0.0
+    comm_deg = {}
+    for n in nodes:
+        c = partition.get(n)
+        comm_deg[c] = comm_deg.get(c, 0.0) + deg[n]
+    q = 0.0
+    for c in sorted(comm_deg, key=str):
+        q += (internal.get(c, 0.0) / total
+              - (comm_deg[c] / (2.0 * total)) ** 2)
+    return q
+
+
+def _louvain_move_pass(nodes, adj, deg, total2):
+    """One Louvain level's local moving, from singletons, over an
+    adjacency that may carry self-loops (adj[n][n], stored at twice
+    the loop weight so degree sums stay exact; a self-loop follows
+    its node, so it is excluded from the gain comparison itself —
+    the standing build_louvain pattern). Deterministic: nodes in
+    sorted order, candidate communities in sorted order, a move
+    needs a strictly better gain. Returns {node: community key},
+    each key the smallest member id of its community."""
+    comm = {n: n for n in nodes}
+    comm_deg = {n: deg[n] for n in nodes}
+    improved = True
+    while improved:
+        improved = False
+        for n in sorted(nodes):
+            cur = comm[n]
+            to_comm = {}
+            for nb, w in adj[n].items():
+                if nb != n:
+                    to_comm[comm[nb]] = to_comm.get(comm[nb], 0.0) + w
+            cur_gain = (to_comm.get(cur, 0.0)
+                        - (comm_deg[cur] - deg[n]) * deg[n] / total2)
+            best_c, best_delta = cur, 0.0
+            for c in sorted(to_comm):
+                if c == cur:
+                    continue
+                gain = to_comm[c] - comm_deg[c] * deg[n] / total2
+                if gain - cur_gain > best_delta + 1e-12:
+                    best_delta, best_c = gain - cur_gain, c
+            if best_c != cur:
+                comm_deg[cur] -= deg[n]
+                comm_deg[best_c] += deg[n]
+                comm[n] = best_c
+                improved = True
+    smallest = {}
+    for n in sorted(nodes):
+        c = comm[n]
+        if c not in smallest or n < smallest[c]:
+            smallest[c] = n
+    return {n: smallest[comm[n]] for n in nodes}
+
+
+def louvain_full(nodes, weights, max_levels=25):
+    """Full two-phase Louvain (Blondel et al. 2008) over the
+    weighted pair graph: local moving, then aggregation of
+    communities into supernodes, repeated until a level merges
+    nothing. Deterministic by construction (sorted iteration,
+    smallest-member community keys at every level); communities
+    are renumbered by smallest member id, the build's standing
+    convention. Returns {node: community_id} covering every node
+    exactly once. (The rendered graph partition remains the build's
+    long-standing single-level Louvain; this full form is computed
+    beside it and measured — see build_lens.py.)"""
+    nodes = sorted(nodes)
+    if not nodes:
+        return {}
+    # Level state: pair weights between current (super)nodes, plus
+    # self-loop weights per supernode.
+    pair_w = {}
+    for (a, b), w in sorted(weights.items()):
+        if a in set(nodes) and b in set(nodes) and a != b:
+            pair_w[(a, b) if a < b else (b, a)] = \
+                pair_w.get((a, b) if a < b else (b, a), 0.0) + w
+    loop_w = {n: 0.0 for n in nodes}
+    members = {n: [n] for n in nodes}   # supernode -> original nodes
+    current = list(nodes)
+    final_key = {n: n for n in nodes}   # original node -> supernode
+    for _level in range(max_levels):
+        adj = {n: {} for n in current}
+        for (a, b), w in sorted(pair_w.items()):
+            adj[a][b] = adj[a].get(b, 0.0) + w
+            adj[b][a] = adj[b].get(a, 0.0) + w
+        for n in current:
+            if loop_w.get(n):
+                adj[n][n] = 2.0 * loop_w[n]
+        deg = {n: sum(adj[n].values()) for n in current}
+        total2 = sum(deg.values())
+        if total2 == 0:
+            break
+        part = _louvain_move_pass(current, adj, deg, total2)
+        groups = {}
+        for n in current:
+            groups.setdefault(part[n], []).append(n)
+        if len(groups) == len(current):
+            break  # no merge at this level: converged
+        # Aggregate: new pair weights + self-loops from this level's
+        # partition; a supernode's key stays its smallest member key.
+        new_pair, new_loop = {}, {k: 0.0 for k in groups}
+        for (a, b), w in sorted(pair_w.items()):
+            ca, cb = part[a], part[b]
+            if ca == cb:
+                new_loop[ca] += w
+            else:
+                key = (ca, cb) if ca < cb else (cb, ca)
+                new_pair[key] = new_pair.get(key, 0.0) + w
+        for n in current:
+            if loop_w.get(n):
+                new_loop[part[n]] += loop_w[n]
+        new_members = {}
+        for key, sups in groups.items():
+            merged = []
+            for s in sups:
+                merged.extend(members[s])
+            new_members[key] = merged
+        members, pair_w, loop_w = new_members, new_pair, new_loop
+        current = sorted(groups)
+        for orig in nodes:
+            # final_key[orig] is the supernode holding it; find the
+            # group key that supernode landed in.
+            final_key[orig] = part[final_key[orig]]
+    remap = {}
+    for n in nodes:
+        c = final_key[n]
+        if c not in remap:
+            remap[c] = len(remap)
+    return {n: remap[final_key[n]] for n in nodes}
+
+
+def graph_centralities(nodes, weights):
+    """The centrality suite over the weighted pair graph:
+    {node: {degree, strength, degree_centrality, pagerank,
+    betweenness, closeness, eigenvector, clustering,
+    clustering_weighted}}. Raw floats; the build rounds for
+    display. All iterations in sorted order — deterministic."""
+    import math
+    nodes = sorted(nodes)
+    n = len(nodes)
+    adj = weighted_adjacency(nodes, weights)
+    deg = {x: len(adj[x]) for x in nodes}
+    strength = {x: sum(adj[x].values()) for x in nodes}
+    out = {x: {} for x in nodes}
+
+    # Breadth-first distances over the unweighted pair graph,
+    # computed once per source and reused by closeness/betweenness.
+    def bfs(s):
+        dist = {s: 0}
+        order = [s]
+        for u in order:
+            for v in sorted(adj[u]):
+                if v not in dist:
+                    dist[v] = dist[u] + 1
+                    order.append(v)
+        return dist
+
+    # PageRank (weighted, damping 0.85): dangling nodes (no
+    # incident weight) redistribute their mass uniformly.
+    pr = {x: 1.0 / n for x in nodes} if n else {}
+    if n:
+        for _ in range(200):
+            dangling = sum(pr[x] for x in nodes if strength[x] == 0)
+            new = {}
+            for x in nodes:
+                rank = (1.0 - 0.85) / n + 0.85 * dangling / n
+                acc = 0.0
+                for y in sorted(adj[x]):
+                    if strength[y] > 0:
+                        acc += pr[y] * adj[y][x] / strength[y]
+                new[x] = rank + 0.85 * acc
+            shift = sum(abs(new[x] - pr[x]) for x in nodes)
+            pr = new
+            if shift < 1e-10:
+                break
+
+    # Eigenvector centrality: power iteration on the weighted
+    # adjacency, L2-normalised, sign fixed so the sum is positive.
+    ev = {x: 1.0 for x in nodes}
+    if n:
+        for _ in range(200):
+            new = {x: sum(adj[x][y] * ev[y] for y in sorted(adj[x]))
+                   for x in nodes}
+            norm = math.sqrt(sum(v * v for v in new.values()))
+            if norm == 0:
+                break
+            new = {x: v / norm for x, v in new.items()}
+            shift = sum(abs(new[x] - ev[x]) for x in nodes)
+            ev = new
+            if shift < 1e-10:
+                break
+        if sum(ev.values()) < 0:
+            ev = {x: -v for x, v in ev.items()}
+
+    # Betweenness (Brandes 2001, unweighted BFS form).
+    cb = {x: 0.0 for x in nodes}
+    for s in nodes:
+        stack = []
+        pred = {x: [] for x in nodes}
+        sigma = {x: 0.0 for x in nodes}
+        sigma[s] = 1.0
+        dist = {x: -1 for x in nodes}
+        dist[s] = 0
+        queue = [s]
+        head = 0
+        while head < len(queue):
+            v = queue[head]
+            head += 1
+            stack.append(v)
+            for w in sorted(adj[v]):
+                if dist[w] < 0:
+                    dist[w] = dist[v] + 1
+                    queue.append(w)
+                if dist[w] == dist[v] + 1:
+                    sigma[w] += sigma[v]
+                    pred[w].append(v)
+        delta = {x: 0.0 for x in nodes}
+        while stack:
+            w = stack.pop()
+            for v in pred[w]:
+                if sigma[w]:
+                    delta[v] += (sigma[v] / sigma[w]) * (1.0 + delta[w])
+            if w != s:
+                cb[w] += delta[w]
+    if n > 2:  # undirected: halve, then Wasserman–Faust-style scale
+        scale = 1.0 / ((n - 1) * (n - 2))
+        cb = {x: v * scale for x, v in cb.items()}
+
+    # Clustering (local): unweighted Watts–Strogatz + Onnela
+    # weighted, over the pair graph's neighbourhoods.
+    wmax = max((w for nbs in adj.values() for w in nbs.values()),
+               default=0.0)
+
+    def clustering(x, weighted):
+        nbrs = sorted(adj[x])
+        k = len(nbrs)
+        if k < 2:
+            return 0.0
+        total = 0.0
+        pairs = 0
+        for i, y in enumerate(nbrs):
+            for z in nbrs[i + 1:]:
+                pairs += 1
+                if z in adj[y]:
+                    if weighted and wmax > 0:
+                        total += (adj[x][y] * adj[x][z]
+                                  * adj[y][z]) ** (1.0 / 3.0) / wmax
+                    else:
+                        total += 1.0
+        return total / pairs if pairs else 0.0
+
+    for x in nodes:
+        dist = bfs(x)
+        reached = len(dist) - 1
+        sdist = sum(d for y, d in dist.items() if y != x)
+        close = 0.0
+        if reached and sdist and n > 1:
+            close = ((reached / (n - 1.0)) * (reached / sdist))
+        out[x] = {
+            "degree": deg[x],
+            "strength": round(strength[x], 4),
+            "degree_centrality": (deg[x] / (n - 1.0)) if n > 1 else 0.0,
+            "pagerank": pr.get(x, 0.0),
+            "betweenness": cb[x],
+            "closeness": close,
+            "eigenvector": ev.get(x, 0.0),
+            "clustering": clustering(x, False),
+            "clustering_weighted": clustering(x, True),
+        }
+    return out
+
+
+def graph_level_metrics(nodes, weights, partition=None):
+    """Graph-level metrics over the pair graph: density,
+    components, diameter / radius of the largest component
+    (unweighted), average clustering, and — when a partition is
+    given — its modularity. Deterministic throughout."""
+    nodes = sorted(nodes)
+    n = len(nodes)
+    adj = weighted_adjacency(nodes, weights)
+    e = sum(1 for (a, b) in weights if a != b and a in adj and b in adj)
+    density = (2.0 * e / (n * (n - 1))) if n > 1 else 0.0
+    seen = {}
+    comps = []
+    for s in nodes:
+        if s in seen:
+            continue
+        comp = []
+        queue = [s]
+        seen[s] = len(comps)
+        while queue:
+            u = queue.pop()
+            comp.append(u)
+            for v in sorted(adj[u]):
+                if v not in seen:
+                    seen[v] = len(comps)
+                    queue.append(v)
+        comps.append(sorted(comp))
+    comps.sort(key=lambda c: (-len(c), c[0] if c else ""))
+    diameter = radius = 0
+    if comps and len(comps[0]) > 1:
+        ecc = []
+        for s in comps[0]:
+            dist = {s: 0}
+            order = [s]
+            for u in order:
+                for v in sorted(adj[u]):
+                    if v not in dist:
+                        dist[v] = dist[u] + 1
+                        order.append(v)
+            ecc.append(max(dist.values()))
+        diameter = max(ecc)
+        radius = min(ecc)
+    def _clustering(x):
+        nbrs = sorted(adj[x])
+        k = len(nbrs)
+        if k < 2:
+            return 0.0
+        links = sum(1 for i, y in enumerate(nbrs)
+                    for z in nbrs[i + 1:] if z in adj[y])
+        return links / (k * (k - 1) / 2.0)
+
+    avg_cl = (sum(_clustering(x) for x in nodes) / n) if n else 0.0
+    out = {"nodes": n, "edges": e, "density": density,
+           "components": len(comps),
+           "component_sizes": [len(c) for c in comps],
+           "diameter": diameter, "radius": radius,
+           "average_clustering": avg_cl}
+    if partition is not None:
+        out["modularity"] = modularity(nodes, weights, partition)
+    return out
+
+
+def link_prediction_pack(neighbours, top_n=12):
+    """The "missing link?" review list with BOTH published
+    scorings: Adamic–Adar (rare neighbours weigh more) and Common
+    Neighbours (the plain shared-neighbour count). Same pair
+    enumeration as link_suggestions; each ranked lane carries both
+    scores, so a reviewer can see where the two methods agree and
+    where they part. Computed suggestions only — nothing here
+    writes to any page."""
+    import math
+    common = {}
+    for z in sorted(neighbours):
+        ns = sorted(neighbours[z])
+        for i, a in enumerate(ns):
+            for b in ns[i + 1:]:
+                common.setdefault((a, b), []).append(z)
+    entries = []
+    for (a, b), zs in sorted(common.items()):
+        if b in neighbours.get(a, ()):
+            continue  # already linked — not a suggestion
+        score = 0.0
+        for z in zs:
+            deg = len(neighbours.get(z, ()))
+            if deg > 1:
+                score += 1.0 / math.log(deg)
+        entries.append({"a": a, "b": b,
+                        "adamic_adar": round(score, 4),
+                        "common_neighbours": len(zs),
+                        "shared_neighbours": zs[:8]})
+    by_aa = sorted(entries,
+                   key=lambda e: (-e["adamic_adar"],
+                                  -e["common_neighbours"],
+                                  e["a"], e["b"]))[:top_n]
+    by_cn = sorted(entries,
+                   key=lambda e: (-e["common_neighbours"],
+                                  -e["adamic_adar"],
+                                  e["a"], e["b"]))[:top_n]
+    return {"pairs_considered": len(entries),
+            "by_adamic_adar": by_aa,
+            "by_common_neighbours": by_cn}
+
+
+def cluster_digests(nodes, partition, out_links, in_links, titles,
+                    summaries, weights, cocitations=None, depth=2,
+                    max_members=12):
+    """One precomputed digest per community (the Vault Graph
+    Summary pattern): the cluster's hub, its members ranked by
+    within-cluster link strength with each member's crawl depth
+    from the hub over links AND backlinks (the crawl that defines
+    the digest's reach), its strongest internal edges, the
+    boundary edges where the cluster touches the rest of the wiki,
+    and its strongest internal co-cited pair with a citing
+    sentence when the co-citation index has one. `depth` is the
+    crawl depth chosen for this build and is recorded on every
+    digest. Deterministic: sorted iteration and fixed tie-breaks
+    throughout."""
+    adj = weighted_adjacency(nodes, weights)
+    und = {x: set() for x in nodes}
+    for x in nodes:
+        und[x] |= {y for y in out_links.get(x, ()) if y in und}
+        und[x] |= {y for y in in_links.get(x, ()) if y in und}
+        und[x] |= set(adj[x])
+        und[x].discard(x)
+    members_of = {}
+    for x in sorted(nodes):
+        members_of.setdefault(partition.get(x), []).append(x)
+    digests = []
+    for cid in sorted(members_of, key=lambda c: (c is None, c)):
+        members = sorted(members_of[cid])
+        member_set = set(members)
+        internal_strength = {
+            x: sum(w for y, w in adj[x].items() if y in member_set)
+            for x in members}
+        ranked = sorted(members,
+                        key=lambda x: (-internal_strength[x], x))
+        hub = ranked[0]
+        # Crawl from the hub, over links and backlinks, restricted
+        # to the cluster, to the chosen depth.
+        depth_of = {hub: 0}
+        frontier = [hub]
+        for d in range(1, depth + 1):
+            nxt = []
+            for u in frontier:
+                for v in sorted(und[u]):
+                    if v in member_set and v not in depth_of:
+                        depth_of[v] = d
+                        nxt.append(v)
+            frontier = nxt
+        shown = ranked[:max_members]
+        internal_edges = []
+        boundary = []
+        for (a, b), w in sorted(weights.items()):
+            if a in member_set and b in member_set:
+                internal_edges.append((a, b, w))
+            elif a in member_set or b in member_set:
+                src = a if a in member_set else b
+                dst = b if a in member_set else a
+                boundary.append((src, dst, w))
+        internal_edges.sort(key=lambda t: (-t[2], t[0], t[1]))
+        boundary.sort(key=lambda t: (-t[2], t[0], t[1]))
+        cocited = None
+        if cocitations:
+            best = None
+            for a in members:
+                for entry in cocitations.get(a, ()):
+                    b = entry["other"]
+                    if b not in member_set or b <= a:
+                        continue
+                    key = (-entry["shared_citers"],
+                           -len(entry["sentences"]), a, b)
+                    if best is None or key < best[0]:
+                        sents = entry["sentences"]
+                        best = (key, {"a": a, "b": b,
+                                      "shared_citers":
+                                          entry["shared_citers"],
+                                      "sentence": (sents[0]["text"]
+                                                   if sents else None),
+                                      "cited_by": (sents[0]["by"]
+                                                   if sents else None)})
+            if best is not None:
+                cocited = best[1]
+        digests.append({
+            "id": cid,
+            "label": f"Cluster around {titles.get(hub, hub)}",
+            "hub_id": hub,
+            "hub_title": titles.get(hub, hub),
+            "hub_summary": summaries.get(hub, ""),
+            "size": len(members),
+            "crawl_depth": depth,
+            "members": [{"id": x, "title": titles.get(x, x),
+                         "depth": depth_of.get(x),
+                         "internal_strength":
+                             round(internal_strength[x], 2),
+                         "neighbours": len(und[x])}
+                        for x in shown],
+            "members_omitted": len(members) - len(shown),
+            "unreached": sum(1 for x in members if x not in depth_of),
+            "top_internal_edges": [
+                {"a": a, "b": b, "weight": round(w, 2)}
+                for a, b, w in internal_edges[:5]],
+            "boundary": [
+                {"from": a, "to": b, "to_title": titles.get(b, b),
+                 "weight": round(w, 2)}
+                for a, b, w in boundary[:5]],
+            "cocited_pair": cocited,
+        })
+    return digests
 
 
 # --------------------------------------------------------------------------
@@ -3150,3 +3953,592 @@ def git_provenance(repo, page_path, runner=None):
     date, author = line[0].split("\t", 1)
     return {"last_modified": date[:10] if date else None,
             "last_author": author or None}
+
+
+# ---------------------------------------------------------------------------
+# Timeline dated entries (W2, 2026-10-22): the Lens timeline grows
+# from log-only to every dated-entry record in the corpus — the
+# agents' filing ledgers (wiki/filings/*-filings.md, their
+# `## Ledger` bullets) and the decision record (the Chapter 7 page
+# the Decisions mode is built from). Clean re-implementation of
+# the Liniem timeline idea; all code here is this repo's own.
+#
+# Date honesty: an entry's date is read from the entry's own text
+# (a leading bold or plain date in a ledger bullet; the DECIDED
+# date inside a decision item's head). File mtimes and filename
+# dates are never used. A candidate whose own text carries no
+# date is EXCLUDED and returned in the excluded list with its
+# reason — counted on the artefact, never silently placed.
+#
+# Kinds are a small closed set (TIMELINE_KINDS): "ingest" and
+# "decision" keep their log meanings, "filing" is a ledger entry,
+# "log" is any other log entry, and "other" is reserved for
+# events that are not dated markdown entries at all (git
+# commits), which carry a tkind_reason saying so.
+#
+# Determinism: sort_timeline is a stable sort by date descending;
+# ties keep the caller's concatenation order — log entries (file
+# order), then ledger entries (page-path order), then decision
+# entries (page order), then commits (git order). Same corpus =>
+# identical artefact bytes.
+# ---------------------------------------------------------------------------
+
+TIMELINE_KINDS = ("log", "filing", "decision", "ingest", "other")
+
+_LEDGER_AGENT_NAMES = {
+    "antigravity": "Antigravity",
+    "chatgpt-coordinator": "ChatGPT Coordinator",
+    "codex": "Codex",
+    "grok": "Grok",
+    "hark": "Hark",
+}
+
+_LEDGER_BOLD_DATE = re.compile(
+    r"\*\*(\d{4}-\d{2}-\d{2})"
+    r"(?:[ \t]+~?\d{2}:\d{2}(?::\d{2})?(?:[ \t]+[A-Z]{2,5})?)?\*\*"
+    r"[ \t]*—[ \t]*(.*)", re.S)
+_LEDGER_PLAIN_DATE = re.compile(r"(\d{4}-\d{2}-\d{2}):[ \t]*(.*)", re.S)
+_DECISION_DATE = re.compile(r"DECIDED by Usman (\d{4}-\d{2}-\d{2})")
+_DECISION_CLAUSE = re.compile(
+    r"\s*—\s*DECIDED by Usman \d{4}-\d{2}-\d{2}:?[ \t]*")
+
+
+def timeline_kind(raw_kind):
+    """The closed timeline kind for a raw event kind."""
+    if raw_kind in ("ingest", "decision", "filing"):
+        return raw_kind
+    if raw_kind == "commit":
+        return "other"
+    return "log"
+
+
+def _tl_title(text, cap=110):
+    """First sentence of an entry's plain text, capped at a word
+    boundary when it runs long."""
+    t = " ".join(text.split())
+    m = re.search(r"^(.*?[.!?])(?:\s|$)", t)
+    title = m.group(1) if m else t
+    if len(title) > cap:
+        title = title[:cap].rsplit(" ", 1)[0].rstrip(",;:") + "…"
+    return title
+
+
+def _ledger_bullets(section):
+    """The raw text of each `- ` bullet in a ledger section,
+    continuation lines joined with a space."""
+    bullets, cur = [], None
+    for line in section.splitlines():
+        if line.startswith("- "):
+            if cur is not None:
+                bullets.append(cur)
+            cur = line[2:]
+        elif cur is not None and line.strip():
+            cur += " " + line.strip()
+    if cur is not None:
+        bullets.append(cur)
+    return bullets
+
+
+def ledger_timeline_entries(body, source, link, agent):
+    """(entries, excluded) from a filings ledger page's
+    `## Ledger` bullets. A bullet's date must lead the bullet, in
+    bold (**YYYY-MM-DD**, a time may follow) or plain
+    (YYYY-MM-DD:) form — both are the entry's own recorded date.
+    A bullet with neither is excluded with its reason."""
+    m = re.search(r"(?ms)^## Ledger[ \t]*$(.*?)(?=^## |\Z)", body)
+    if not m:
+        return [], []
+    entries, excluded = [], []
+    for raw in _ledger_bullets(m.group(1)):
+        text = raw.strip()
+        dm = _LEDGER_BOLD_DATE.match(text) or _LEDGER_PLAIN_DATE.match(text)
+        if not dm:
+            excluded.append({
+                "source": source,
+                "reason": "ledger bullet carries no leading date "
+                          "in its own text",
+                "detail": " ".join(text.split())[:60]})
+            continue
+        date, rest = dm.group(1), dm.group(2)
+        plain = plain_text(rest)
+        entries.append({
+            "date": date, "kind": "filing", "tkind": "filing",
+            "stream": "Filings", "title": _tl_title(plain),
+            "summary": plain[:240], "actor": agent,
+            "source": source, "link": link})
+    return entries, excluded
+
+
+def decision_timeline_entries(body, source, link):
+    """(entries, excluded) from a decision record's numbered
+    items (N. **<topic> — DECIDED by Usman YYYY-MM-DD: ...**).
+    The date is the one the item's own head records; an item
+    whose head carries no date is excluded with its reason."""
+    entries, excluded = [], []
+    items = list(re.finditer(r"(?m)^(\d+)\.\s+\*\*(.+?)\*\*", body, re.S))
+    for j, m in enumerate(items):
+        head = " ".join(m.group(2).split())
+        dm = _DECISION_DATE.search(head)
+        if not dm:
+            excluded.append({
+                "source": source,
+                "reason": "decision item head carries no DECIDED date",
+                "detail": head[:60]})
+            continue
+        end = items[j + 1].start() if j + 1 < len(items) else len(body)
+        tail = body[m.end():end].split("> [!note]")[0]
+        title = " ".join(
+            _DECISION_CLAUSE.sub(" — ", head).split()).strip(" —")
+        entries.append({
+            "date": dm.group(1), "kind": "decision",
+            "tkind": "decision", "stream": "Decisions",
+            "title": _tl_title(title, cap=140),
+            "summary": plain_text(tail)[:240], "actor": "Usman",
+            "source": source, "link": link})
+    return entries, excluded
+
+
+def timeline_extra_entries(pages):
+    """(entries, coverage, excluded) for the dated-entry records
+    beyond the wiki log: every filings ledger page
+    (wiki/filings/*-filings.md, in path order) and the decision
+    record (the Chapter 7 page). `pages` are the build's page
+    dicts (path / id / body). Ledgers are scanned whether or not
+    they carry a ## Ledger section yet — a seat with no filings
+    records 0 entries in coverage, not an absence."""
+    entries, coverage, excluded = [], [], []
+    ledgers = sorted(
+        (pg for pg in pages
+         if pg["path"].startswith("wiki/filings/")
+         and pg["path"].endswith("-filings.md")),
+        key=lambda pg: pg["path"])
+    for pg in ledgers:
+        stem = pg["path"].rsplit("/", 1)[-1][:-len("-filings.md")]
+        agent = _LEDGER_AGENT_NAMES.get(
+            stem, stem.replace("-", " ").title())
+        ents, excls = ledger_timeline_entries(
+            pg["body"], pg["path"], pg["id"], agent)
+        entries.extend(ents)
+        excluded.extend(excls)
+        row = {"source": pg["path"], "entries": len(ents),
+               "excluded": len(excls)}
+        if not re.search(r"(?m)^## Ledger[ \t]*$", pg["body"]):
+            row["note"] = "no ## Ledger section yet"
+        coverage.append(row)
+    for pg in pages:
+        if pg["id"] == "chapter7-decisions":
+            ents, excls = decision_timeline_entries(
+                pg["body"], pg["path"], pg["id"])
+            entries.extend(ents)
+            excluded.extend(excls)
+            coverage.append({"source": pg["path"],
+                             "entries": len(ents),
+                             "excluded": len(excls)})
+    return entries, coverage, excluded
+
+
+def sort_timeline(events):
+    """Stable newest-first sort. Ties keep the caller's order —
+    the build concatenates log entries, ledger entries, decision
+    entries, then commits, so a same-date tie renders in that
+    order on every build."""
+    events.sort(key=lambda e: e["date"], reverse=True)
+    return events
+
+
+# ---------------------------------------------------------------------------
+# Graph time-travel + freshness colouring (W2, 2026-10-22): each
+# graph node ships its grounded creation and last-substantive-update
+# dates in the build artefact; the client scrubs the graph to a
+# past date by filtering on the creation date, and a third colour
+# mode paints nodes by the age of their update at the build date.
+# Clean re-implementation of the vault-explorer graph time-travel
+# pattern boarded in Round 12; all code here is this repo's own.
+#
+# DATE RULES — one precedence, applied uniformly, stated on the
+# artefact itself (TEMPORAL_RULES below) and in the Lens legend:
+#   creation  = frontmatter `created`
+#               else frontmatter `planted` (the growth-stage axis's
+#               creation record — identical to `created` on every
+#               page that carries both, verified 2026-10-22)
+#               else the page's first commit date in
+#               evaluation/page-history.json.
+#   update    = frontmatter `tended` (the schema defines it as the
+#               last SUBSTANTIVE edit; frontmatter-only touches
+#               never move it)
+#               else frontmatter `updated`
+#               else the page's last commit date in
+#               evaluation/page-history.json.
+# A page with no date from any source has NO grounded date: it is
+# never back-dated by guesswork. Ungrounded creation => the node
+# appears in the present-day graph only and is hidden from every
+# past view; ungrounded update => the node takes the "unknown"
+# freshness band. Edges carry no date of their own: an edge is
+# visible at a past date only when both its pages existed by then.
+# Freshness is always measured at the build date — scrubbing
+# filters which pages existed, it does not reconstruct earlier
+# versions of a page.
+FRESHNESS_BANDS = [
+    {"key": "fresh", "label": "Fresh",
+     "meaning": "updated within the last 7 days", "max_days": 7,
+     "colour": "#1B9E6B"},
+    {"key": "recent", "label": "Recent",
+     "meaning": "updated 8–30 days ago", "max_days": 30,
+     "colour": "#7BA23F"},
+    {"key": "ageing", "label": "Ageing",
+     "meaning": "updated 31–90 days ago", "max_days": 90,
+     "colour": "#D9A41F"},
+    {"key": "stale", "label": "Stale",
+     "meaning": "updated more than 90 days ago", "max_days": None,
+     "colour": "#C1443C"},
+]
+FRESHNESS_UNKNOWN = {"key": "unknown", "label": "No grounded date",
+                     "meaning": "no recorded update date from any "
+                                "source",
+                     "max_days": None, "colour": "#CFC9BB"}
+
+TEMPORAL_RULES = (
+    "Creation date: the page's frontmatter `created`, else its "
+    "`planted`, else its first git commit in "
+    "evaluation/page-history.json. A page with none of these has "
+    "no grounded creation date: it appears in the present-day "
+    "graph only and is hidden from every past view. Update date: "
+    "the page's frontmatter `tended` (its last substantive edit) "
+    "when present, else its `updated`, else its last git commit. "
+    "Freshness colours measure the age of that update at the "
+    "build date, even when the graph is scrubbed to a past date; "
+    "scrubbing filters which pages existed — it does not "
+    "reconstruct earlier versions of a page. An edge shows at a "
+    "past date only when both its pages existed by then; edges "
+    "carry no date of their own. Freshness says how long ago a "
+    "page last changed, nothing about whether it is correct.")
+
+
+def _history_date(entry, which):
+    """One date (ISO YYYY-MM-DD) from a page-history entry dict:
+    `which` is "first" (earliest commit) or "last" (latest
+    commit). The register's history list is newest-first. None
+    when the entry or the commit carries no parseable date."""
+    if not isinstance(entry, dict):
+        return None
+    hist = entry.get("history")
+    if not isinstance(hist, list) or not hist:
+        return None
+    rec = hist[-1] if which == "first" else hist[0]
+    if not isinstance(rec, dict):
+        return None
+    d = _fresh_parse_date(rec.get("date"))
+    return d.isoformat() if d else None
+
+
+def page_temporal_dates(fm, history_entry):
+    """{created, created_from, updated, updated_from} for one
+    page, by the precedence in this section's header. `fm` is the
+    page's frontmatter scalars: pass the page TEXT and the
+    scalars are read with _fresh_fields — the line-rule
+    extractor the house freshness mirrors use, so the graph's
+    dates cannot disagree with theirs (and a page whose YAML
+    block fails to parse wholesale still yields the dates on its
+    face); a dict is also accepted, its values normalised by
+    _fresh_parse_date. `history_entry` is the page's
+    evaluation/page-history.json entry or None. A field with no
+    grounded source is None, and its *_from is None too — never
+    an invented date."""
+    if isinstance(fm, str):
+        fm = _fresh_fields(fm)
+    fm = fm if isinstance(fm, dict) else {}
+
+    def pick(field, label):
+        d = _fresh_parse_date(fm.get(field))
+        return (d.isoformat(), label) if d else (None, None)
+
+    created, created_from = pick("created", "frontmatter created")
+    if created is None:
+        created, created_from = pick("planted", "frontmatter planted")
+    if created is None:
+        d = _history_date(history_entry, "first")
+        if d:
+            created, created_from = d, "git first commit"
+    updated, updated_from = pick("tended", "frontmatter tended")
+    if updated is None:
+        updated, updated_from = pick("updated", "frontmatter updated")
+    if updated is None:
+        d = _history_date(history_entry, "last")
+        if d:
+            updated, updated_from = d, "git last commit"
+    return {"created": created, "created_from": created_from,
+            "updated": updated, "updated_from": updated_from}
+
+
+def freshness_band(updated, built_on):
+    """The freshness band key for an update date measured at the
+    build date. An update dated after the build date (clock skew
+    in a source) clamps to age 0 — "fresh" — never a negative
+    age. None/unparseable on either side => "unknown"."""
+    u = _fresh_parse_date(updated)
+    b = _fresh_parse_date(built_on)
+    if u is None or b is None:
+        return "unknown"
+    age = max(0, (b - u).days)
+    for band in FRESHNESS_BANDS:
+        if band["max_days"] is not None and age <= band["max_days"]:
+            return band["key"]
+    return "stale"
+
+
+def node_exists_at(created, as_of):
+    """The time-travel predicate the client mirrors: a node is
+    visible in the view as of `as_of` (ISO date) when no scrub
+    date is set, or when its grounded creation date is on or
+    before the scrub date. No grounded creation date => visible
+    only in the present-day view."""
+    if not as_of:
+        return True
+    c = _fresh_parse_date(created)
+    a = _fresh_parse_date(as_of)
+    if c is None or a is None:
+        return False
+    return c <= a
+
+
+def graph_temporal(node_dates, built_on):
+    """The graph artefact's `temporal` block: the build date the
+    freshness ages are measured at, the band table with its
+    per-band node counts at this build, the grounded-date census,
+    and the date rules in words. `node_dates` is a list of
+    page_temporal_dates dicts (any order — counts only). Pure and
+    deterministic: the same inputs assemble byte-identically."""
+    counts = {"nodes": len(node_dates),
+              "with_created": 0, "without_created": 0,
+              "with_updated": 0, "without_updated": 0}
+    band_counts = {b["key"]: 0 for b in FRESHNESS_BANDS}
+    band_counts["unknown"] = 0
+    created_dates = []
+    for nd in node_dates:
+        if nd.get("created"):
+            counts["with_created"] += 1
+            created_dates.append(nd["created"])
+        else:
+            counts["without_created"] += 1
+        if nd.get("updated"):
+            counts["with_updated"] += 1
+        else:
+            counts["without_updated"] += 1
+        band_counts[freshness_band(nd.get("updated"), built_on)] += 1
+    bands = [dict(b, count=band_counts[b["key"]])
+             for b in FRESHNESS_BANDS]
+    bands.append(dict(FRESHNESS_UNKNOWN,
+                      count=band_counts["unknown"]))
+    return {"built_on": built_on,
+            "bands": bands,
+            "counts": counts,
+            "earliest_created": min(created_dates) if created_dates
+            else None,
+            "rules": TEMPORAL_RULES}
+
+
+# ---------------------------------------------------------------------------
+# Semantic zoom (W2, 2026-10-22): the graph's multilevel view —
+# zoomed out, one node per community; zooming in expands a
+# community into its member pages; the deepest level is the full
+# page graph. Clean re-implementation of the Sensecape semantic-
+# zoom pattern (Round 5 research candidates): the CONTENT changes
+# with scale, not just the size — the overview carries community
+# summaries (label, hub, size, cohesion context), the page level
+# carries pages. All level data is computed here at build; the
+# client renders it and folds the As-of filter over it, exactly
+# as it folds the page level. The levels are DERIVED from the
+# shipped analytics: the partition below is the build's rendered
+# Louvain partition — the same assignment carried by every node's
+# `community` field, the community summaries, and the cluster
+# digests. Zooming never re-clusters, here or in the client.
+#
+# INTERACTION RULES — stated on the artefact (ZOOM_RULES) and in
+# the Lens captions, applied uniformly:
+#   * A community node's position is the centroid of its member
+#     pages' layout positions, and its size scales with the
+#     members' total link weight. Both are build-time values over
+#     the FULL membership: scrubbing the As-of date does not move
+#     or resize a community node, it changes whether the node
+#     shows and the member counts in its label.
+#   * Overview edges aggregate EVERY weighted relation pair
+#     between two communities — the same relation weights the
+#     communities were computed from, not only direct links.
+#     The Community and Pages levels draw direct links, as the
+#     page level always has.
+#   * The As-of date applies at every level: a community shows
+#     when at least one member page existed by the date, and
+#     scrubbed aggregate weights fold over pairs whose two pages
+#     both existed (the client's fold mirrors the aggregation
+#     below over the shipped edge table).
+#   * Freshness colour at Overview is the band of the MEDIAN
+#     member update date at the build date (members with no
+#     grounded update date are left out; a community with none
+#     takes the unknown band). Type colour at Overview is the
+#     community's plurality — most common — member type group,
+#     ties broken by the legend's type order (group_order).
+#   * Legend filters apply at every level: at Overview a
+#     community fades under a type filter when none of its
+#     members is of that type, and under a community filter when
+#     it is not the filtered community. An aggregate edge carries
+#     the union of its pairs' relation-map types for the
+#     edge-type filter.
+ZOOM_LEVELS = [
+    {"key": "overview", "label": "Overview",
+     "content": "one node per community, labelled and sized "
+                "from the cluster digests"},
+    {"key": "community", "label": "Community",
+     "content": "one community expanded into its member pages, "
+                "the rest collapsed around it"},
+    {"key": "pages", "label": "Pages",
+     "content": "every page in the graph"},
+]
+
+ZOOM_RULES = (
+    "Semantic zoom levels: Overview shows one node per "
+    "community; Community expands one community into its member "
+    "pages; Pages is the full graph. The community a page "
+    "belongs to at every level is the build's rendered Louvain "
+    "partition — the same assignment carried by each node's "
+    "community field, the community summaries, and the cluster "
+    "digests; zooming never re-clusters. A community node's "
+    "position is the centroid of its members' layout positions "
+    "and its size scales with the members' total link weight; "
+    "both are build-time values over the full membership and do "
+    "not move when the graph is scrubbed to a past date. "
+    "Overview edges aggregate every weighted relation pair "
+    "between two communities — the same relation weights the "
+    "communities were computed from, not only direct links; "
+    "the Community and Pages levels draw direct links. The "
+    "As-of date applies at every level: a community shows when "
+    "at least one member page existed by the date, its label "
+    "counts the member pages that existed, and scrubbed "
+    "aggregate weights fold over pairs whose two pages both "
+    "existed. Freshness colour at Overview is the band of the "
+    "median member update date at the build date (members with "
+    "no grounded update date are left out; a community with "
+    "none takes the unknown band). Type colour at Overview is "
+    "the community's plurality (most common) member type, ties "
+    "broken by the legend's type order. Legend filters apply "
+    "at every level: at Overview a community fades under a "
+    "type filter when none of its members is of that type, and "
+    "an aggregate edge carries the union of its pairs' "
+    "relation types for the edge-type filter.")
+
+
+def graph_zoom_levels(node_ids, partition, pair_signals, layout,
+                      groups, group_order, wdegrees, comm_meta,
+                      pair_types=None):
+    """The graph artefact's `zoom` block: the multilevel view's
+    build-time data. `node_ids` is the graph's node set;
+    `partition` is the rendered community assignment {node:
+    community_id} (the Louvain partition the build renders —
+    passed in, never recomputed here); `pair_signals` is the
+    weighted relation table {(a, b): {"weight": w, "direct":
+    0/1, ...}} the communities were computed from; `layout` is
+    {node: (x, y)}; `groups` is {node: display-group key} and
+    `group_order` the legend's group order (plurality ties break
+    by it); `wdegrees` is {node: weighted degree}; `comm_meta`
+    is {community_id: comm_data row} — the build's own community
+    summaries, so a zoom label or hub can never disagree with
+    them; `pair_types` optionally maps a pair to its relation-
+    map types, whose union rides each aggregate edge for the
+    client's edge-type filter.
+
+    A node missing from `partition` is unassigned: it belongs to
+    no level's community (counted in the block, never silently
+    placed). Pure and deterministic: sorted iteration and fixed
+    tie-breaks throughout, so the same inputs assemble
+    byte-identically."""
+    order_index = {g: i for i, g in enumerate(group_order)}
+    members_of = {}
+    unassigned = []
+    for n in sorted(node_ids):
+        cid = partition.get(n)
+        if cid is None:
+            unassigned.append(n)
+        else:
+            members_of.setdefault(cid, []).append(n)
+    internal_weight = {cid: 0.0 for cid in members_of}
+    internal_pairs = {cid: 0 for cid in members_of}
+    cross = {}
+    skipped_pairs = 0
+    for (a, b), sig in sorted(pair_signals.items()):
+        ca, cb = partition.get(a), partition.get(b)
+        if ca is None or cb is None:
+            skipped_pairs += 1
+            continue
+        w = sig.get("weight", 0.0)
+        if ca == cb:
+            internal_weight[ca] += w
+            internal_pairs[ca] += 1
+            continue
+        key = (ca, cb) if ca <= cb else (cb, ca)
+        row = cross.setdefault(key, {"weight": 0.0, "pairs": 0,
+                                     "direct_pairs": 0,
+                                     "types": set()})
+        row["weight"] += w
+        row["pairs"] += 1
+        if sig.get("direct"):
+            row["direct_pairs"] += 1
+        if pair_types:
+            row["types"] |= set(pair_types.get((a, b), ()))
+    communities = []
+    for cid in sorted(members_of):
+        members = members_of[cid]
+        meta = comm_meta.get(cid) or {}
+        xs = [layout[n][0] for n in members if n in layout]
+        ys = [layout[n][1] for n in members if n in layout]
+        counts = {}
+        for n in members:
+            g = groups.get(n)
+            if g is not None:
+                counts[g] = counts.get(g, 0) + 1
+        plurality = None
+        if counts:
+            plurality = sorted(
+                counts.items(),
+                key=lambda kv: (-kv[1],
+                                order_index.get(kv[0],
+                                                len(order_index)),
+                                kv[0]))[0][0]
+        group_counts = {}
+        for g in list(group_order) + sorted(
+                g for g in counts if g not in order_index):
+            if g in counts:
+                group_counts[g] = counts[g]
+        communities.append({
+            "id": cid,
+            "key": f"community:{cid}",
+            "label": meta.get("label") or f"Community {cid}",
+            "hub_id": meta.get("hub_id"),
+            "hub_title": meta.get("hub_title"),
+            "x": round(sum(xs) / len(xs), 1) if xs else None,
+            "y": round(sum(ys) / len(ys), 1) if ys else None,
+            "members": members,
+            "member_count": len(members),
+            "total_wdegree": round(
+                sum(wdegrees.get(n, 0.0) for n in members), 2),
+            "internal_weight": round(internal_weight[cid], 2),
+            "internal_pairs": internal_pairs[cid],
+            "plurality_group": plurality,
+            "group_counts": group_counts})
+    edges = [{"a": key[0], "b": key[1],
+              "weight": round(row["weight"], 2),
+              "pairs": row["pairs"],
+              "direct_pairs": row["direct_pairs"],
+              "rm_types": sorted(row["types"])}
+             for key, row in cross.items()]
+    edges.sort(key=lambda e: (-e["weight"], e["a"], e["b"]))
+    return {"levels": [dict(lv) for lv in ZOOM_LEVELS],
+            "communities": communities,
+            "edges": edges,
+            "counts": {"nodes": len(node_ids),
+                       "communities": len(communities),
+                       "internal_pairs": sum(
+                           internal_pairs.values()),
+                       "cross_pairs": sum(
+                           r["pairs"] for r in cross.values()),
+                       "unassigned_nodes": len(unassigned),
+                       "skipped_pairs": skipped_pairs},
+            "rules": ZOOM_RULES}

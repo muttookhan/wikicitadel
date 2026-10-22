@@ -661,15 +661,33 @@ function lensRendererTests() {
    * expectations derive from evaluation/retrieval-severance.json
    * (sev-0001, the superseded "Collaborator seat reserved" form) over the
    * Lens corpus — the same exclusion set the Python mirror
-   * produces (scripts/tests/test_lens_surfaces.py). */
+   * produces (scripts/tests/test_lens_surfaces.py). W1.5 (truth-
+   * aware retrieval, 2026-10-22) adds the successor exemption:
+   * the page the governance artefact names as sev-0001's
+   * successor (decision-register, carrying the current form)
+   * is exempt from that entry's exclusion and stays in the
+   * lanes, with the exemption recorded on LAST_GOVERNANCE -
+   * the Python ranker's behaviour, mirrored. The carrier page
+   * (entities/collaborator) is no successor and still leaves.
+   * (Smoke expectations updated by the build coordinator,
+   * 2026-10-22, to the approved W1.5 semantics.) */
   const sevLanes = searchLanes("collaborator seat reserved");
   const sevPaths = [...sevLanes.bm25, ...sevLanes.hybrid].map(r => r.path);
   t("severance: the severed claim's carriers leave both ranked lanes",
-    !sevPaths.includes("wiki/syntheses/decision-register.md") &&
     !sevPaths.includes("wiki/entities/collaborator.md"));
-  t("severance: the exclusion is recorded, naming the entry",
-    lensLastSeverance().applied &&
-    lensLastSeverance().excluded.some(e => e.path === "wiki/syntheses/decision-register.md" && e.entries.includes("sev-0001")));
+  /* Public-corpus form of the successor check: the fictional
+   * decision-register page does not carry the severed claim's
+   * text, so it cannot rank for this query and the exemption's
+   * ranking effect is not observable here (the behaviour itself
+   * is fixture-proven in scripts/tests/test_wiki_governance.py
+   * in both trees). What this build must show: the governance
+   * layer is applied and the shipped artefact names sev-0001's
+   * successor. */
+  t("severance: governance ships sev-0001's successor and the layer is applied",
+    lensLastGovernance().applied &&
+    !!(SEARCH.governance && SEARCH.governance.chains &&
+       (SEARCH.governance.chains["sev-0001"] || {}).successors &&
+       SEARCH.governance.chains["sev-0001"].successors.includes("wiki/syntheses/decision-register.md")));
   renderSearch("owner");
   t("freshness: the attested page's line renders in the results",
     html().includes("verified until 2027-01-20"));
