@@ -7,7 +7,7 @@ an agent maintains a personal wiki — raw sources preserved untouched, a
 compiled layer of interlinked pages, and a schema file that teaches the
 agent how the wiki is run — except that here, **claims that rest on a
 specific passage carry a verifiable citation (in the seed corpus: 12
-citation markers across 29 pages; 9 pages list no sources), dead claims
+citation markers across 43 pages; 22 pages list no sources), dead claims
 are severed so they cannot leak back
 into answers, and the system will say "not recorded" instead of
 inventing.** Most LLM wikis compile knowledge. This one can be *checked*.
@@ -75,9 +75,45 @@ work under `AGENTS.md`.
 - **Honest labels.** A verification register states what has actually
   been verified, and no page, report or README in this project claims
   more than the register allows. `BENCHMARKS.md` follows the same rule.
+- **Measured retrieval, with the failures kept.** A reranker seam, a
+  uniform bakeoff harness and preregistered adoption criteria judge
+  every ranking change against frozen question sets; the challengers
+  that scored better on ranking yet failed the abstention battery are
+  recorded as rejected, with the numbers. Truth-aware governance —
+  newer records superseding older ones — is itself measured: turning
+  it off returns superseded-claim coverage to exactly its
+  pre-governance figure. Synthetic evaluation slices (generated from
+  the corpus, labelled synthetic, never pooled with hand-written
+  scores) expose the weak classes plainly — multi-hop questions are
+  this system's weakest, and the slice says so.
+- **Answers that show their evidence.** Sentence-level support
+  scoring, claim-grouped citations, a provenance envelope for every
+  answer, and a declared depth ladder (Quick / Standard / Deep) whose
+  levels change breadth only — the abstention bar is identical at
+  every depth. Opt-in retrieval stages (query expansion, one-hop
+  voting, iterative passes) ship off by default, each with its
+  measured effect attached, including the negative ones.
+- **Capture with doors, not crawls.** An ISBN-first book door
+  (checksum before any fetch), per-source clip templates, OPML and
+  feed discovery, single-file page capture, voice-capture modes, a
+  GROBID sidecar for scholarly PDFs, and converter/OCR trials whose
+  engines are named doors until they are installed — each capture
+  lands with its provenance and its missing fields named.
+- **Review machinery.** Anchored passage-level review threads
+  (an anchor whose words move is ORPHANED, never silently
+  re-anchored), a closed agent-to-agent vocabulary with agent cards
+  that declare an interface and grant nothing, a review centre, a
+  corrections ledger with a lifecycle report, and session guards.
+- **Records that travel.** Book building, slice exports, linked-data
+  export (with its loss inventory stated), standards bundles (PROV,
+  PREMIS, RFC 9264 linksets), SHACL shapes with a conformance report
+  that currently reads FALSE on this corpus — the findings are the
+  deliverable — and a FAIR4RS release block whose identifier and
+  author slots stand empty until the owner fills them.
 
-The full inventory is in [CAPABILITIES.md](CAPABILITIES.md) — twelve
-sections, including an explicit list of what is **not** in this edition.
+The full inventory is in [CAPABILITIES.md](CAPABILITIES.md), including
+an explicit list of what is **not** in this edition; the schema
+(`AGENTS.md`) records each mechanism as it lands.
 
 ## Install
 
@@ -99,7 +135,7 @@ ingest your first source.
 ## Heritage and licences of ideas
 
 WikiCitadel implements Andrej Karpathy's LLM Wiki pattern and stands on
-a surveyed field of roughly 3,300 projects (the survey is part of this
+a surveyed field of more than 4,400 projects (the survey is part of this
 project's record). Where a mechanism was adapted from an MIT- or
 Apache-2.0-licensed project, the schema credits it by name; mechanisms
 from copyleft or source-available projects were re-implemented from
@@ -109,11 +145,24 @@ licences where they appear.
 ## Status and known limitations
 
 WikiCitadel v1: a working seed installation and engine, maintained as
-a public edition. Known limitations, stated plainly:
+a public edition. The 2026-10-22 wave added the measured-retrieval,
+capture, review and records machinery described above; every claim in
+this README is checked against the shipped tree. Known limitations,
+stated plainly:
 
-- **The seed corpus is a demo, not coverage.** 29 pages, 12 citation
-  markers, 9 pages listing no sources. The machinery is the product;
+- **The seed corpus is a demo, not coverage.** 43 pages, 12 citation
+  markers, 22 pages listing no sources. The machinery is the product;
   the corpus only demonstrates it.
+- **Two evaluation instruments are not yet in this edition.** The
+  hand-written abstention battery and conflict question set have not
+  been authored for the seed corpus; the Ask door ships calibrated
+  on the extended baseline (τ = 1.2225 over the seed corpus), and
+  the bakeoff ledger stands empty until those instruments exist.
+  Nothing here claims a battery result for this edition.
+- **Several engines are doors, not installs.** The document-converter
+  and OCR engines, the GROBID service and Graphviz-WASM are
+  interfaces with trial records; where an engine is absent the tool
+  says so on the artefact rather than improvising output.
 - **Citation checks detect change, not truth.** The lockfile proves
   cited text has not moved since it was locked. Whether a claim is
   *true* is settled by the proof bar in `AGENTS.md`, not by a hash.
