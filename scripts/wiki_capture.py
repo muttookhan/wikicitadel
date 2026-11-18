@@ -1,0 +1,408 @@
+#!/usr/bin/env python3
+"""wiki_capture.py — capture templates: named destinations,
+harness-filled provenance (WikiCitadel v1).
+
+The specification is the org-capture template grammar
+(find 3 — GPL source, IDEAS ONLY, re-implemented here in our own
+code): a capture lands from a NAMED template at a NAMED
+destination; the metadata that matters (timestamp, provenance
+link, source fields) is filled by the harness at invocation,
+because invocation is the only moment some of it exists; and
+the prompts ask only for what the harness cannot know — in
+the capture templates proper the one designed prompt is Why;
+the filing kind instead carries the filing order's own field
+grammar, whose What happened / Evidence fields do that work.
+
+Templates live in templates/capture/<kind>.md and are written
+in the grammar this tool expands:
+
+    %U          the capture timestamp (harness)
+    %:date      the capture date, YYYY-MM-DD (harness)
+    %:title     the title given at invocation
+    %:by        who captured (invocation; default agent)
+    %:kind      the capture kind
+    %:destination  the kind's named destination
+    %:decided   (decision kind) the ruling date given at
+                invocation, else a TODO prompt — dual dating
+                is structural for decisions (governing rule 4)
+    %a          the provenance link given at invocation
+                (--provenance); absent one, a TODO prompt,
+                because provenance exists only at invocation
+    %^{...}     a prompt: expands to [prompt: ...] in the
+                draft. Two roles only: the artefact slot (the
+                thing captured itself — org's %i role) and the
+                single designed question, Why.
+    %?          where the capturer's writing starts; expands
+                to an HTML comment marker
+    %%          a literal percent sign
+
+The kinds are the corpus's real intake doors, no more:
+
+    source-note  a thing read at the owner's direction
+    filing       an agent's contribution, in the standing
+                 [[agent-filing-order]] shape — the draft is
+                 staged only; a filing exists when it is SENT
+                 through the filings channel, and this tool
+                 writes nothing to raw/filings/ or the ledgers
+    decision     an owner ruling made or reversed
+    idea         an undirected idea for [[ideas]] Waiting
+    jot          a one-line quick capture (the Memos pattern,
+                 Marathon Round 3): the title is the line, the
+                 only provenance is the invocation's, and the
+                 draft waits in staging like every other kind
+    memo         a timeline-inbox capture (usememos/memos
+                 shape, Marathon Round 4): text plus TAGS as
+                 the only structure (--tags, memo kind only);
+                 the store door is scripts/wiki_memo.py
+                 (add/list/timeline over staging/memos.jsonl)
+                 and the read doors list memos from day one
+    note         a session observation ([[capture-rules]])
+
+Every draft renders to staging/captures/ — NEVER into wiki/.
+Its frontmatter is pre-filled to schema: status at the honest
+floor (draft), confidence observed (the capturer was there),
+sources empty — never faked. The compile-stamp keys
+are present and EMPTY: a capture is not yet a compile, and
+scripts/wiki_stamp.py fills them at compile time. The item-51
+sensitivity question rides as a marked TODO in the frontmatter:
+while it stands unanswered the draft is unclassified, and the
+ingest converter (scripts/wiki_convert.py --sensitivity)
+refuses unclassified material a home in raw/ — enforcement
+stays there; this tool asks the question at capture, where
+answering it is cheapest.
+
+Capture remains a DELIBERATE act: this tool renders a draft
+when invoked and does nothing else — no watching, no ambient
+capture, no auto-filing (the lane constraint).
+
+    python3 scripts/wiki_capture.py list
+    python3 scripts/wiki_capture.py new <kind> --title "..."
+        [--by NAME] [--provenance LINK] [--decided YYYY-MM-DD]
+        [--file NAME]
+
+Exit codes: 0 ok · 1 refusal · 2 usage error.
+"""
+import argparse
+import re
+import sys
+from datetime import date as _date
+from datetime import datetime
+from pathlib import Path
+
+import wiki_dedupe  # W1.9: the shared capture-time dedupe
+# design — a re-render of a capture whose text already
+# stands in staging/captures/ is refused with the surviving
+# draft named, and the decision logged (see new_capture).
+
+ROOT = Path(__file__).resolve().parent.parent
+TEMPLATE_DIR = Path("templates/capture")
+CAPTURE_DIR = Path("staging/captures")
+
+KINDS = {
+    "source-note": {
+        "template": "source-note.md",
+        "destination": "wiki/sources/ (compiled at ingest "
+                       "from the raw record)",
+        "when": "a thing read at the owner's direction — an "
+                "article, a page, a document, an export — that "
+                "will become a source page",
+    },
+    "filing": {
+        "template": "filing.md",
+        "destination": "the filings flow — email to "
+                       "agent@example.com in the "
+                       "[[agent-filing-order]] shape; preserved "
+                       "verbatim under raw/filings/<agent>/ on "
+                       "pickup, ledgered on the sender's "
+                       "wiki/filings/ page",
+        "when": "an agent's contribution: a fact learned, work "
+                "done, a correction, a proposal — drafted here, "
+                "a filing only when sent",
+    },
+    "decision": {
+        "template": "decision.md",
+        "destination": "evaluation/decisions-register.jsonl + "
+                       "the human decision record + wiki/log.md, "
+                       "entered at integration",
+        "when": "an owner ruling made, or an earlier ruling "
+                "reversed (capture triggers 1-2)",
+    },
+    "idea": {
+        "template": "idea.md",
+        "destination": "wiki/ideas.md — the Waiting section, "
+                       "one line, appended at integration",
+        "when": "an undirected idea that must wait for the "
+                "owner's call (the ask-first rule)",
+    },
+    "jot": {
+        "template": "jot.md",
+        "destination": "staging/captures/ only — a jot is a "
+                       "one-line quick capture; it is promoted "
+                       "to a fuller kind (or discarded) at "
+                       "integration, never filed as-is",
+        "when": "a single line that must not be lost — a name, "
+                "a number, a passing fact (Memos pattern, "
+                "Marathon Round 3 / TA4): the title IS the "
+                "line; provenance is the one minimal field "
+                "(given at invocation, or a TODO prompt — "
+                "never faked)",
+    },
+    "memo": {
+        "template": "memo.md",
+        "destination": "staging/memos.jsonl — the timeline "
+                       "inbox (scripts/wiki_memo.py); tags are "
+                       "its only structure; read via the "
+                       "traverse `memos` command and the MCP "
+                       "read door's wiki_memos tool",
+        "when": "a short capture for the timeline inbox — "
+                "text plus tags, no folder, no hierarchy "
+                "(usememos/memos pattern, Marathon Round 4): "
+                "the draft renders here like every kind, and "
+                "the memo store is staging/memos.jsonl",
+    },
+    "note": {
+        "template": "note.md",
+        "destination": "wiki/filings/, or the page the note "
+                       "touches, + wiki/log.md — at integration",
+        "when": "a session observation: something measured or "
+                "verified, a commitment given, a grey-zone "
+                "capture under [[capture-rules]]",
+    },
+}
+
+PROMPT_RE = re.compile(r"%\^\{([^}]*)\}")
+KEYWORD_RE = re.compile(r"%:([a-z_]+)")
+TOKEN_LEFTOVER_RE = re.compile(r"%[:^Ua\?]|%\{")
+
+
+class CaptureError(Exception):
+    pass
+
+
+def slugify(title):
+    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    slug = slug[:60].strip("-")
+    return slug or "untitled"
+
+
+def _timestamp(now):
+    return now.strftime("%Y-%m-%d %H:%M %Z")
+
+
+def expand(template_text, values):
+    """Expand the capture grammar. `values` carries the
+    harness/invocation fills: title, by, kind, destination,
+    provenance (None when not supplied), decided (None when
+    not supplied)."""
+    text = template_text.replace("%%", "\x00")
+
+    def prompt(m):
+        return "[prompt: %s]" % m.group(1).strip()
+
+    text = PROMPT_RE.sub(prompt, text)
+
+    def keyword(m):
+        key = m.group(1)
+        if key == "date":
+            return values["date"]
+        if key == "decided":
+            if values.get("decided"):
+                return values["decided"]
+            return ("TODO (prompt: the date the ruling was "
+                    "made, if not the capture date — dual "
+                    "dating is not optional)")
+        if key == "tags":
+            return values.get("tags") or "[]"
+        if key in ("title", "by", "kind", "destination"):
+            return values[key]
+        raise CaptureError("template uses unknown keyword "
+                           "%%:%s" % key)
+
+    text = KEYWORD_RE.sub(keyword, text)
+    text = text.replace("%U", values["timestamp"])
+    if values.get("provenance"):
+        text = text.replace("%a", values["provenance"])
+    else:
+        text = text.replace(
+            "%a",
+            "TODO (prompt: provenance — the page, place, "
+            "person or message this was captured from)")
+    text = text.replace("%?", "<!-- write from here -->")
+    text = text.replace("\x00", "%")
+    leftover = TOKEN_LEFTOVER_RE.search(text)
+    if leftover:
+        raise CaptureError("template left an unexpanded token "
+                           "at %r" % leftover.group(0))
+    return text
+
+
+def render(kind, title, by="agent", provenance=None,
+           decided=None, tags=None, now=None, root=ROOT):
+    if kind not in KINDS:
+        raise CaptureError(
+            "unknown capture kind %r; the kinds are: %s"
+            % (kind, ", ".join(sorted(KINDS))))
+    if decided and kind != "decision":
+        raise CaptureError("--decided belongs to the decision "
+                           "kind only")
+    if tags and kind != "memo":
+        raise CaptureError("--tags belongs to the memo kind "
+                           "only (tags are a memo's only "
+                           "structure)")
+    clean_tags = []
+    for tag in tags or []:
+        for piece in str(tag).split(","):
+            piece = piece.strip().lower().lstrip("#")
+            if not piece:
+                continue
+            if not re.match(r"^[a-z0-9][a-z0-9-]*$", piece):
+                raise CaptureError(
+                    "memo tag %r is not a slug tag" % piece)
+            if piece not in clean_tags:
+                clean_tags.append(piece)
+    if decided:
+        try:
+            _date.fromisoformat(decided)
+        except ValueError:
+            raise CaptureError("--decided must be YYYY-MM-DD, "
+                               "got %r" % decided)
+    if not title or not title.strip():
+        raise CaptureError("a capture needs a --title")
+    spec = KINDS[kind]
+    template_path = root / TEMPLATE_DIR / spec["template"]
+    if not template_path.exists():
+        raise CaptureError("capture template missing: %s"
+                           % template_path)
+    now = now or datetime.now().astimezone()
+    values = {
+        "timestamp": _timestamp(now),
+        "date": now.strftime("%Y-%m-%d"),
+        "title": title.strip().replace('"', "'"),
+        "by": by,
+        "kind": kind,
+        "destination": spec["destination"],
+        "provenance": provenance,
+        "decided": decided,
+        "tags": "[" + ", ".join(clean_tags) + "]",
+    }
+    return expand(template_path.read_text(encoding="utf-8"),
+                  values)
+
+
+def new_capture(kind, title, by="agent", provenance=None,
+                decided=None, tags=None, file=None, now=None,
+                root=ROOT):
+    """Render a capture draft into staging/captures/ and return
+    its repo-relative path. Refuses anything that would write
+    outside staging/captures/."""
+    now = now or datetime.now().astimezone()
+    text = render(kind, title, tags=tags, by=by,
+                  provenance=provenance, decided=decided,
+                  now=now, root=root)
+    # W1.9 dedupe (text-as-identity): the filename guard
+    # below only catches a same-day re-render under the same
+    # name. A re-capture of the same text on another day —
+    # or under another --file — is the same capture: refuse
+    # it with the surviving draft named, and log the
+    # decision. A collision (same fingerprint, different
+    # commentary on both sides) is logged and the write
+    # proceeds: both copies kept, nothing lost.
+    out_dir = root / CAPTURE_DIR
+    if out_dir.is_dir():
+        new_payload = wiki_dedupe.strip_frontmatter(text)
+        for prior in sorted(out_dir.glob("*.md")):
+            verdict = wiki_dedupe.decide(
+                wiki_dedupe.strip_frontmatter(
+                    prior.read_text(encoding="utf-8")),
+                new_payload)
+            if verdict["outcome"] == "distinct":
+                continue
+            survivor = str(CAPTURE_DIR / prior.name)
+            wiki_dedupe.log_decision(root, {
+                "door": "capture",
+                "outcome": verdict["outcome"],
+                "action": ("duplicate-refused"
+                           if verdict["outcome"] in
+                           ("exact-duplicate", "existing-wins")
+                           else "collision-kept-both"),
+                "survivor": survivor,
+                "incoming": "capture %s %r" % (kind, title),
+                "fingerprint": verdict["fingerprint"],
+                "backup": None,
+                "at": now.strftime("%Y-%m-%d")})
+            if verdict["outcome"] in ("exact-duplicate",
+                                       "existing-wins"):
+                raise CaptureError(
+                    "duplicate capture: this text already "
+                    "stands staged at %s (dedupe: "
+                    "text-as-identity — the earlier draft "
+                    "stands; the decision is logged)" % survivor)
+            break  # collision logged; the write proceeds
+    if file:
+        if Path(file).is_absolute() or "/" in file \
+                or "\\" in file or ".." in file:
+            raise CaptureError(
+                "--file takes a bare file name; drafts live "
+                "flat in staging/captures/ — got %r" % file)
+        name = file if file.endswith(".md") else file + ".md"
+    else:
+        name = "%s-%s-%s.md" % (now.strftime("%Y-%m-%d"), kind,
+                                slugify(title))
+    out_dir = root / CAPTURE_DIR
+    out = out_dir / name
+    if out.exists():
+        raise CaptureError("capture draft already exists: %s "
+                           "(choose another --file)"
+                           % (CAPTURE_DIR / name))
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out.write_text(text, encoding="utf-8")
+    return str(CAPTURE_DIR / name)
+
+
+def list_kinds():
+    lines = []
+    for kind in sorted(KINDS):
+        spec = KINDS[kind]
+        lines.append("%s" % kind)
+        lines.append("  destination: %s" % spec["destination"])
+        lines.append("  when: %s" % spec["when"])
+    return "\n".join(lines)
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--root", type=Path, default=ROOT)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("list")
+    p = sub.add_parser("new")
+    p.add_argument("kind")
+    p.add_argument("--title", required=True)
+    p.add_argument("--by", default="agent")
+    p.add_argument("--provenance")
+    p.add_argument("--decided")
+    p.add_argument("--tags",
+                   help="memo kind only: comma-separated slug "
+                        "tags — a memo's only structure")
+    p.add_argument("--file")
+    args = ap.parse_args(argv)
+    try:
+        if args.cmd == "list":
+            print(list_kinds())
+        else:
+            tags = args.tags.split(",") if args.tags else None
+            rel = new_capture(args.kind, args.title, by=args.by,
+                              provenance=args.provenance,
+                              decided=args.decided, tags=tags,
+                              file=args.file, root=args.root)
+            print("capture draft: %s" % rel)
+            print("staged only — nothing was filed; the "
+                  "sensitivity TODO in its frontmatter must be "
+                  "answered before it can be ingested.")
+    except CaptureError as exc:
+        print("refused: %s" % exc, file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
