@@ -1,0 +1,3 @@
+{"id": "LM-T1", "ability": "extraction", "sessions": [{"id": "s1", "timestamp": "2026-01-03", "turns": ["The harbour fee is ten coins for small boats."]}], "question": "what is the harbour fee", "expected": "harbour fee ten coins"}
+{"id": "LM-T2", "ability": "knowledge-update", "sessions": [{"id": "s1", "timestamp": "2026-01-03", "turns": ["The harbour fee is ten coins."]}, {"id": "s2", "timestamp": "2026-02-03", "turns": ["The harbour fee is twelve coins now."]}], "question": "what is the harbour fee", "expected": "harbour fee twelve coins"}
+{"id": "LM-T3", "ability": "abstention", "sessions": [{"id": "s1", "timestamp": "2026-01-03", "turns": ["The harbour fee is ten coins."]}], "question": "what is the mayor's favourite song", "expected": null}

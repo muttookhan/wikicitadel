@@ -1,0 +1,663 @@
+{
+ "as_of": "2026-10-22",
+ "cadence": {
+  "default_days": 90,
+  "intervals_days": {
+   "concept": 180,
+   "entity": 90,
+   "query": 365,
+   "source": 180,
+   "synthesis": 30
+  },
+  "status": "PROPOSED — not in AGENTS.md; the adopted clocks (evidence TTL, FSRS re-verification, owner attestation horizons) take precedence where a page carries them"
+ },
+ "census": {
+  "by_declared": {
+   "(absent)": 39
+  },
+  "by_effective": {
+   "undeclared": 39
+  },
+  "findings": [],
+  "population": {
+   "carrying_review_state": 0,
+   "in_population": 39,
+   "retired_excluded": 1,
+   "scanned": 40,
+   "with_findings": 0
+  }
+ },
+ "history": {
+  "declared_page_reviews": [],
+  "owner_attestations": [
+   {
+    "page": "wiki/entities/owner.md",
+    "state": "current",
+    "verified_by": "owner",
+    "verified_until": "2027-01-15"
+   }
+  ],
+  "reverify_events": []
+ },
+ "in_review": [],
+ "kind": "review-center",
+ "ordering": "priority band (P1 attestation-expired / reverify-overdue / pending-review-open / review-record-invalid; P2 evidence-due / source-changed / review-state-stale; P3 the rest), then most-overdue first (undated last), then page path",
+ "stats": {
+  "by_reason": {
+   "cadence-stale": 16,
+   "orphaned-from-index": 1,
+   "reverify-overdue": 9,
+   "source-changed": 10
+  },
+  "in_review": 0,
+  "worklist": 18
+ },
+ "tool": "scripts/wiki_review_state.py",
+ "worklist": [
+  {
+   "claim": {
+    "as_of": "2026-01-15",
+    "claim": "Dieses Wiki existiert, um den Kontext des Agenten sichtbar in versionierten Dateien zu halten, statt im eigenen Gedächtnis des Agenten.",
+    "outcome_n": null,
+    "outcome_status": "candidate — no outcomes recorded"
+   },
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 273,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/i18n/de/overview.md",
+   "page_id": "overview",
+   "priority": 1,
+   "reasons": [
+    {
+     "days_overdue": 273,
+     "detail": "claim last verified never (as_of anchor); re-check fell due 2026-01-22",
+     "due": "2026-01-22",
+     "reason": "reverify-overdue"
+    },
+    {
+     "days_overdue": 2,
+     "detail": "cited source raw/sources/founding-note.md last changed 2026-10-20, after the page's updated 2026-01-15 — the page may rest on a superseded reading",
+     "due": "2026-10-20",
+     "reason": "source-changed"
+    },
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [
+    "raw/sources/founding-note.md"
+   ],
+   "title": "Überblick",
+   "type": "synthesis"
+  },
+  {
+   "claim": {
+    "as_of": "2026-01-15",
+    "claim": "決定が一括指示の対象になることは決してない。すべての決定には所有者自身の承認が必要である。",
+    "outcome_n": null,
+    "outcome_status": "candidate — no outcomes recorded"
+   },
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 273,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/i18n/ja/decision-register.md",
+   "page_id": "decision-register",
+   "priority": 1,
+   "reasons": [
+    {
+     "days_overdue": 273,
+     "detail": "claim last verified never (as_of anchor); re-check fell due 2026-01-22",
+     "due": "2026-01-22",
+     "reason": "reverify-overdue"
+    },
+    {
+     "days_overdue": 2,
+     "detail": "cited source raw/sources/founding-note.md last changed 2026-10-20, after the page's updated 2026-01-15 — the page may rest on a superseded reading",
+     "due": "2026-10-20",
+     "reason": "source-changed"
+    },
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [
+    "raw/sources/founding-note.md"
+   ],
+   "title": "決定レジスタ",
+   "type": "synthesis"
+  },
+  {
+   "claim": {
+    "as_of": "2026-01-15",
+    "claim": "このウィキは、エージェント自身の記憶の中ではなく、版管理されたファイルの中に、エージェントの文脈を目に見える形で保持するために存在する。",
+    "outcome_n": null,
+    "outcome_status": "candidate — no outcomes recorded"
+   },
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 273,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/i18n/ja/overview.md",
+   "page_id": "overview",
+   "priority": 1,
+   "reasons": [
+    {
+     "days_overdue": 273,
+     "detail": "claim last verified never (as_of anchor); re-check fell due 2026-01-22",
+     "due": "2026-01-22",
+     "reason": "reverify-overdue"
+    },
+    {
+     "days_overdue": 2,
+     "detail": "cited source raw/sources/founding-note.md last changed 2026-10-20, after the page's updated 2026-01-15 — the page may rest on a superseded reading",
+     "due": "2026-10-20",
+     "reason": "source-changed"
+    },
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [
+    "raw/sources/founding-note.md"
+   ],
+   "title": "概要",
+   "type": "synthesis"
+  },
+  {
+   "claim": {
+    "as_of": "2026-01-15",
+    "claim": "결정은 포괄 지시의 대상이 되는 일이 결코 없다. 모든 결정에는 소유자 자신의 승인이 필요하다.",
+    "outcome_n": null,
+    "outcome_status": "candidate — no outcomes recorded"
+   },
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 273,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/i18n/ko/decision-register.md",
+   "page_id": "decision-register",
+   "priority": 1,
+   "reasons": [
+    {
+     "days_overdue": 273,
+     "detail": "claim last verified never (as_of anchor); re-check fell due 2026-01-22",
+     "due": "2026-01-22",
+     "reason": "reverify-overdue"
+    },
+    {
+     "days_overdue": 2,
+     "detail": "cited source raw/sources/founding-note.md last changed 2026-10-20, after the page's updated 2026-01-15 — the page may rest on a superseded reading",
+     "due": "2026-10-20",
+     "reason": "source-changed"
+    },
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [
+    "raw/sources/founding-note.md"
+   ],
+   "title": "결정 등록부",
+   "type": "synthesis"
+  },
+  {
+   "claim": {
+    "as_of": "2026-01-15",
+    "claim": "이 위키는 에이전트 자신의 기억이 아니라, 버전이 관리되는 파일 안에 에이전트의 맥락을 눈에 보이게 보관하기 위해 존재한다.",
+    "outcome_n": null,
+    "outcome_status": "candidate — no outcomes recorded"
+   },
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 273,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/i18n/ko/overview.md",
+   "page_id": "overview",
+   "priority": 1,
+   "reasons": [
+    {
+     "days_overdue": 273,
+     "detail": "claim last verified never (as_of anchor); re-check fell due 2026-01-22",
+     "due": "2026-01-22",
+     "reason": "reverify-overdue"
+    },
+    {
+     "days_overdue": 2,
+     "detail": "cited source raw/sources/founding-note.md last changed 2026-10-20, after the page's updated 2026-01-15 — the page may rest on a superseded reading",
+     "due": "2026-10-20",
+     "reason": "source-changed"
+    },
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [
+    "raw/sources/founding-note.md"
+   ],
+   "title": "개요",
+   "type": "synthesis"
+  },
+  {
+   "claim": {
+    "as_of": "2026-01-15",
+    "claim": "本维基的存在，是为了把智能体的上下文以可见的方式保存在受版本管理的文件中，而不是保存在智能体自身的记忆里。",
+    "outcome_n": null,
+    "outcome_status": "candidate — no outcomes recorded"
+   },
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 273,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/i18n/zh/overview.md",
+   "page_id": "overview",
+   "priority": 1,
+   "reasons": [
+    {
+     "days_overdue": 273,
+     "detail": "claim last verified never (as_of anchor); re-check fell due 2026-01-22",
+     "due": "2026-01-22",
+     "reason": "reverify-overdue"
+    },
+    {
+     "days_overdue": 2,
+     "detail": "cited source raw/sources/founding-note.md last changed 2026-10-20, after the page's updated 2026-01-15 — the page may rest on a superseded reading",
+     "due": "2026-10-20",
+     "reason": "source-changed"
+    },
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [
+    "raw/sources/founding-note.md"
+   ],
+   "title": "概述",
+   "type": "synthesis"
+  },
+  {
+   "claim": {
+    "as_of": "2026-01-15",
+    "claim": "This wiki exists to hold the agent's context visibly, in versioned files, rather than in the agent's own memory.",
+    "outcome_n": null,
+    "outcome_status": "candidate — no outcomes recorded"
+   },
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 273,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/overview.md",
+   "page_id": "overview",
+   "priority": 1,
+   "reasons": [
+    {
+     "days_overdue": 273,
+     "detail": "claim last verified never (as_of anchor); re-check fell due 2026-01-22",
+     "due": "2026-01-22",
+     "reason": "reverify-overdue"
+    },
+    {
+     "days_overdue": 2,
+     "detail": "cited source raw/sources/founding-note.md last changed 2026-10-20, after the page's updated 2026-01-15 — the page may rest on a superseded reading",
+     "due": "2026-10-20",
+     "reason": "source-changed"
+    },
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [
+    "raw/sources/founding-note.md"
+   ],
+   "title": "Overview",
+   "type": "synthesis"
+  },
+  {
+   "claim": {
+    "as_of": "2026-01-15",
+    "claim": "The founding note grants a blanket direction over work and reverses it for decisions in the same sitting.",
+    "outcome_n": null,
+    "outcome_status": "candidate — no outcomes recorded"
+   },
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 273,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 180d for type source",
+   "next_due_if_reviewed_today": "2027-04-20",
+   "page": "wiki/sources/founding-note.md",
+   "page_id": "founding-note",
+   "priority": 1,
+   "reasons": [
+    {
+     "days_overdue": 273,
+     "detail": "claim last verified never (as_of anchor); re-check fell due 2026-01-22",
+     "due": "2026-01-22",
+     "reason": "reverify-overdue"
+    },
+    {
+     "days_overdue": 2,
+     "detail": "cited source raw/sources/founding-note.md last changed 2026-10-20, after the page's updated 2026-01-15 — the page may rest on a superseded reading",
+     "due": "2026-10-20",
+     "reason": "source-changed"
+    },
+    {
+     "days_overdue": 100,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 180d interval for type source — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-07-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [
+    "raw/sources/founding-note.md"
+   ],
+   "title": "Founding note (source)",
+   "type": "source"
+  },
+  {
+   "claim": {
+    "as_of": "2026-01-15",
+    "claim": "Decisions are never covered by the blanket direction; every decision needs the owner's own approval.",
+    "outcome_n": null,
+    "outcome_status": "candidate — no outcomes recorded"
+   },
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 273,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/syntheses/decision-register.md",
+   "page_id": "decision-register",
+   "priority": 1,
+   "reasons": [
+    {
+     "days_overdue": 273,
+     "detail": "claim last verified never (as_of anchor); re-check fell due 2026-01-22",
+     "due": "2026-01-22",
+     "reason": "reverify-overdue"
+    },
+    {
+     "days_overdue": 2,
+     "detail": "cited source raw/sources/founding-note.md last changed 2026-10-20, after the page's updated 2026-01-15 — the page may rest on a superseded reading",
+     "due": "2026-10-20",
+     "reason": "source-changed"
+    },
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [
+    "raw/sources/founding-note.md"
+   ],
+   "title": "Decision register",
+   "type": "synthesis"
+  },
+  {
+   "claim": null,
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 2,
+   "never_reviewed": false,
+   "next_due_basis": "PROPOSED cadence 90d for type entity",
+   "next_due_if_reviewed_today": "2027-01-20",
+   "page": "wiki/entities/owner.md",
+   "page_id": "owner",
+   "priority": 2,
+   "reasons": [
+    {
+     "days_overdue": 2,
+     "detail": "cited source raw/sources/founding-note.md last changed 2026-10-20, after the page's updated 2026-01-15 — the page may rest on a superseded reading",
+     "due": "2026-10-20",
+     "reason": "source-changed"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [
+    "raw/sources/founding-note.md"
+   ],
+   "title": "The owner",
+   "type": "entity"
+  },
+  {
+   "claim": null,
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 250,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/ideas.md",
+   "page_id": "ideas",
+   "priority": 3,
+   "reasons": [
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [],
+   "title": "Ideas",
+   "type": "synthesis"
+  },
+  {
+   "claim": null,
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 250,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/rules/curation-workarounds.md",
+   "page_id": "curation-workarounds",
+   "priority": 3,
+   "reasons": [
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [],
+   "title": "Curation activities and workarounds register — the rules page",
+   "type": "synthesis"
+  },
+  {
+   "claim": null,
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 250,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/rules/evidence-ttl.md",
+   "page_id": "evidence-ttl",
+   "priority": 3,
+   "reasons": [
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [],
+   "title": "Evidence TTL — the rules page",
+   "type": "synthesis"
+  },
+  {
+   "claim": null,
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 250,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/rules/notices.md",
+   "page_id": "notices",
+   "priority": 3,
+   "reasons": [
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [],
+   "title": "Notices — the rules page",
+   "type": "synthesis"
+  },
+  {
+   "claim": null,
+   "declared_state": null,
+   "last_change": "2026-01-15",
+   "max_days_overdue": 250,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 30d for type synthesis",
+   "next_due_if_reviewed_today": "2026-11-21",
+   "page": "wiki/rules/share-publish-cite-ready.md",
+   "page_id": "share-publish-cite-ready",
+   "priority": 3,
+   "reasons": [
+    {
+     "days_overdue": 250,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-15 (frontmatter `updated`) is 280d ago, beyond the proposed 30d interval for type synthesis — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-02-14",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [],
+   "title": "Share, publish, cite-ready — a controlled vocabulary",
+   "type": "synthesis"
+  },
+  {
+   "claim": null,
+   "declared_state": null,
+   "last_change": "2026-01-16",
+   "max_days_overdue": 99,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 180d for type concept",
+   "next_due_if_reviewed_today": "2027-04-20",
+   "page": "wiki/concepts/demo-guide-ja.md",
+   "page_id": "demo-guide-ja",
+   "priority": 3,
+   "reasons": [
+    {
+     "days_overdue": 99,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-16 (frontmatter `tended`) is 279d ago, beyond the proposed 180d interval for type concept — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-07-15",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [],
+   "title": "デモガイド（日本語）",
+   "type": "concept"
+  },
+  {
+   "claim": null,
+   "declared_state": null,
+   "last_change": "2026-01-16",
+   "max_days_overdue": 99,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 180d for type concept",
+   "next_due_if_reviewed_today": "2027-04-20",
+   "page": "wiki/concepts/demo-guide-ko.md",
+   "page_id": "demo-guide-ko",
+   "priority": 3,
+   "reasons": [
+    {
+     "days_overdue": 99,
+     "detail": "no review event on record (no owner attestation, no re-verification); last substantive change 2026-01-16 (frontmatter `tended`) is 279d ago, beyond the proposed 180d interval for type concept — queued by last substantive change, which is an edit, not a review",
+     "due": "2026-07-15",
+     "reason": "cadence-stale"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [],
+   "title": "데모 가이드 (한국어)",
+   "type": "concept"
+  },
+  {
+   "claim": null,
+   "declared_state": null,
+   "last_change": "2026-10-20",
+   "max_days_overdue": null,
+   "never_reviewed": true,
+   "next_due_basis": "PROPOSED cadence 180d for type concept",
+   "next_due_if_reviewed_today": "2027-04-20",
+   "page": "wiki/concepts/citation-chain.md",
+   "page_id": "citation-chain",
+   "priority": 3,
+   "reasons": [
+    {
+     "days_overdue": null,
+     "detail": "page is not catalogued in wiki/index.md",
+     "due": null,
+     "reason": "orphaned-from-index"
+    }
+   ],
+   "review_state": "undeclared",
+   "sources": [],
+   "title": "Citation chain",
+   "type": "concept"
+  }
+ ]
+}

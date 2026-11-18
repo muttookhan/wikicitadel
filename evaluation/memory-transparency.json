@@ -1,0 +1,319 @@
+{
+ "ask_events": [],
+ "claim_history": {
+  "wiki/i18n/de/overview.md": [
+   {
+    "contradicts": 0,
+    "date": "2026-10-21",
+    "event": "indexed",
+    "hash": "a796ca8dec647036",
+    "stated": "2026-01-15",
+    "superseded": false,
+    "supports": 0,
+    "verified_n": 0
+   }
+  ],
+  "wiki/i18n/ja/decision-register.md": [
+   {
+    "contradicts": 0,
+    "date": "2026-10-21",
+    "event": "indexed",
+    "hash": "2fa13739110fb9d2",
+    "stated": "2026-01-15",
+    "superseded": false,
+    "supports": 0,
+    "verified_n": 0
+   }
+  ],
+  "wiki/i18n/ja/overview.md": [
+   {
+    "contradicts": 0,
+    "date": "2026-10-21",
+    "event": "indexed",
+    "hash": "b451d0636d7e5da2",
+    "stated": "2026-01-15",
+    "superseded": false,
+    "supports": 0,
+    "verified_n": 0
+   }
+  ],
+  "wiki/i18n/ko/decision-register.md": [
+   {
+    "contradicts": 0,
+    "date": "2026-10-21",
+    "event": "indexed",
+    "hash": "c942c3b30fef041c",
+    "stated": "2026-01-15",
+    "superseded": false,
+    "supports": 0,
+    "verified_n": 0
+   }
+  ],
+  "wiki/i18n/ko/overview.md": [
+   {
+    "contradicts": 0,
+    "date": "2026-10-21",
+    "event": "indexed",
+    "hash": "1cff9f7e2b968556",
+    "stated": "2026-01-15",
+    "superseded": false,
+    "supports": 0,
+    "verified_n": 0
+   }
+  ],
+  "wiki/i18n/zh/overview.md": [
+   {
+    "contradicts": 0,
+    "date": "2026-10-21",
+    "event": "indexed",
+    "hash": "fe9773bc50e97abf",
+    "stated": "2026-01-15",
+    "superseded": false,
+    "supports": 0,
+    "verified_n": 0
+   }
+  ],
+  "wiki/overview.md": [
+   {
+    "contradicts": 0,
+    "date": "2026-10-21",
+    "event": "indexed",
+    "hash": "28eb6110fc3463d6",
+    "stated": "2026-01-15",
+    "superseded": false,
+    "supports": 0,
+    "verified_n": 0
+   }
+  ],
+  "wiki/sources/founding-note.md": [
+   {
+    "contradicts": 0,
+    "date": "2026-10-21",
+    "event": "indexed",
+    "hash": "00e455f5cc11cfd1",
+    "stated": "2026-01-15",
+    "superseded": false,
+    "supports": 0,
+    "verified_n": 0
+   }
+  ],
+  "wiki/syntheses/decision-register.md": [
+   {
+    "contradicts": 0,
+    "date": "2026-10-21",
+    "event": "indexed",
+    "hash": "51f225d9d312c517",
+    "stated": "2026-01-15",
+    "superseded": false,
+    "supports": 0,
+    "verified_n": 0
+   }
+  ]
+ },
+ "claims": [
+  {
+   "claim_id": "wiki/i18n/de/overview.md",
+   "contradicts": 0,
+   "hash": "a796ca8dec647036",
+   "indexed_on": "2026-10-21",
+   "stated": "2026-01-15",
+   "superseded": false,
+   "supports": 0,
+   "text": "Dieses Wiki existiert, um den Kontext des Agenten sichtbar in versionierten Dateien zu halten, statt im eigenen Gedächtnis des Agenten.",
+   "verified_n": 0
+  },
+  {
+   "claim_id": "wiki/i18n/ja/decision-register.md",
+   "contradicts": 0,
+   "hash": "2fa13739110fb9d2",
+   "indexed_on": "2026-10-21",
+   "stated": "2026-01-15",
+   "superseded": false,
+   "supports": 0,
+   "text": "決定が一括指示の対象になることは決してない。すべての決定には所有者自身の承認が必要である。",
+   "verified_n": 0
+  },
+  {
+   "claim_id": "wiki/i18n/ja/overview.md",
+   "contradicts": 0,
+   "hash": "b451d0636d7e5da2",
+   "indexed_on": "2026-10-21",
+   "stated": "2026-01-15",
+   "superseded": false,
+   "supports": 0,
+   "text": "このウィキは、エージェント自身の記憶の中ではなく、版管理されたファイルの中に、エージェントの文脈を目に見える形で保持するために存在する。",
+   "verified_n": 0
+  },
+  {
+   "claim_id": "wiki/i18n/ko/decision-register.md",
+   "contradicts": 0,
+   "hash": "c942c3b30fef041c",
+   "indexed_on": "2026-10-21",
+   "stated": "2026-01-15",
+   "superseded": false,
+   "supports": 0,
+   "text": "결정은 포괄 지시의 대상이 되는 일이 결코 없다. 모든 결정에는 소유자 자신의 승인이 필요하다.",
+   "verified_n": 0
+  },
+  {
+   "claim_id": "wiki/i18n/ko/overview.md",
+   "contradicts": 0,
+   "hash": "1cff9f7e2b968556",
+   "indexed_on": "2026-10-21",
+   "stated": "2026-01-15",
+   "superseded": false,
+   "supports": 0,
+   "text": "이 위키는 에이전트 자신의 기억이 아니라, 버전이 관리되는 파일 안에 에이전트의 맥락을 눈에 보이게 보관하기 위해 존재한다.",
+   "verified_n": 0
+  },
+  {
+   "claim_id": "wiki/i18n/zh/overview.md",
+   "contradicts": 0,
+   "hash": "fe9773bc50e97abf",
+   "indexed_on": "2026-10-21",
+   "stated": "2026-01-15",
+   "superseded": false,
+   "supports": 0,
+   "text": "本维基的存在，是为了把智能体的上下文以可见的方式保存在受版本管理的文件中，而不是保存在智能体自身的记忆里。",
+   "verified_n": 0
+  },
+  {
+   "claim_id": "wiki/overview.md",
+   "contradicts": 0,
+   "hash": "28eb6110fc3463d6",
+   "indexed_on": "2026-10-21",
+   "stated": "2026-01-15",
+   "superseded": false,
+   "supports": 0,
+   "text": "This wiki exists to hold the agent's context visibly, in versioned files, rather than in the agent's own memory.",
+   "verified_n": 0
+  },
+  {
+   "claim_id": "wiki/sources/founding-note.md",
+   "contradicts": 0,
+   "hash": "00e455f5cc11cfd1",
+   "indexed_on": "2026-10-21",
+   "stated": "2026-01-15",
+   "superseded": false,
+   "supports": 0,
+   "text": "The founding note grants a blanket direction over work and reverses it for decisions in the same sitting.",
+   "verified_n": 0
+  },
+  {
+   "claim_id": "wiki/syntheses/decision-register.md",
+   "contradicts": 0,
+   "hash": "51f225d9d312c517",
+   "indexed_on": "2026-10-21",
+   "stated": "2026-01-15",
+   "superseded": false,
+   "supports": 0,
+   "text": "Decisions are never covered by the blanket direction; every decision needs the owner's own approval.",
+   "verified_n": 0
+  }
+ ],
+ "connections": [
+  {
+   "ask_event_ids": [],
+   "cited_by_pages": [
+    "wiki/concepts/demo-guide-ja.md",
+    "wiki/concepts/demo-guide-ko.md",
+    "wiki/index.md",
+    "wiki/log.md",
+    "wiki/sources/founding-note.md"
+   ],
+   "claim_id": "wiki/i18n/de/overview.md",
+   "contradicts": 0,
+   "page": "wiki/i18n/de/overview.md",
+   "supports": 0
+  },
+  {
+   "ask_event_ids": [],
+   "cited_by_pages": [
+    "wiki/i18n/de/overview.md",
+    "wiki/i18n/ja/overview.md",
+    "wiki/i18n/ko/overview.md",
+    "wiki/i18n/zh/overview.md",
+    "wiki/index.md",
+    "wiki/log.md",
+    "wiki/overview.md",
+    "wiki/sources/founding-note.md"
+   ],
+   "claim_id": "wiki/i18n/ja/decision-register.md",
+   "contradicts": 0,
+   "page": "wiki/i18n/ja/decision-register.md",
+   "supports": 0
+  },
+  {
+   "ask_event_ids": [],
+   "cited_by_pages": [],
+   "claim_id": "wiki/i18n/ja/overview.md",
+   "contradicts": 0,
+   "page": "wiki/i18n/ja/overview.md",
+   "supports": 0
+  },
+  {
+   "ask_event_ids": [],
+   "cited_by_pages": [],
+   "claim_id": "wiki/i18n/ko/decision-register.md",
+   "contradicts": 0,
+   "page": "wiki/i18n/ko/decision-register.md",
+   "supports": 0
+  },
+  {
+   "ask_event_ids": [],
+   "cited_by_pages": [],
+   "claim_id": "wiki/i18n/ko/overview.md",
+   "contradicts": 0,
+   "page": "wiki/i18n/ko/overview.md",
+   "supports": 0
+  },
+  {
+   "ask_event_ids": [],
+   "cited_by_pages": [],
+   "claim_id": "wiki/i18n/zh/overview.md",
+   "contradicts": 0,
+   "page": "wiki/i18n/zh/overview.md",
+   "supports": 0
+  },
+  {
+   "ask_event_ids": [],
+   "cited_by_pages": [],
+   "claim_id": "wiki/overview.md",
+   "contradicts": 0,
+   "page": "wiki/overview.md",
+   "supports": 0
+  },
+  {
+   "ask_event_ids": [],
+   "cited_by_pages": [
+    "wiki/i18n/de/overview.md",
+    "wiki/i18n/ja/overview.md",
+    "wiki/i18n/ko/overview.md",
+    "wiki/i18n/zh/overview.md",
+    "wiki/index.md",
+    "wiki/log.md",
+    "wiki/overview.md"
+   ],
+   "claim_id": "wiki/sources/founding-note.md",
+   "contradicts": 0,
+   "page": "wiki/sources/founding-note.md",
+   "supports": 0
+  },
+  {
+   "ask_event_ids": [],
+   "cited_by_pages": [],
+   "claim_id": "wiki/syntheses/decision-register.md",
+   "contradicts": 0,
+   "page": "wiki/syntheses/decision-register.md",
+   "supports": 0
+  }
+ ],
+ "kind": "memory-transparency",
+ "sources": {
+  "ask_records": 0,
+  "claim_index_records": 9,
+  "claims": 9,
+  "wiki_pages_scanned": 29
+ },
+ "version": 1
+}

@@ -1,0 +1,342 @@
+{
+ "dimensions": [
+  {
+   "category": "accessibility",
+   "dimension": "availability"
+  },
+  {
+   "category": "accessibility",
+   "dimension": "licensing"
+  },
+  {
+   "category": "accessibility",
+   "dimension": "interlinking"
+  },
+  {
+   "category": "accessibility",
+   "dimension": "security"
+  },
+  {
+   "category": "accessibility",
+   "dimension": "performance"
+  },
+  {
+   "category": "intrinsic",
+   "dimension": "accuracy"
+  },
+  {
+   "category": "intrinsic",
+   "dimension": "consistency"
+  },
+  {
+   "category": "intrinsic",
+   "dimension": "conciseness"
+  },
+  {
+   "category": "trust",
+   "dimension": "reputation"
+  },
+  {
+   "category": "trust",
+   "dimension": "believability"
+  },
+  {
+   "category": "trust",
+   "dimension": "verifiability"
+  },
+  {
+   "category": "trust",
+   "dimension": "objectivity"
+  },
+  {
+   "category": "dataset-dynamicity",
+   "dimension": "currency"
+  },
+  {
+   "category": "dataset-dynamicity",
+   "dimension": "volatility"
+  },
+  {
+   "category": "dataset-dynamicity",
+   "dimension": "timeliness"
+  },
+  {
+   "category": "contextual",
+   "dimension": "completeness"
+  },
+  {
+   "category": "contextual",
+   "dimension": "amount-of-data"
+  },
+  {
+   "category": "contextual",
+   "dimension": "relevancy"
+  },
+  {
+   "category": "representational",
+   "dimension": "representational-conciseness"
+  },
+  {
+   "category": "representational",
+   "dimension": "representational-consistency"
+  },
+  {
+   "category": "representational",
+   "dimension": "understandability"
+  },
+  {
+   "category": "representational",
+   "dimension": "interpretability"
+  },
+  {
+   "category": "representational",
+   "dimension": "versatility"
+  }
+ ],
+ "kind": "zaveri-coverage-register",
+ "note": "STATIC TABLE, NO ENGINE: this register maps existing checks to quality dimensions and lists uncovered dimensions as gaps. It runs no check, measures nothing, and a 'covered' row claims only that a named existing check addresses the dimension — never that the corpus passes it. Checked for completeness and honesty by scripts/wiki_zaveri_coverage.py check (every dimension accounted for exactly once; every named check a scripts/ file that exists in this tree; gap rows name no checks).",
+ "recorded": "2026-10-21",
+ "recorded_by": "Marathon R12 lane BA (ideas board line 181, Round 10 RA)",
+ "rows": [
+  {
+   "basis": "Link health resolves every internal wikilink target and the source-hash check reports cited local sources CHANGED or MISSING — availability of what is inside the tree.",
+   "category": "accessibility",
+   "checks": [
+    "scripts/wiki_link_health.py",
+    "scripts/wiki_source_hash.py"
+   ],
+   "coverage": "partial",
+   "dimension": "availability",
+   "gap_note": "Live availability of external cited URLs and of any published endpoint is not measured by these checks (the R12 cited-source probe records external status for human decision; it is a register, not an availability gate)."
+  },
+  {
+   "basis": "Every compiled page carries (or is reported as missing) a reuse statement from the closed vocabulary in evaluation/reuse-vocabulary.json — the per-page licence/reuse indication, human- and machine-readable.",
+   "category": "accessibility",
+   "checks": [
+    "scripts/wiki_reuse.py"
+   ],
+   "coverage": "covered",
+   "dimension": "licensing",
+   "gap_note": ""
+  },
+  {
+   "basis": "Link health computes resolved/broken inter-page links and orphan status over the compiled layer; link refs census the link graph's references.",
+   "category": "accessibility",
+   "checks": [
+    "scripts/wiki_link_health.py",
+    "scripts/wiki_link_refs.py"
+   ],
+   "coverage": "covered",
+   "dimension": "interlinking",
+   "gap_note": ""
+  },
+  {
+   "basis": "The profile's sensitivity check flags compiled pages citing sources whose sensitivity class forbids the citation — handling classes are enforced as a report.",
+   "category": "accessibility",
+   "checks": [
+    "scripts/wiki_profile.py"
+   ],
+   "coverage": "partial",
+   "dimension": "security",
+   "gap_note": "No check measures access restriction, transport security or protection against alteration of the published corpus; sensitivity classes govern handling, not access enforcement."
+  },
+  {
+   "basis": "No script in this tree measures access latency, throughput or scalability of the data itself; the census of scripts/ for such a check is the basis of this gap.",
+   "category": "accessibility",
+   "checks": [],
+   "coverage": "gap",
+   "dimension": "performance",
+   "gap_note": "No check measures data-access latency, throughput or scalability in Zaveri's sense. The benchmark machinery (scripts/wiki_benchmark.py, scripts/wiki_beir_eval.py) measures retrieval/answer quality on eval sets, which is not this dimension, so it is not claimed here."
+  },
+  {
+   "basis": "Factcheck and FactScore-style checks test stated facts on pages against their cited sources — correctness of representation of the sourced world.",
+   "category": "intrinsic",
+   "checks": [
+    "scripts/wiki_factcheck.py",
+    "scripts/wiki_factscore_check.py"
+   ],
+   "coverage": "covered",
+   "dimension": "accuracy",
+   "gap_note": ""
+  },
+  {
+   "basis": "The validator enforces the corpus's formal conventions (no internal contradiction of the schema), and the conflict slice scores whether real contradictions between pages are identified and surfaced, never silently smoothed.",
+   "category": "intrinsic",
+   "checks": [
+    "scripts/wiki_validate.py",
+    "scripts/wiki_conflict_score.py"
+   ],
+   "coverage": "covered",
+   "dimension": "consistency",
+   "gap_note": ""
+  },
+  {
+   "basis": "Version stacks report near-duplicate raw files stacked as Latest/Similar/Identical/Superseded — redundancy at the file level is surfaced.",
+   "category": "intrinsic",
+   "checks": [
+    "scripts/wiki_version_stack.py"
+   ],
+   "coverage": "partial",
+   "dimension": "conciseness",
+   "gap_note": "No check measures schema-level (intensional) redundancy or duplicate entities/statements inside the compiled layer; near-duplicate files are the only redundancy measured."
+  },
+  {
+   "basis": "Sources are graded on the integrity axis only on cited events on this wiki's own record — a standing earned from what happened here, which is the local form of reputation.",
+   "category": "trust",
+   "checks": [
+    "scripts/wiki_source_grades.py"
+   ],
+   "coverage": "partial",
+   "dimension": "reputation",
+   "gap_note": "Deliberately no reputation score and no external reputation signal: grades exist only on cited local events, so a source with no local record is ungraded, not reputable."
+  },
+  {
+   "basis": "The treatment register records how later records have treated cited claims (followed / questioned / caution / negative) and computes transitive weakening — the corpus's own grounds for believing or withholding belief.",
+   "category": "trust",
+   "checks": [
+    "scripts/wiki_treatment.py"
+   ],
+   "coverage": "partial",
+   "dimension": "believability",
+   "gap_note": "Believability as a reader's acceptance is not measured; the register records treatment events and standings, not whether any reader in fact believes a claim."
+  },
+  {
+   "basis": "The citation lockfile lets any consumer re-check a claim against the exact cited lines (dual-anchored), and signed checkpoints let a consumer verify the corpus state itself against a signature and external witness copies.",
+   "category": "trust",
+   "checks": [
+    "scripts/wiki_cite_lock.py",
+    "scripts/wiki_checkpoint.py"
+   ],
+   "coverage": "covered",
+   "dimension": "verifiability",
+   "gap_note": ""
+  },
+  {
+   "basis": "No script in this tree assesses bias or impartiality; the census of scripts/ for such a check is the basis of this gap.",
+   "category": "trust",
+   "checks": [],
+   "coverage": "gap",
+   "dimension": "objectivity",
+   "gap_note": "No check assesses bias, partiality or impartiality of a source or a page. Contradiction flagging (consistency) and source grading (reputation) are different dimensions and are not claimed as objectivity."
+  },
+  {
+   "basis": "Evidence carries as-of dates with TTLs and claims carry re-verification schedules computed from their own history — the age of the evidence behind a page is always computable.",
+   "category": "dataset-dynamicity",
+   "checks": [
+    "scripts/wiki_evidence_ttl.py",
+    "scripts/wiki_reverify.py"
+   ],
+   "coverage": "partial",
+   "dimension": "currency",
+   "gap_note": "Currency as promptness — how soon after a real-world change the wiki is updated — is not measured; these checks know the age of evidence, not the lag behind the world."
+  },
+  {
+   "basis": "No script in this tree measures change frequency or a validity interval of the data itself; the census of scripts/ for such a check is the basis of this gap.",
+   "category": "dataset-dynamicity",
+   "checks": [],
+   "coverage": "gap",
+   "dimension": "volatility",
+   "gap_note": "No check measures how frequently the underlying data changes or the interval for which it remains valid. Evidence TTLs are review clocks this wiki sets for itself, not observed volatility of the data, so they are not claimed here."
+  },
+  {
+   "basis": "Drift reports surface pages whose evidence or claims have gone stale, and expired evidence TTLs name what is due for refresh — lateness is surfaced on the record.",
+   "category": "dataset-dynamicity",
+   "checks": [
+    "scripts/wiki_drift.py",
+    "scripts/wiki_evidence_ttl.py"
+   ],
+   "coverage": "partial",
+   "dimension": "timeliness",
+   "gap_note": "Timeliness is surfaced after the fact as staleness findings; no check measures the time between a source changing and the wiki reflecting it."
+  },
+  {
+   "basis": "Automatic-track pages are held to completeness expectations (core frontmatter, tags, stage, work_type), the schema profile reports conformance per element, and the collections census accounts for every page in exactly one collection.",
+   "category": "contextual",
+   "checks": [
+    "scripts/wiki_quality_track.py",
+    "scripts/wiki_profile.py",
+    "scripts/wiki_collections.py"
+   ],
+   "coverage": "covered",
+   "dimension": "completeness",
+   "gap_note": ""
+  },
+  {
+   "basis": "No script in this tree judges whether a volume of data is appropriate for a task; the census of scripts/ for such a check is the basis of this gap.",
+   "category": "contextual",
+   "checks": [],
+   "coverage": "gap",
+   "dimension": "amount-of-data",
+   "gap_note": "Whether the volume of data is appropriate for a task is never judged. The collections census counts what exists; a count is not an appropriateness judgement, so no check is claimed."
+  },
+  {
+   "basis": "Retrieval evaluation scores whether the pages retrieved for a query are the relevant ones, on pinned eval sets — relevancy at the retrieval surface.",
+   "category": "contextual",
+   "checks": [
+    "scripts/wiki_beir_eval.py",
+    "scripts/wiki_benchmark.py"
+   ],
+   "coverage": "partial",
+   "dimension": "relevancy",
+   "gap_note": "Relevancy of the dataset itself to a task (as opposed to retrieved results to a query) is not assessed; eval-set relevance judgements do not generalise to the whole corpus."
+  },
+  {
+   "basis": "No script in this tree measures representation length or compactness; the census of scripts/ for such a check is the basis of this gap.",
+   "category": "representational",
+   "checks": [],
+   "coverage": "gap",
+   "dimension": "representational-conciseness",
+   "gap_note": "No check measures how concisely information is represented (representation length, compactness of identifiers or pages). The export-loss inventory counts what an export cannot carry, which is a different property and is not claimed here."
+  },
+  {
+   "basis": "The validator and the schema-profile conformance check hold every page to the same representation: the same frontmatter elements, vocabularies and formats across the corpus.",
+   "category": "representational",
+   "checks": [
+    "scripts/wiki_validate.py",
+    "scripts/wiki_profile.py"
+   ],
+   "coverage": "covered",
+   "dimension": "representational-consistency",
+   "gap_note": ""
+  },
+  {
+   "basis": "Lint lanes surface statement-level editorial markers and unbanded estimative language — places where a page's meaning is flagged as unclear or imprecisely stated.",
+   "category": "representational",
+   "checks": [
+    "scripts/wiki_lint_lanes.py"
+   ],
+   "coverage": "partial",
+   "dimension": "understandability",
+   "gap_note": "No readability or understandability measure exists; the lanes flag marked ambiguity and estimative misuse, not whether an unmarked page is in fact easy to understand."
+  },
+  {
+   "basis": "The schema profile states, per page class and element, what each element means and what values it may take, and records disagreements with the validator as open lines rather than hiding them.",
+   "category": "representational",
+   "checks": [
+    "scripts/wiki_profile.py"
+   ],
+   "coverage": "partial",
+   "dimension": "interpretability",
+   "gap_note": "Definitions exist for the schema's own elements; no check verifies that a given page's data can in fact be interpreted as intended by a reader or a machine meeting it cold."
+  },
+  {
+   "basis": "The corpus is renderable into other representations: the general export, the OKF export carrying labels and scope notes, and CSL citation export from the lockfile.",
+   "category": "representational",
+   "checks": [
+    "scripts/wiki_export.py",
+    "scripts/wiki_okf_export.py",
+    "scripts/wiki_csl_export.py"
+   ],
+   "coverage": "partial",
+   "dimension": "versatility",
+   "gap_note": "Versatility is provided at export time; the data itself is held in one representation (Markdown + frontmatter) and no check measures fitness across multiple data models at the source."
+  }
+ ],
+ "source": {
+  "authors": "Amrapali Zaveri, Anisa Rula, Andrea Maurino, Ricardo Pietrobon, Jens Lehmann, Sören Auer",
+  "note": "Dimension names and the six-group grouping are the paper's (its section 4: accessibility 5, intrinsic 3, trust 4, dataset dynamicity 3, contextual 3, representational 5 = 23 dimensions). Coverage judgements, bases and gap notes are this wiki's own, stated against checks present in this tree at the recorded date. Nothing else is taken from the paper.",
+  "title": "Quality Assessment for Linked Open Data: A Survey",
+  "venue": "Semantic Web 7(1), 2016"
+ },
+ "version": 1
+}

@@ -1,0 +1,46 @@
+{
+  "pattern": "DocETL decomposition + gleaning (Shankar et al., PVLDB 2025, CC BY 4.0) - re-implemented as deterministic machinery; see scripts/wiki_compile_decompose.py for what is machinery and what remains an operator/model act.",
+  "complexity_threshold": {
+    "lines": 400,
+    "chars": 20000,
+    "sections": 6,
+    "cite_markers": 25
+  },
+  "validation_prompts": {
+    "paper": [
+      "List every section heading of the source that the compiled page does not carry, in source order.",
+      "List every claim-level citation marker in the source whose target does not appear in the compiled page.",
+      "List every cross-reference (wikilink or named entity) in the source that the compiled page never mentions.",
+      "List every dated or numbered fact in the source that does not appear, in any form, in the compiled page.",
+      "List every caveat, condition or scope limit stated in the source that the compiled page drops."
+    ],
+    "repo": [
+      "List every top-level module or directory the source describes that the compiled page does not name.",
+      "List every citation marker in the source whose target does not appear in the compiled page.",
+      "List every component named in the source that the compiled page never mentions.",
+      "List every version, count or dated fact in the source missing from the compiled page.",
+      "List every stated limitation or known gap in the source that the compiled page drops."
+    ],
+    "transcript": [
+      "List every topic heading in the transcript that the compiled page does not carry.",
+      "List every citation marker in the transcript whose target does not appear in the compiled page.",
+      "List every speaker or participant named in the transcript that the compiled page never mentions.",
+      "List every decision, date or number stated in the transcript missing from the compiled page.",
+      "List every qualification or disagreement stated in the transcript that the compiled page smooths over."
+    ],
+    "filing": [
+      "List every section of the filing that the compiled page does not carry.",
+      "List every citation marker in the filing whose target does not appear in the compiled page.",
+      "List every proposal or request in the filing that the compiled page never mentions.",
+      "List every dated or numbered claim in the filing missing from the compiled page.",
+      "List every caveat or dissent in the filing that the compiled page drops."
+    ],
+    "generic": [
+      "List every section heading of the source that the compiled page does not carry, in source order.",
+      "List every citation marker in the source whose target does not appear in the compiled page.",
+      "List every cross-reference in the source that the compiled page never mentions.",
+      "List every dated or numbered fact in the source missing from the compiled page.",
+      "List every caveat, condition or scope limit in the source that the compiled page drops."
+    ]
+  }
+}

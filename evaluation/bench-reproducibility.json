@@ -1,0 +1,465 @@
+{
+  "kind": "bench-registry",
+  "version": 1,
+  "convention": {
+    "reproducibility_levels": [
+      "paper_only",
+      "data_public",
+      "official_script",
+      "smoke_tested",
+      "full_run"
+    ],
+    "placement": "Sidecar only (evaluation/bench-registry.json); existing benchmark/eval files are never rewritten to add the field.",
+    "null_means": "reproducibility: null records the record has not been graded; externally-sourced fields are their source trace or null (traced-or-null)."
+  },
+  "datasets": {
+    "agent-objects/demo-reader.agent.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "beir-tasks.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "bookmarks-register.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "canonical-names.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "citation-lockfile.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "claim-index.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "commonmark-conformance.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "compile-decompose.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "correction-outcomes.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "crud-lifecycle-tasks.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "decisions-register.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "entity-aliases.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "extended-questions.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "extraction-schema.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "feed-clips.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "golden-questions.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "halumem-ops-sample.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "importance.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "judge-calibration/judge-config.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "judge-calibration/labeled-examples.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "judge-lang-ab-fixtures.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "kopia-pilot-evidence.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "lit-ragbench-fixture.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "loadouts.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "longmem-fixtures.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "markdown-dialect.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "memory-transparency.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "mteb-tasks.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "native-eval-fixtures/annotations-a.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "native-eval-fixtures/annotations-b.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "native-eval-fixtures/set-ja.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "native-eval-fixtures/set-ko.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "notice-vocabulary.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "page-history.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "posq-slice.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "ragbench-row-schema.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "related-pages.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "relation-maps.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "results/repro-scale-2026-10-20.corpus-manifest.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "results/repro-scale-2026-10-20.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "results/repro-seed-2026-10-20.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "results/repro-seed-r2-2026-10-20.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "results/scale-bench.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "retraction-watch.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "retrieval-profiles/japanese-dual-track.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "retrieval-severance.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "reuse-vocabulary.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "source-catalog.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "source-manifest.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "source-record-schema.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "stale-context-bench.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "textlint-config.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "threat-register.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "treatment-register.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "typed-ir.json": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    },
+    "verification-status.jsonl": {
+      "reproducibility": null,
+      "source": null,
+      "upstream": null,
+      "upstream_url": null,
+      "paper": null,
+      "dataset_url": null
+    }
+  }
+}

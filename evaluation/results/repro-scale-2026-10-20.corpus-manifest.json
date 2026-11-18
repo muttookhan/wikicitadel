@@ -1,0 +1,18 @@
+{
+  "kind": "synthetic-bench-corpus",
+  "generator": "scripts/wiki_bench_synth.py",
+  "seed": 20261020,
+  "topics": [
+    "astronomy",
+    "botany",
+    "cooking",
+    "geology",
+    "music",
+    "sailing"
+  ],
+  "pages_per_topic": 8,
+  "corpus_docs": 48,
+  "questions_count": 12,
+  "questions_sha256": "766ae03c75f690ca72e1d2c7b972df9d832cc46fabd0e21ef5ca3247f529b06d",
+  "note": "Deterministic synthetic fixture corpus for the reproducible benchmark pack; not the real golden set."
+}

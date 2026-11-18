@@ -1,0 +1,17 @@
+{
+  "tool": "wiki_ghostcite fabricated-citation detection",
+  "generated": "2026-10-22",
+  "scope": "corpus",
+  "report_only": true,
+  "note": "Flags are findings for a human/agent to re-verify, never a rejection: a flagged citation is one whose locator, quote or source cannot exist as cited. Citations the citation lockfile verifies are never flagged. Pattern: GhostCite fabricated-citation detection (idea only) — re-implemented over wiki_cite_lock / wiki_validate.",
+  "coverage": {
+    "examined": 12,
+    "lockfile_verified": 12,
+    "clean": 0,
+    "flagged": 0,
+    "quotes_checked": 0,
+    "quotes_diverged": 0
+  },
+  "malformed_markers": [],
+  "flags": []
+}

@@ -1,0 +1,15 @@
+{
+  "tool": "wiki_citeindex_gate",
+  "report_only": true,
+  "evidence_entry_shape": {
+    "source": "str \u2014 the catalog collection name or manifest path",
+    "field": "str \u2014 the identifying field that changed",
+    "quote": "str \u2014 verbatim quote supporting the change",
+    "locator": "str \u2014 file#L<a>-L<b> or commit sha",
+    "date": "str \u2014 YYYY-MM-DD"
+  },
+  "commits_seen": 3,
+  "changes_seen": 0,
+  "changes_lacking_evidence": [],
+  "lacking_count": 0
+}

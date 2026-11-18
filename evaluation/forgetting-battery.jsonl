@@ -1,0 +1,3 @@
+{"kind": "header", "battery": "forgetting-battery", "version": 1, "purpose": "Bemula-style forgetting battery (arXiv:2610.18052, via landscape weekly 2026-10-27): severed cases are derived by scripts/wiki_forgetting_check.py from evaluation/retrieval-severance.json in this tree; this file names only the PRESERVATION controls — live, load-bearing pages that must exist and must NOT be severed (the over-deletion half of the check)."}
+{"kind": "control", "page": "wiki/concepts/citation-chain.md", "label": "the citation-chain concept page — live, never severed"}
+{"kind": "control", "page": "wiki/overview.md", "label": "the living synthesis — live, never severed"}

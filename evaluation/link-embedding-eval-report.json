@@ -1,0 +1,127 @@
+{
+  "tool": "link-embedding-eval",
+  "pattern": "OpenKE pattern, batch 8 - offline, report-only; NO embedding model trained; baseline scorer as documented in the module docstring",
+  "report_only": true,
+  "auto_applied": false,
+  "pages": 33,
+  "edges_total": 60,
+  "held_out": 12,
+  "hits_at_10": 0.6666666666666666,
+  "mrr": 0.18032841374575245,
+  "ranks": [
+    32,
+    3,
+    5,
+    6,
+    7,
+    8,
+    2,
+    3,
+    8,
+    11,
+    12,
+    31
+  ],
+  "suggestions": [
+    {
+      "source": "log",
+      "candidate": "index",
+      "score": 42.194
+    },
+    {
+      "source": "index",
+      "candidate": "log",
+      "score": 42.184
+    },
+    {
+      "source": "overview",
+      "candidate": "index",
+      "score": 9.4727
+    },
+    {
+      "source": "overview",
+      "candidate": "log",
+      "score": 5.4627
+    },
+    {
+      "source": "founding-note",
+      "candidate": "index",
+      "score": 4.7513
+    },
+    {
+      "source": "founding-note",
+      "candidate": "log",
+      "score": 4.7413
+    },
+    {
+      "source": "demo-guide-ja",
+      "candidate": "index",
+      "score": 2.7513
+    },
+    {
+      "source": "demo-guide-ko",
+      "candidate": "index",
+      "score": 2.7513
+    },
+    {
+      "source": "demo-guide-ja",
+      "candidate": "log",
+      "score": 2.7413
+    },
+    {
+      "source": "demo-guide-ko",
+      "candidate": "log",
+      "score": 2.7413
+    },
+    {
+      "source": "demo-guide-ja",
+      "candidate": "founding-note",
+      "score": 2.7233
+    },
+    {
+      "source": "demo-guide-ko",
+      "candidate": "founding-note",
+      "score": 2.7233
+    },
+    {
+      "source": "founding-note",
+      "candidate": "demo-guide-ja",
+      "score": 2.7223
+    },
+    {
+      "source": "decision-register",
+      "candidate": "index",
+      "score": 2.03
+    },
+    {
+      "source": "marathon-round-4-2026-10-21",
+      "candidate": "index",
+      "score": 2.03
+    },
+    {
+      "source": "decision-register",
+      "candidate": "log",
+      "score": 2.02
+    },
+    {
+      "source": "capture-pipeline-extensions",
+      "candidate": "index",
+      "score": 0.03
+    },
+    {
+      "source": "capture-triage-machinery",
+      "candidate": "index",
+      "score": 0.03
+    },
+    {
+      "source": "citation-chain",
+      "candidate": "index",
+      "score": 0.03
+    },
+    {
+      "source": "did-webvh",
+      "candidate": "index",
+      "score": 0.03
+    }
+  ]
+}

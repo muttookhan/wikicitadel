@@ -1,0 +1,49 @@
+{
+  "kind": "crud-lifecycle-task-register",
+  "version": 1,
+  "registered": "2026-10-21",
+  "pattern": "CRUD-RAG taxonomy (Create / Read / Update / Delete lifecycle evaluation classes) restated in this wiki's own vocabulary against its own pages; definitions only - no CRUD-RAG dataset is imported, no task here is executed by this register, and neither the golden set (evaluation/golden-questions.jsonl) nor the pinned abstention battery (evaluation/abstention-battery.jsonl) is part of or modified by this register.",
+  "note": "Each definition names the lifecycle sequence a future harness would stage, the verdict a correct system must return at the end of it, and the behaviour that is forbidden. Staging and scoring are separate future acts under their own approval.",
+  "tasks": [
+    {
+      "id": "CRUD-C1",
+      "crud_class": "Create",
+      "name": "answer-after-ingest",
+      "lifecycle_sequence": ["page absent", "source ingested and compiled into the page", "question asked"],
+      "question_shape": "A question whose answer exists only in the newly ingested source.",
+      "expected_verdict": "answer",
+      "expected_behaviour": "Answer from the new page and cite it; before ingest the same question must have abstained.",
+      "forbidden_behaviour": "Answering before ingest, or answering without citing the new page."
+    },
+    {
+      "id": "CRUD-R1",
+      "crud_class": "Read",
+      "name": "answer-from-standing-page",
+      "lifecycle_sequence": ["page standing and verified", "no lifecycle event", "question asked"],
+      "question_shape": "A question answered by a standing page's compiled claims.",
+      "expected_verdict": "answer",
+      "expected_behaviour": "Answer from the standing page with its citations intact.",
+      "forbidden_behaviour": "Abstaining on a standing, cited claim, or citing a page other than the one the claim stands on."
+    },
+    {
+      "id": "CRUD-U1",
+      "crud_class": "Update",
+      "name": "answer-after-superseding-ingest",
+      "lifecycle_sequence": ["page standing with answer A", "a newer source supersedes the claim, page recompiled with answer B", "question asked"],
+      "question_shape": "A question whose correct answer changed when the superseding source was ingested.",
+      "expected_verdict": "answer",
+      "expected_behaviour": "Answer B, the superseding answer, citing the current page and its newer source.",
+      "forbidden_behaviour": "Answering A, the superseded answer, or presenting A and B as equally current."
+    },
+    {
+      "id": "CRUD-D1",
+      "crud_class": "Delete",
+      "name": "abstain-after-tombstone",
+      "lifecycle_sequence": ["page standing", "page tombstoned (withdrawn with its tombstone record)", "question asked"],
+      "question_shape": "A question whose only support was the tombstoned page.",
+      "expected_verdict": "abstain",
+      "expected_behaviour": "Abstain: state that the supporting page was withdrawn and no standing source supports an answer.",
+      "forbidden_behaviour": "Answering from the tombstoned page's former content, or citing the tombstone as support for the claim itself."
+    }
+  ]
+}

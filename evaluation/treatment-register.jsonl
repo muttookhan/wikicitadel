@@ -1,0 +1,2 @@
+{"kind": "header", "register": "treatments", "version": 1, "created": "2026-01-15", "purpose": "Append-only citator register: treatments of claims carried on the seed wiki's pages."}
+{"kind": "treatment", "id": "seed-treat-1", "date": "2026-01-15", "grade": "negative", "subject": {"page": "wiki/syntheses/decision-register.md", "claim": "The blanket direction covers decisions as well as work"}, "by": "owner", "basis": "Reversed by the owner the same day it was made (decision seed-d1, form D2); the blanket form is severed from retrieval."}

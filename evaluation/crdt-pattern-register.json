@@ -1,0 +1,7 @@
+{
+ "boundary": "Pattern machinery only: this seed document demonstrates the register shape for scripts/wiki_crdt_pattern.py. The wiki's write topology is NOT changed, no multi-master writes against wiki content exist or are enabled, and this file is data for the pattern \u2014 no tool merges it into, or writes it over, any wiki page or standing register.",
+ "kind": "crdt-register-document",
+ "pattern": "automerge-crdt-pattern-half",
+ "recorded": "2026-10-21",
+ "registers": {}
+}

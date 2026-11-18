@@ -1,0 +1,4 @@
+{"id": "KO-1", "lang": "ko", "text": "이 문장은 픽스처입니다", "label": "yes"}
+{"id": "KO-2", "lang": "ko", "text": "다른 픽스처 문장입니다", "label": "no"}
+{"id": "KO-3", "lang": "ko", "text": "세 번째 문장입니다", "label": "yes"}
+{"id": "KO-4", "lang": "ko", "text": "네 번째 문장입니다", "label": "no"}

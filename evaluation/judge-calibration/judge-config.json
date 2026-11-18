@@ -1,0 +1,17 @@
+{
+  "schema": "judge-config/1",
+  "judge": {
+    "kind": "stub-rules",
+    "model": null,
+    "module": "evaluation/judge-calibration/stub_judge.py",
+    "prompt_file": "evaluation/judge-calibration/judge-prompt.md",
+    "prompt_sha256": "7148fd3fcfd9c22506b742559edc32b2b407e962fac4bcce7e6035870ce366e8"
+  },
+  "certification": {
+    "min_examples": 100,
+    "min_owner_labeled": 100,
+    "tpr_min": 0.8,
+    "tnr_min": 0.8
+  },
+  "note": "Seed installation configuration. The judge is a deterministic rule-based stub standing in for an LLM judge that is not wired in; certification is refused until the owner has labelled at least 100 examples personally \u2014 the shipped starter set is derived, so the refusal is the current, honest state."
+}

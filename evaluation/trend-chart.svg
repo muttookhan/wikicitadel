@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+<title>Eval trend: coverage@10 / MRR vs corpus pages</title>
+<rect x="0" y="0" width="640" height="360" fill="white"/>
+<line x1="56" y1="316.0" x2="624" y2="316.0" stroke="#cccccc" stroke-width="1"/>
+<text x="50" y="320.0" font-size="10" text-anchor="end">0.0</text>
+<line x1="56" y1="170.0" x2="624" y2="170.0" stroke="#cccccc" stroke-width="1"/>
+<text x="50" y="174.0" font-size="10" text-anchor="end">0.5</text>
+<line x1="56" y1="24.0" x2="624" y2="24.0" stroke="#cccccc" stroke-width="1"/>
+<text x="50" y="28.0" font-size="10" text-anchor="end">1.0</text>
+<text x="56" y="352" font-size="11">corpus pages (11–48)</text>
+<text x="60" y="14" font-size="11" fill="#3366aa">— coverage@10</text>
+<text x="180" y="14" font-size="11" fill="#bb4422">— MRR</text>
+<polyline points="56.0,24.0 624.0,24.0 56.0,24.0" fill="none" stroke="#3366aa" stroke-width="2"/>
+<circle cx="56.0" cy="24.0" r="3" fill="#3366aa"/>
+<circle cx="624.0" cy="24.0" r="3" fill="#3366aa"/>
+<circle cx="56.0" cy="24.0" r="3" fill="#3366aa"/>
+<polyline points="56.0,137.6 624.0,24.0 56.0,137.6" fill="none" stroke="#bb4422" stroke-width="2"/>
+<circle cx="56.0" cy="137.6" r="3" fill="#bb4422"/>
+<circle cx="624.0" cy="24.0" r="3" fill="#bb4422"/>
+<circle cx="56.0" cy="137.6" r="3" fill="#bb4422"/>
+</svg>

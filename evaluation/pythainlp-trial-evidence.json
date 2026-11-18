@@ -1,0 +1,15 @@
+{
+  "tool": "pythainlp-trial",
+  "library": "pythainlp",
+  "licence": "Apache-2.0",
+  "ran": true,
+  "sample": "trials/pythainlp/sample-th.txt",
+  "sample_sha256": "7eac2fb60e0046f3d427fce1c6f495a5c983c816bbc5bacfdc3576e4c7c8788d",
+  "tool_version": "5.4.0",
+  "result": "trials/pythainlp/result.json",
+  "result_sha256": "121900ad749385f252c9058fcd7328b965993ad92eb9cccbf75495ad4bf7abe9",
+  "token_count": 25,
+  "wrapper": "scripts/wiki_pythainlp_trial.py run",
+  "install": "pip install pythainlp -> 5.4.0 + python-crfsuite in trials/pythainlp/venv (outside the trees)",
+  "narrowing": "first run failed: sent_tokenize's default crfcut engine needs the optional pycrfsuite module (ModuleNotFoundError); cured by installing python-crfsuite into the venv, then ran clean: 3 sentences, 25 tokens (whitespace tokens included by newmm)."
+}

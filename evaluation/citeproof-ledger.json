@@ -1,0 +1,62 @@
+{
+  "catches": 3,
+  "controls": 2,
+  "controls_passed": 2,
+  "false_cleans": 0,
+  "fixtures_file": "evaluation/citeproof-fixtures.json",
+  "lockfile_check_beside": {
+    "citations": 12,
+    "path": "evaluation/citation-lockfile.json",
+    "present": true,
+    "sha256": "539618e97c6dcfe40aab43e054e0435baf64bfac80ddc520f6375e18b8428f69"
+  },
+  "results": [
+    {
+      "detail": "",
+      "expected": "passed",
+      "false_clean": false,
+      "id": "cp-clean-1",
+      "kind": "clean-control",
+      "match": true,
+      "observed": "passed"
+    },
+    {
+      "detail": "",
+      "expected": "passed",
+      "false_clean": false,
+      "id": "cp-clean-2",
+      "kind": "clean-control",
+      "match": true,
+      "observed": "passed"
+    },
+    {
+      "detail": "locator out of range: source has 3 lines",
+      "expected": "caught",
+      "false_clean": false,
+      "id": "cp-bad-locator",
+      "kind": "fabricated-locator",
+      "match": true,
+      "observed": "caught"
+    },
+    {
+      "detail": "diverges after 4 of 45 chars — the quotation continues 'archive holds forty two boxes of letters', which is not in src/beta.md#L1-L2",
+      "expected": "caught",
+      "false_clean": false,
+      "id": "cp-bad-swapped",
+      "kind": "swapped-source",
+      "match": true,
+      "observed": "caught"
+    },
+    {
+      "detail": "diverges after 25 of 47 chars — the quotation continues 'hree boxes of letters.', which is not in src/alpha.md#L1-L1",
+      "expected": "caught",
+      "false_clean": false,
+      "id": "cp-bad-oneword",
+      "kind": "one-word-altered-quote",
+      "match": true,
+      "observed": "caught"
+    }
+  ],
+  "seeded_bad": 3,
+  "tool": "wiki_citeproof_ledger"
+}

@@ -1,0 +1,22 @@
+{
+  "kind": "markdown-dialect-pin",
+  "dialect": "CommonMark",
+  "spec_version": "0.31.2",
+  "spec_url": "https://spec.commonmark.org/0.31.2/",
+  "spec_licence": "CC BY-SA 4.0",
+  "media_type": "text/markdown",
+  "variant_label": "text/markdown; variant=CommonMark",
+  "variant_rfc": "RFC 7763",
+  "declared_in": "AGENTS.md (section: Markdown dialect and the variant label)",
+  "conformance_cases": "evaluation/commonmark-conformance.json",
+  "conformance_runner": "scripts/wiki_markdown_dialect.py",
+  "registered": "2026-10-21",
+  "note": "The corpus is written and rendered as CommonMark 0.31.2. Local extensions the corpus also uses are NOT CommonMark and are not claimed by this pin: pipe tables, [[wikilinks]], [!callout] blocks, and the Lens renderer's presentation attributes (heading id anchors, figure-wrapped images, target/rel on external links). The conformance subset therefore contains no table case from the spec (the spec defines no tables); the renderer's table behaviour is a local extension, pinned by the Lens's own tests, not by this file.",
+  "extensions_not_commonmark": [
+    "pipe tables (GFM-style)",
+    "[[wikilinks]]",
+    "[!callout] blockquotes",
+    "Lens heading id anchors",
+    "Lens figure-wrapped images"
+  ]
+}

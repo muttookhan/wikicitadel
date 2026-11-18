@@ -1,0 +1,22 @@
+{
+  "source": "raw/sources/2026-10-21-comprehensive-research-gap-analysis.md",
+  "sha256": "bfaa3b90c1f60b216abd53b18366844a6a3f48bc29bb0fd07e003e6be8540879",
+  "format": "md",
+  "trust_tier": "project",
+  "sensitivity": "public",
+  "sensitivity_basis": "Assigned at ingest (2026-10-22): a research record built entirely from public sources, ingested as this public edition's own research. Class vocabulary: evaluation/sensitivity.json.",
+  "extraction": {
+    "state": "native-markdown",
+    "note": "No conversion: the source is Markdown as authored by the research programme."
+  },
+  "ingest": {
+    "date": "2026-10-22",
+    "act": "extract ingest",
+    "portion": "The report's preface, programme-in-numbers, how-to-read section and the complete capability gap analysis (fifteen capabilities), verbatim. The row-level parts are carried as data instead: evaluation/source-index.jsonl (1,259 deep-studied rows) and evaluation/catalogue-index.jsonl (3,425 catalogue rows).",
+    "full_text_preserved_at": "llm-wiki (private): raw/sources/2026-10-21-comprehensive-research-report-completed/report-data-completed.md",
+    "compiled_into": [
+      "wiki/sources/comprehensive-research-report-2026-10-21.md",
+      "evaluation/capability-register.jsonl"
+    ]
+  }
+}

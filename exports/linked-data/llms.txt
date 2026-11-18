@@ -1,0 +1,67 @@
+# LLM Wiki — linked-data export
+
+> Standards-based export of the compiled wiki graph — pages, typed edges with provenance labels, claims and citations — as JSON-LD and Turtle under mapping version 1.0.0. Corpus commit: a02b5394ba2cde30b72b0afc95e4d31513fcb3ac (working tree dirty).
+
+## Artefacts
+
+- [JSON-LD export](wiki.jsonld): the full graph with the context embedded.
+- [Turtle export](wiki.ttl): the same triple set in RDF/Turtle.
+- [JSON-LD context](context.jsonld): the versioned vocabulary mapping, published as its own artefact.
+- [Export report](linked-data-report.json): counts, the full mapping table, the canonical SHA-256 of the triple set, and the loss report (every wiki construct with no mapping, by name and count).
+
+## Pages (42)
+
+- [Capture pipeline extensions (Marathon Round 3, TA4)](https://wikicitadel.example.org/wiki/concepts/capture-pipeline-extensions.md): concept — wiki/concepts/capture-pipeline-extensions.md
+- [Capture and triage machinery](https://wikicitadel.example.org/wiki/concepts/capture-triage-machinery.md): concept — wiki/concepts/capture-triage-machinery.md
+- [Citation chain](https://wikicitadel.example.org/wiki/concepts/citation-chain.md): concept — wiki/concepts/citation-chain.md
+- [デモガイド（日本語）](https://wikicitadel.example.org/wiki/concepts/demo-guide-ja.md): concept — wiki/concepts/demo-guide-ja.md
+- [데모 가이드 (한국어)](https://wikicitadel.example.org/wiki/concepts/demo-guide-ko.md): concept — wiki/concepts/demo-guide-ko.md
+- [did:webvh — a reading lead, not a build](https://wikicitadel.example.org/wiki/concepts/did-webvh.md): concept — wiki/concepts/did-webvh.md
+- [Eval & judging machinery (Marathon Round 3, TB6)](https://wikicitadel.example.org/wiki/concepts/eval-judging-machinery-r3.md): concept — wiki/concepts/eval-judging-machinery-r3.md
+- [Memory and retrieval designs](https://wikicitadel.example.org/wiki/concepts/memory-and-retrieval-designs.md): concept — wiki/concepts/memory-and-retrieval-designs.md
+- [Progressive retrieval — dual-level routing, layered disclosure, proposed lenses](https://wikicitadel.example.org/wiki/concepts/progressive-retrieval.md): concept — wiki/concepts/progressive-retrieval.md
+- [Standing approval (retired)](https://wikicitadel.example.org/wiki/concepts/standing-approval.md): concept — wiki/concepts/standing-approval.md
+- [The owner](https://wikicitadel.example.org/wiki/entities/owner.md): entity — wiki/entities/owner.md
+- [Überblick](https://wikicitadel.example.org/wiki/i18n/de/overview.md): synthesis — wiki/i18n/de/overview.md
+- [決定レジスタ](https://wikicitadel.example.org/wiki/i18n/ja/decision-register.md): synthesis — wiki/i18n/ja/decision-register.md
+- [概要](https://wikicitadel.example.org/wiki/i18n/ja/overview.md): synthesis — wiki/i18n/ja/overview.md
+- [결정 등록부](https://wikicitadel.example.org/wiki/i18n/ko/decision-register.md): synthesis — wiki/i18n/ko/decision-register.md
+- [개요](https://wikicitadel.example.org/wiki/i18n/ko/overview.md): synthesis — wiki/i18n/ko/overview.md
+- [概述](https://wikicitadel.example.org/wiki/i18n/zh/overview.md): synthesis — wiki/i18n/zh/overview.md
+- [Ideas](https://wikicitadel.example.org/wiki/ideas.md): synthesis — wiki/ideas.md
+- [(untitled)](https://wikicitadel.example.org/wiki/index.md): page — wiki/index.md
+- [(untitled)](https://wikicitadel.example.org/wiki/log.md): page — wiki/log.md
+- [Overview](https://wikicitadel.example.org/wiki/overview.md): synthesis — wiki/overview.md
+- [Curation activities and workarounds register — the rules page](https://wikicitadel.example.org/wiki/rules/curation-workarounds.md): synthesis — wiki/rules/curation-workarounds.md
+- [Evidence TTL — the rules page](https://wikicitadel.example.org/wiki/rules/evidence-ttl.md): synthesis — wiki/rules/evidence-ttl.md
+- [Notices — the rules page](https://wikicitadel.example.org/wiki/rules/notices.md): synthesis — wiki/rules/notices.md
+- [Share, publish, cite-ready — a controlled vocabulary](https://wikicitadel.example.org/wiki/rules/share-publish-cite-ready.md): synthesis — wiki/rules/share-publish-cite-ready.md
+- [Founding note (source)](https://wikicitadel.example.org/wiki/sources/founding-note.md): source — wiki/sources/founding-note.md
+- [Decision register](https://wikicitadel.example.org/wiki/syntheses/decision-register.md): synthesis — wiki/syntheses/decision-register.md
+- [Marathon Round 3, Lane TA5 — proposal machinery (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md): synthesis — wiki/syntheses/marathon-r3-ta5-proposal-machinery-2026-10-21.md
+- [Retrieval and ranking machinery — Marathon Round 3 (TB7)](https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb7-retrieval.md): synthesis — wiki/syntheses/marathon-r3-tb7-retrieval.md
+- [Five gated patterns — build notes (demo corpus)](https://wikicitadel.example.org/wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md): synthesis — wiki/syntheses/marathon-r3-tb8-patterns-2026-10-21.md
+- [Marathon Round 10 — record (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-round-10-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-10-2026-10-21.md
+- [Marathon Round 11 — record (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-round-11-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-11-2026-10-21.md
+- [Marathon Round 12 — record (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-round-12-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-12-2026-10-21.md
+- [Marathon Round 13 — record (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-round-13-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-13-2026-10-21.md
+- [Marathon Round 3 — TA7: doors and watch machinery](https://wikicitadel.example.org/wiki/syntheses/marathon-round-3-ta7-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-3-ta7-2026-10-21.md
+- [Marathon Round 4 — record (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-round-4-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-4-2026-10-21.md
+- [Marathon Round 5 — record (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-round-5-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-5-2026-10-21.md
+- [Marathon Round 6 — record (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-round-6-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-6-2026-10-21.md
+- [Marathon Round 7 — record (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-round-7-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-7-2026-10-21.md
+- [Marathon Round 8 — record (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-round-8-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-8-2026-10-21.md
+- [Marathon Round 9 — record (2026-10-21)](https://wikicitadel.example.org/wiki/syntheses/marathon-round-9-2026-10-21.md): synthesis — wiki/syntheses/marathon-round-9-2026-10-21.md
+- [Source registry — one manifest over raw/sources](https://wikicitadel.example.org/wiki/syntheses/source-registry.md): synthesis — wiki/syntheses/source-registry.md
+
+## Claims (9)
+
+- [Dieses Wiki existiert, um den Kontext des Agenten sichtbar in versionierten Dateien zu halten, statt im eigenen Gedächtnis des Agenten.](https://wikicitadel.example.org/claim/wiki/i18n/de/overview.md): stated on wiki/i18n/de/overview.md
+- [決定が一括指示の対象になることは決してない。すべての決定には所有者自身の承認が必要である。](https://wikicitadel.example.org/claim/wiki/i18n/ja/decision-register.md): stated on wiki/i18n/ja/decision-register.md
+- [このウィキは、エージェント自身の記憶の中ではなく、版管理されたファイルの中に、エージェントの文脈を目に見える形で保持するために存在する。](https://wikicitadel.example.org/claim/wiki/i18n/ja/overview.md): stated on wiki/i18n/ja/overview.md
+- [결정은 포괄 지시의 대상이 되는 일이 결코 없다. 모든 결정에는 소유자 자신의 승인이 필요하다.](https://wikicitadel.example.org/claim/wiki/i18n/ko/decision-register.md): stated on wiki/i18n/ko/decision-register.md
+- [이 위키는 에이전트 자신의 기억이 아니라, 버전이 관리되는 파일 안에 에이전트의 맥락을 눈에 보이게 보관하기 위해 존재한다.](https://wikicitadel.example.org/claim/wiki/i18n/ko/overview.md): stated on wiki/i18n/ko/overview.md
+- [本维基的存在，是为了把智能体的上下文以可见的方式保存在受版本管理的文件中，而不是保存在智能体自身的记忆里。](https://wikicitadel.example.org/claim/wiki/i18n/zh/overview.md): stated on wiki/i18n/zh/overview.md
+- [This wiki exists to hold the agent's context visibly, in versioned files, rather than in the agent's own memory.](https://wikicitadel.example.org/claim/wiki/overview.md): stated on wiki/overview.md
+- [The founding note grants a blanket direction over work and reverses it for decisions in the same sitting.](https://wikicitadel.example.org/claim/wiki/sources/founding-note.md): stated on wiki/sources/founding-note.md
+- [Decisions are never covered by the blanket direction; every decision needs the owner's own approval.](https://wikicitadel.example.org/claim/wiki/syntheses/decision-register.md): stated on wiki/syntheses/decision-register.md

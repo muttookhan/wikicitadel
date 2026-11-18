@@ -1,0 +1,33 @@
+{
+  "tool": "openrefine-bench-trial",
+  "ran": true,
+  "input": "trials/openrefine/work/manifest-messy.csv (lane trials area, outside the trees)",
+  "input_sha256": "96f234ddb3fdf5617d7e5478e13db53ddfbd7f1ebf367b1e1da87cf96b3e4a2f",
+  "operations": [
+    {
+      "op": "core/text-transform",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "columnName": "path",
+      "expression": "value.trim()",
+      "onError": "keep-original",
+      "repeat": false,
+      "repeatCount": 10
+    }
+  ],
+  "project_id": "2754972742476",
+  "output": "trials/openrefine/work/run1/cleaned.csv (lane trials area)",
+  "output_sha256": "7857b28606603bb2f5194677bd69fe98d6d36adc7dd620d26613fc916ade2e60",
+  "history_artefact": "trials/openrefine/work/run1/history.json (lane trials area) \u2014 the get-operations export, carried alongside the cleaned output so the transformation is citable",
+  "history_sha256": "8fe511ac05a283a32282d8dca0910599c3748a227ef14bf56428e4cea0c71291",
+  "tool_version": "OpenRefine 3.10.1 (official linux tarball, github.com/OpenRefine/OpenRefine releases)",
+  "runtime": "Temurin JRE 21.0.12.1+1 (Adoptium) \u2014 both obtained OUTSIDE the trees into the lane trials area",
+  "licence": "BSD-3-Clause",
+  "corpus_source": "evaluation/source-manifest.jsonl (private scratch tree)",
+  "corpus_source_sha256": "9169ff13f557646dbd79a800695bedd27e80455d527c1835419171272212e541",
+  "input_note": "a COPY of the first 12 manifest rows flattened to CSV in the trials area, path values padded with spaces as the messy working copy; the in-tree original was never touched",
+  "wrapper": "scripts/wiki_openrefine_trial.py run (same command produced this evidence)",
+  "notes": "History records the text-transform op applied; OpenRefine reported 'Text transform on 0 cells' because its CSV importer had already trimmed the padded values on ingest \u2014 the cleaned export carries unpadded paths and the history artefact states the operation either way. CSRF token must ride in the query string for multipart posts in 3.10.1; the wrapper does this."
+}

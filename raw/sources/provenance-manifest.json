@@ -1,0 +1,54 @@
+{
+  "manifest": "WikiCitadel raw/ provenance manifest (all of raw/)",
+  "schema_version": 1,
+  "generated_at": "2026-10-28T11:55:24-04:00",
+  "root": "raw",
+  "excludes": [
+    "raw/sources/provenance-manifest.json (the manifest never lists itself)"
+  ],
+  "file_count": 6,
+  "total_bytes": 34205,
+  "sub_manifests": [
+    {
+      "path": "raw/sources/mirror-a-manifest.json",
+      "kind": "mirror sub-manifest",
+      "covers": "raw/sources/mirror-a",
+      "entries": 0,
+      "note": "not present on disk"
+    },
+    {
+      "path": "raw/sources/mirror-b-manifest.json",
+      "kind": "mirror sub-manifest",
+      "covers": "raw/sources/mirror-b",
+      "entries": 0,
+      "note": "not present on disk"
+    }
+  ],
+  "sub_manifest_drift": [],
+  "files": {
+    "raw/diagrams/citation-chain.svg": {
+      "bytes": 1163,
+      "sha256": "b206ced8c49860b20c54c720379a97f7ad79976135796cab4c03e72966874a1d"
+    },
+    "raw/sources/2026-10-21-comprehensive-research-gap-analysis.ingest.json": {
+      "bytes": 1264,
+      "sha256": "e234d220f1d1d62f3b8992488edc004be917c3284013420e26827e06a8845f0e"
+    },
+    "raw/sources/2026-10-21-comprehensive-research-gap-analysis.md": {
+      "bytes": 25594,
+      "sha256": "bfaa3b90c1f60b216abd53b18366844a6a3f48bc29bb0fd07e003e6be8540879"
+    },
+    "raw/sources/2026-10-27-landscape-weekly.ingest.json": {
+      "bytes": 694,
+      "sha256": "121c9077c3115a3368942ee79bdf2118c0cdd6332fd9c42409080d3eb148b0d1"
+    },
+    "raw/sources/2026-10-27-landscape-weekly.md": {
+      "bytes": 4694,
+      "sha256": "c11c83ae866c06a1280e2373ba6abdc527d49ea81c3ab518d44d05e679e13093"
+    },
+    "raw/sources/founding-note.md": {
+      "bytes": 796,
+      "sha256": "2a2f7adf1c92693ea6374dfc11261a8287078eac4f297644f4f1bd5b16948962"
+    }
+  }
+}

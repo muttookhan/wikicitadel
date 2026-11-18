@@ -1,0 +1,1 @@
+{"kind": "header", "register": "source-availability", "version": 1, "note": "Append-only side register for scripts/wiki_source_availability.py: one record per cited URL per probe run (url, status, final_url, flag, checked, probe_mode). Seeded empty-but-valid — no probe has been run into this register; flags are for human decision and change nothing automatically."}

@@ -1,0 +1,23 @@
+{
+ "kind": "source-registry",
+ "version": 1,
+ "generated_at": "2026-10-21",
+ "root": "raw/sources",
+ "collections": [
+  {
+   "name": "loose-files",
+   "path": "raw/sources",
+   "path_pattern": "raw/sources/*",
+   "file_count": 2,
+   "total_bytes": 1707,
+   "licence": null,
+   "licence_source": null,
+   "load_entry_point": "python3 scripts/wiki_source_registry.py load loose-files"
+  }
+ ],
+ "totals": {
+  "collections": 1,
+  "files": 2,
+  "bytes": 1707
+ }
+}

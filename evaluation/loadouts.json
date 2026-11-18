@@ -1,0 +1,39 @@
+{
+  "agents": [
+    "owner",
+    "agent",
+    "galen",
+    "hugo",
+    "codex",
+    "chatgpt",
+    "coordinator",
+    "antigravity"
+  ],
+  "loadouts": {
+    "owner": [
+      "wiki/*"
+    ],
+    "agent": [
+      "wiki/*"
+    ],
+    "galen": [
+      "wiki/*"
+    ],
+    "hugo": [
+      "wiki/*"
+    ],
+    "codex": [
+      "wiki/*"
+    ],
+    "chatgpt": [
+      "wiki/*"
+    ],
+    "coordinator": [
+      "wiki/*"
+    ],
+    "antigravity": [
+      "wiki/*"
+    ]
+  },
+  "note": "Seed register (Marathon R3 TB2): every admitted agent loads the compiled layer; page-level visibility: frontmatter narrows it. Owner is never excluded."
+}

@@ -1,0 +1,17 @@
+{
+ "source": "raw/sources/2026-10-27-landscape-weekly.md",
+ "sha256": "c11c83ae866c06a1280e2373ba6abdc527d49ea81c3ab518d44d05e679e13093",
+ "format": "md",
+ "trust_tier": "project",
+ "sensitivity": "public",
+ "sensitivity_basis": "Assigned at ingest (2026-10-27): A landscape research record built entirely from public sources (GitHub API, arXiv, vendor blogs), ingested as this public edition's own research. Class vocabulary: evaluation/sensitivity.json.",
+ "extraction": {
+  "state": "native-markdown",
+  "note": "No conversion: the source is Markdown as authored by the research run."
+ },
+ "ingest": {
+  "date": "2026-10-27",
+  "act": "landscape weekly ingest",
+  "portion": "complete"
+ }
+}

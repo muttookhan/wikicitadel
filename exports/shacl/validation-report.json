@@ -1,0 +1,467 @@
+{
+ "canonical_sha256": "911a82fc2bcdd5799e1a0f98fa802ffdae3ac33317ca48bd022be3c6b1befc0b",
+ "conforms": false,
+ "corpus_commit": "a02b5394ba2cde30b72b0afc95e4d31513fcb3ac",
+ "corpus_dirty": true,
+ "gaps": [
+  "Tombstone reason/date: AGENTS.md's tombstone rule also requires `tombstoned: <date>` and `tombstone_reason: <why>`; neither field is in the linked-data export's mapping table, so no triple carries them and that half of the rule cannot be checked over this export. (No page in the corpus is tombstoned today, so the gap is latent, not live.)",
+  "Declared-inverse agreement is checked over the exported graph's direct triples; the exporter emits a declared pair together, so this shape guards the export's internal consistency and any future pipeline change — whether the two PAGES' frontmatter declarations agree is the wiki validator / lint's ground, not this report's.",
+  "Citation resolution is checked against the corpus on disk at validation time (the resolve rule is about files); a validation run without a corpus root skips that clause and says so in its notes."
+ ],
+ "kind": "shacl-pattern-validation-report",
+ "notes": [],
+ "on_disk_export_canonical_sha256": "911a82fc2bcdd5799e1a0f98fa802ffdae3ac33317ca48bd022be3c6b1befc0b",
+ "pattern": "SHACL-pattern validation (W3C SHACL / SHACL-AF pattern, house re-implementation): shapes target node classes and property annotations, never path lists. This report is NOT the output of a conformant SHACL processor; shapes.ttl beside it carries the same shapes for a real engine.",
+ "results": [
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/automation",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/build",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/capture",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/decisions",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/demo",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/did",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/evaluation",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/founding",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/governance",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/graphify",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/i18n",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/identifiers",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/judging",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/kr-r1",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/lead",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/lightmem",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/machinery",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/marathon",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/marathon-r3",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/mcp",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/memory",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/people",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/proposals",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/purpose",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/ranking",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/record",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/registry",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/reme",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/retrieval",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/round-10",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/round-11",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/round-12",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/round-13",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/sage-wiki",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/search",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/sources",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/tools",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/triage",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/tag/vanillaflava",
+   "message": "tag in use carries no skos:scopeNote — the export found no registry row to join it to (unregistered tag in use, or a registry row without a scopeNote)",
+   "resultPath": "skos:scopeNote",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TagRegistrationShape",
+   "value": null
+  },
+  {
+   "focusNode": "https://wikicitadel.example.org/wiki/concepts/standing-approval.md",
+   "message": "tombstoned page declares no replacement in the graph (no page stands in dcterms:replaces to it — the graph form of its is-superseded-by declaration)",
+   "resultPath": "dcterms:isReplacedBy",
+   "severity": "Violation",
+   "sourceShape": "wkshape:TombstoneShape",
+   "value": null
+  }
+ ],
+ "shapes": [
+  {
+   "id": "wkshape:PageTypeShape",
+   "name": "Compiled page type is declared and agrees with its class",
+   "rule_source": "AGENTS.md, Page conventions: frontmatter `type` is one of (source | entity | concept | synthesis | query) on every wiki page",
+   "target": {
+    "classes": [
+     "wk:SourcePage",
+     "wk:EntityPage",
+     "wk:ConceptPage",
+     "wk:SynthesisPage",
+     "wk:QueryPage"
+    ],
+    "in_words": "every node carrying one of the five typed page classes",
+    "kind": "class"
+   },
+   "targets_checked": 40,
+   "violations": 0
+  },
+  {
+   "id": "wkshape:PageTypeVocabularyShape",
+   "name": "A declared page type is in the closed vocabulary",
+   "rule_source": "AGENTS.md, Page conventions (the same closed type list); a type outside it is not a page type here",
+   "target": {
+    "classes": [
+     "wk:Page"
+    ],
+    "in_words": "every node typed only with the generic wk:Page class (pages whose type the exporter could not map, and the structural pages)",
+    "kind": "class"
+   },
+   "targets_checked": 2,
+   "violations": 0
+  },
+  {
+   "id": "wkshape:RelationVocabularyShape",
+   "name": "Edge relation is in the closed relation vocabulary",
+   "rule_source": "wiki/rules/relation-vocabulary.md: \"Closed. A relation outside this list is not declared\" (the ten adopted terms + the grounds extension of 2026-10-20 + mentions, the untyped default)",
+   "target": {
+    "classes": [
+     "wk:EdgeAssertion"
+    ],
+    "in_words": "every edge assertion node",
+    "kind": "class"
+   },
+   "targets_checked": 101,
+   "violations": 0
+  },
+  {
+   "id": "wkshape:DeclaredInverseShape",
+   "name": "A declared relation between two of our pages carries its declared inverse",
+   "rule_source": "wiki/rules/relation-vocabulary.md, Rules of use: \"When both pages are ours, the inverse is written on the target too, and the pair must agree\"",
+   "target": {
+    "in_words": "every direct triple under a predicate whose vocabulary entry declares an inverse, where BOTH endpoints are page nodes (\"when both pages are ours\")",
+    "kind": "triples"
+   },
+   "targets_checked": 5,
+   "violations": 0
+  },
+  {
+   "id": "wkshape:EdgeProvenanceShape",
+   "name": "Every edge carries its provenance label, confidence and polarity",
+   "rule_source": "The W1.8 edge-label model (tools/lens/lenslib.py edge-label section; scripts/wiki_edge_labels.py check: every door edge carries a label from the closed set with a confidence in [0, 1])",
+   "target": {
+    "classes": [
+     "wk:EdgeAssertion"
+    ],
+    "in_words": "every edge assertion node",
+    "kind": "class"
+   },
+   "targets_checked": 101,
+   "violations": 0
+  },
+  {
+   "id": "wkshape:ClaimShape",
+   "name": "A claim is stated, dated, on a real page, and its page rests on a source",
+   "rule_source": "AGENTS.md, Outcome-verified claims: a claim page opts in with frontmatter `claim:` (one falsifiable sentence) + `as_of:`; Page conventions: `sources` is a required frontmatter element — the claim's evidence is its page's sources, carried in the graph as the page's outgoing cito:cites",
+   "target": {
+    "classes": [
+     "wk:Claim"
+    ],
+    "in_words": "every claim node",
+    "kind": "class"
+   },
+   "targets_checked": 9,
+   "violations": 0
+  },
+  {
+   "id": "wkshape:CitationShape",
+   "name": "A citation is locked, anchored, and its target resolves",
+   "rule_source": "AGENTS.md, Page conventions (claim-level citations): \"The path is repo-relative and must resolve\"; the citation lockfile (evaluation/citation-lockfile.json) is the machinery that proves a cited source has not changed — its entries carry the content hash and the quote selector",
+   "target": {
+    "classes": [
+     "wk:Citation"
+    ],
+    "in_words": "every citation node (the citation lockfile's entries)",
+    "kind": "class"
+   },
+   "targets_checked": 12,
+   "violations": 0
+  },
+  {
+   "id": "wkshape:TombstoneShape",
+   "name": "A tombstone declares its replacement",
+   "rule_source": "wiki/rules/relation-vocabulary.md, Tombstones + AGENTS.md, Tombstones: a tombstone carries `replaced_by` when there is a replacement and declares the is-superseded-by relation. HALF MECHANISED: the export's mapping carries wk:status but not the tombstone reason/date fields, so this shape checks the replacement half only (see the report's gap list)",
+   "target": {
+    "in_words": "every page whose wk:status is \"tombstoned\" (a value target — the SHACL-AF custom-target form)",
+    "kind": "value",
+    "path": "wk:status",
+    "value": "tombstoned"
+   },
+   "targets_checked": 1,
+   "violations": 1
+  },
+  {
+   "id": "wkshape:TagRegistrationShape",
+   "name": "A tag in use is registered",
+   "rule_source": "AGENTS.md, Tag registry: (1) \"A tag is registered at first use\"; (2) \"A concept's scopeNote says what the tag means here\" — the export joins a used tag to its registry row and emits skos:scopeNote exactly when the join succeeds, so a used tag with no scopeNote is an unregistered tag in use; (3) deprecation supersedes — a deprecated tag still in use is named",
+   "target": {
+    "in_words": "every node that is the object of a dcterms:subject triple (tags actually used on pages)",
+    "kind": "objects-of",
+    "path": "dcterms:subject"
+   },
+   "targets_checked": 39,
+   "violations": 39
+  }
+ ],
+ "shapes_version": "1.0.0",
+ "tool": "scripts/wiki_graph_shapes.py",
+ "triples": 2048,
+ "violations": 40
+}

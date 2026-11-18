@@ -1,0 +1,34 @@
+{
+  "tool": "bolognese-trial",
+  "ran": true,
+  "records": [
+    {
+      "input": "trials/bolognese/records/fenner2019bolognese.bib",
+      "input_sha256": "9a7ad31bb0f82c7997eb2da2661ff90e2dfae6b4a934d5bf85f561d2b6986d10",
+      "exit": 0,
+      "output": "trials/bolognese/out/fenner2019bolognese.converted.json",
+      "output_sha256": "e2f382cf0487f7c391fdcf85f15796ad26a96bd0a0b89ad32b778853d6507917"
+    },
+    {
+      "input": "trials/bolognese/records/karpathy2026wiki.bib",
+      "input_sha256": "c3e3796c8778a7b4649e5423a92d1298133ac8b30997839c7a54a62332cea251",
+      "exit": 0,
+      "output": "trials/bolognese/out/karpathy2026wiki.converted.json",
+      "output_sha256": "f6b1e8bf67f5d795d717a30b3d525f626b5957a5d0aef72729dc197092cff21b"
+    },
+    {
+      "input": "trials/bolognese/records/openrefine2025.bib",
+      "input_sha256": "e28267c909604ab6310a0c5b7452faacb0665b7d459ce26cb28fb80233994b69",
+      "exit": 0,
+      "output": "trials/bolognese/out/openrefine2025.converted.json",
+      "output_sha256": "f61202351633ab09ab1bb0d4cbf4ce3705ccc78f49736b804fc455f4ba01814a"
+    }
+  ],
+  "tool_version": "bolognese 2.7.0 (gem, rubygems.org)",
+  "runtime": "ruby 3.3.6 (ruby-builder toolcache tarball) \u2014 obtained OUTSIDE the trees into the lane trials area; apt packages for ruby were not locatable in this VM (first door tried), the toolcache tarball was the working door",
+  "licence": "MIT",
+  "conversion": "BibTeX -> CSL JSON via the writer bolognese 2.7.0 names 'citeproc' (--to citeproc); one record per invocation, so the bounded set is one file per record",
+  "records_note": "bounded set of 3 held records (trials/bolognese/records/*.bib, lane trials area); the citekeys register itself is empty in both trees, so records were transcribed from corpus-held items. The citeproc writer crashes on records with no publisher (nil publisher in citeproc_hsh) \u2014 publisher fields were added to the input records and the crash is recorded here, not hidden",
+  "diffs": "before/after unified diff per record in trials/bolognese/out/*.diff (lane trials area) \u2014 the acceptance check",
+  "wrapper": "scripts/wiki_bolognese_trial.py run (same command produced this evidence)"
+}

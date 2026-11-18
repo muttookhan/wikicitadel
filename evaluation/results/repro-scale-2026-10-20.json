@@ -1,0 +1,530 @@
+{
+  "kind": "reproducible-benchmark-pack",
+  "label": "scale-2026-10-20",
+  "generated_at": "2026-10-21T00:53:40+00:00",
+  "recipe": {
+    "engines": [
+      "bm25",
+      "hybrid",
+      "hindsight"
+    ],
+    "top_k": 10,
+    "questions_file": "evaluation/golden-questions.jsonl",
+    "questions_sha256": "766ae03c75f690ca72e1d2c7b972df9d832cc46fabd0e21ef5ca3247f529b06d",
+    "questions_count": 12
+  },
+  "environment": {
+    "git_head": "a5452b4ce61deb89858d65d20216b208025cee33",
+    "corpus_docs": 48,
+    "python": "3.12.3",
+    "platform": "Linux-7.0.0-39-generic-x86_64-with-glibc2.39"
+  },
+  "results": {
+    "bm25": {
+      "citation_coverage": {
+        "@1": 1.0,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mrr_must_cite": 1.0,
+      "per_question": [
+        {
+          "id": "SYN-001",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/astronomy/astronomy-overview.md",
+            "wiki/astronomy/astronomy-zenith.md",
+            "wiki/astronomy/astronomy-parallax.md"
+          ]
+        },
+        {
+          "id": "SYN-002",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/astronomy/astronomy-meteor.md",
+            "wiki/astronomy/astronomy-overview.md",
+            "wiki/astronomy/astronomy-aurora.md"
+          ]
+        },
+        {
+          "id": "SYN-003",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/botany/botany-overview.md",
+            "wiki/botany/botany-mycelium.md",
+            "wiki/botany/botany-chlorophyll.md"
+          ]
+        },
+        {
+          "id": "SYN-004",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/botany/botany-deciduous.md",
+            "wiki/botany/botany-overview.md",
+            "wiki/botany/botany-herbarium.md"
+          ]
+        },
+        {
+          "id": "SYN-005",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/cooking/cooking-overview.md",
+            "wiki/cooking/cooking-skillet.md",
+            "wiki/cooking/cooking-ganache.md"
+          ]
+        },
+        {
+          "id": "SYN-006",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/cooking/cooking-skillet.md",
+            "wiki/cooking/cooking-overview.md",
+            "wiki/cooking/cooking-vinaigrette.md"
+          ]
+        },
+        {
+          "id": "SYN-007",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/geology/geology-overview.md",
+            "wiki/geology/geology-caldera.md",
+            "wiki/geology/geology-aquifer.md"
+          ]
+        },
+        {
+          "id": "SYN-008",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/geology/geology-alluvial.md",
+            "wiki/geology/geology-overview.md",
+            "wiki/geology/geology-gneiss.md"
+          ]
+        },
+        {
+          "id": "SYN-009",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/music/music-overview.md",
+            "wiki/music/music-staccato.md",
+            "wiki/music/music-vibrato.md"
+          ]
+        },
+        {
+          "id": "SYN-010",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/music/music-syncopation.md",
+            "wiki/music/music-overview.md",
+            "wiki/music/music-ostinato.md"
+          ]
+        },
+        {
+          "id": "SYN-011",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/sailing/sailing-overview.md",
+            "wiki/sailing/sailing-spinnaker.md",
+            "wiki/sailing/sailing-boathook.md"
+          ]
+        },
+        {
+          "id": "SYN-012",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/sailing/sailing-catamaran.md",
+            "wiki/sailing/sailing-overview.md",
+            "wiki/sailing/sailing-leeward.md"
+          ]
+        }
+      ]
+    },
+    "hybrid": {
+      "citation_coverage": {
+        "@1": 0.5,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mrr_must_cite": 0.75,
+      "per_question": [
+        {
+          "id": "SYN-001",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/astronomy/astronomy-overview.md",
+            "wiki/astronomy/astronomy-zenith.md",
+            "wiki/astronomy/astronomy-parallax.md"
+          ]
+        },
+        {
+          "id": "SYN-002",
+          "route": "synthetic",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/astronomy/astronomy-overview.md",
+            "wiki/astronomy/astronomy-meteor.md",
+            "wiki/astronomy/astronomy-aurora.md"
+          ]
+        },
+        {
+          "id": "SYN-003",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/botany/botany-overview.md",
+            "wiki/botany/botany-mycelium.md",
+            "wiki/botany/botany-chlorophyll.md"
+          ]
+        },
+        {
+          "id": "SYN-004",
+          "route": "synthetic",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/botany/botany-overview.md",
+            "wiki/botany/botany-deciduous.md",
+            "wiki/botany/botany-herbarium.md"
+          ]
+        },
+        {
+          "id": "SYN-005",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/cooking/cooking-overview.md",
+            "wiki/cooking/cooking-skillet.md",
+            "wiki/cooking/cooking-ganache.md"
+          ]
+        },
+        {
+          "id": "SYN-006",
+          "route": "synthetic",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/cooking/cooking-overview.md",
+            "wiki/cooking/cooking-skillet.md",
+            "wiki/cooking/cooking-vinaigrette.md"
+          ]
+        },
+        {
+          "id": "SYN-007",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/geology/geology-overview.md",
+            "wiki/geology/geology-caldera.md",
+            "wiki/geology/geology-aquifer.md"
+          ]
+        },
+        {
+          "id": "SYN-008",
+          "route": "synthetic",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/geology/geology-overview.md",
+            "wiki/geology/geology-alluvial.md",
+            "wiki/geology/geology-gneiss.md"
+          ]
+        },
+        {
+          "id": "SYN-009",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/music/music-overview.md",
+            "wiki/music/music-staccato.md",
+            "wiki/music/music-vibrato.md"
+          ]
+        },
+        {
+          "id": "SYN-010",
+          "route": "synthetic",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/music/music-overview.md",
+            "wiki/music/music-syncopation.md",
+            "wiki/music/music-ostinato.md"
+          ]
+        },
+        {
+          "id": "SYN-011",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/sailing/sailing-overview.md",
+            "wiki/sailing/sailing-spinnaker.md",
+            "wiki/sailing/sailing-boathook.md"
+          ]
+        },
+        {
+          "id": "SYN-012",
+          "route": "synthetic",
+          "must_cite_rank": 2,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/sailing/sailing-overview.md",
+            "wiki/sailing/sailing-catamaran.md",
+            "wiki/sailing/sailing-leeward.md"
+          ]
+        }
+      ]
+    },
+    "hindsight": {
+      "citation_coverage": {
+        "@1": 1.0,
+        "@3": 1.0,
+        "@5": 1.0,
+        "@10": 1.0
+      },
+      "hit_rate_topk": 1.0,
+      "mrr_must_cite": 1.0,
+      "per_question": [
+        {
+          "id": "SYN-001",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/astronomy/astronomy-overview.md",
+            "wiki/astronomy/astronomy-zenith.md",
+            "wiki/astronomy/astronomy-parallax.md"
+          ]
+        },
+        {
+          "id": "SYN-002",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/astronomy/astronomy-meteor.md",
+            "wiki/astronomy/astronomy-aurora.md",
+            "wiki/astronomy/astronomy-overview.md"
+          ]
+        },
+        {
+          "id": "SYN-003",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/botany/botany-overview.md",
+            "wiki/botany/botany-mycelium.md",
+            "wiki/botany/botany-chlorophyll.md"
+          ]
+        },
+        {
+          "id": "SYN-004",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/botany/botany-deciduous.md",
+            "wiki/botany/botany-herbarium.md",
+            "wiki/botany/botany-overview.md"
+          ]
+        },
+        {
+          "id": "SYN-005",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/cooking/cooking-overview.md",
+            "wiki/cooking/cooking-skillet.md",
+            "wiki/cooking/cooking-ganache.md"
+          ]
+        },
+        {
+          "id": "SYN-006",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/cooking/cooking-skillet.md",
+            "wiki/cooking/cooking-vinaigrette.md",
+            "wiki/cooking/cooking-overview.md"
+          ]
+        },
+        {
+          "id": "SYN-007",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/geology/geology-overview.md",
+            "wiki/geology/geology-caldera.md",
+            "wiki/geology/geology-aquifer.md"
+          ]
+        },
+        {
+          "id": "SYN-008",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/geology/geology-alluvial.md",
+            "wiki/geology/geology-gneiss.md",
+            "wiki/geology/geology-overview.md"
+          ]
+        },
+        {
+          "id": "SYN-009",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/music/music-overview.md",
+            "wiki/music/music-staccato.md",
+            "wiki/music/music-vibrato.md"
+          ]
+        },
+        {
+          "id": "SYN-010",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/music/music-syncopation.md",
+            "wiki/music/music-ostinato.md",
+            "wiki/music/music-overview.md"
+          ]
+        },
+        {
+          "id": "SYN-011",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/sailing/sailing-overview.md",
+            "wiki/sailing/sailing-spinnaker.md",
+            "wiki/sailing/sailing-boathook.md"
+          ]
+        },
+        {
+          "id": "SYN-012",
+          "route": "synthetic",
+          "must_cite_rank": 1,
+          "hit_in_topk": true,
+          "must_in_topk": true,
+          "precision_at_k": 0.1,
+          "top3": [
+            "wiki/sailing/sailing-catamaran.md",
+            "wiki/sailing/sailing-leeward.md",
+            "wiki/sailing/sailing-overview.md"
+          ]
+        }
+      ]
+    }
+  },
+  "corpus_kind": "synthetic",
+  "note": "Synthetic multi-topic corpus from scripts/wiki_bench_synth.py (seed 20261020, 6 topics x 8 pages, 12 questions); corpus generated in a scratch run root, bench scripts are the public tree's own at HEAD a5452b4ce61deb89858d65d20216b208025cee33. Baseline: an identical second run of the same recipe (determinism gate) - compare exits 0. The scale-bench in-memory generator (wiki_scale_bench.synthetic_docs) writes no wiki/ tree or golden questions, so it cannot feed wiki_bench_repro directly; wiki_bench_synth.py is the compatible generator."
+}

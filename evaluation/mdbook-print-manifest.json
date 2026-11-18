@@ -1,0 +1,32 @@
+{
+  "tool": "mdbook-print",
+  "declared_set": [
+    "wiki/overview.md",
+    "wiki/rules/evidence-ttl.md",
+    "wiki/rules/notices.md"
+  ],
+  "built": true,
+  "mdbook_version": "mdbook v0.4.52",
+  "pages": [
+    {
+      "page": "wiki/overview.md",
+      "chapter": "ch01-overview.md",
+      "source_sha256": "958af2eab87b4af6b5bf693e50948d7a142409f94a14df0452085dad9742bc6f"
+    },
+    {
+      "page": "wiki/rules/evidence-ttl.md",
+      "chapter": "ch02-evidence-ttl.md",
+      "source_sha256": "e38428dcdf58acbde9a27f9936a2c8764a1614ffd56760b7efa2f344e9816130"
+    },
+    {
+      "page": "wiki/rules/notices.md",
+      "chapter": "ch03-notices.md",
+      "source_sha256": "090fac469a2e1e2051dca9db25c139d486406161d1527710266c354c6b378158"
+    }
+  ],
+  "artefact": "evaluation/mdbook-print/print.html",
+  "artefact_sha256": "2777b2535464532fff187d3efb56b5f351e6f1b02b1c296ad5c727f0b7226fb2",
+  "artefact_bytes": 17839,
+  "known_loss": "wikilinks are carried verbatim; mdBook does not resolve [[wikilinks]], callouts or claim markers \u2014 see the export loss inventory (scripts/wiki_export_loss.py)",
+  "wrapper": "scripts/wiki_mdbook_print.py build"
+}

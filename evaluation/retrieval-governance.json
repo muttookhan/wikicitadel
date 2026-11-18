@@ -1,0 +1,137 @@
+{
+ "kind": "retrieval-governance",
+ "version": 1,
+ "generated_from": {
+  "generator": "scripts/wiki_governance.py",
+  "inputs": {
+   "evaluation/decisions-register.jsonl": "3c6f0e2f3da3fe6a87e2f03f16188804f75836373d7249928f18450d7d079b1d",
+   "evaluation/treatment-register.jsonl": "49c2d372758edaaaf745900be673ee17621cc21d6051e26bd9bf6646c544ba5e",
+   "evaluation/outcomes.jsonl": null,
+   "evaluation/retrieval-severance.json": "36881c26e982c3193194840b041c2089d581116fb5d2d817d80c8e1fbdfdd1d0"
+  }
+ },
+ "chains": {
+  "sev-0001": {
+   "successors": [
+    "wiki/syntheses/decision-register.md"
+   ],
+   "via": "decisions register: source page + the superseded_by record",
+   "dangling": []
+  }
+ },
+ "pages": {
+  "wiki/concepts/standing-approval.md": {
+   "state": "withheld",
+   "reasons": [
+    "page-status-tombstoned",
+    "superseded-by wiki/syntheses/decision-register.md"
+   ],
+   "successor": "wiki/syntheses/decision-register.md",
+   "proposition": null,
+   "lifecycle": "tombstoned",
+   "validity": null
+  },
+  "wiki/i18n/de/overview.md": {
+   "state": "governed",
+   "reasons": [
+    "claim-candidate (proposed, unsettled — fewer than 3 outcomes on record)"
+   ],
+   "successor": null,
+   "proposition": "proposed",
+   "lifecycle": "current",
+   "validity": null
+  },
+  "wiki/i18n/ja/decision-register.md": {
+   "state": "governed",
+   "reasons": [
+    "claim-candidate (proposed, unsettled — fewer than 3 outcomes on record)"
+   ],
+   "successor": null,
+   "proposition": "proposed",
+   "lifecycle": "current",
+   "validity": null
+  },
+  "wiki/i18n/ja/overview.md": {
+   "state": "governed",
+   "reasons": [
+    "claim-candidate (proposed, unsettled — fewer than 3 outcomes on record)"
+   ],
+   "successor": null,
+   "proposition": "proposed",
+   "lifecycle": "current",
+   "validity": null
+  },
+  "wiki/i18n/ko/decision-register.md": {
+   "state": "governed",
+   "reasons": [
+    "claim-candidate (proposed, unsettled — fewer than 3 outcomes on record)"
+   ],
+   "successor": null,
+   "proposition": "proposed",
+   "lifecycle": "current",
+   "validity": null
+  },
+  "wiki/i18n/ko/overview.md": {
+   "state": "governed",
+   "reasons": [
+    "claim-candidate (proposed, unsettled — fewer than 3 outcomes on record)"
+   ],
+   "successor": null,
+   "proposition": "proposed",
+   "lifecycle": "current",
+   "validity": null
+  },
+  "wiki/i18n/zh/overview.md": {
+   "state": "governed",
+   "reasons": [
+    "claim-candidate (proposed, unsettled — fewer than 3 outcomes on record)"
+   ],
+   "successor": null,
+   "proposition": "proposed",
+   "lifecycle": "current",
+   "validity": null
+  },
+  "wiki/overview.md": {
+   "state": "governed",
+   "reasons": [
+    "claim-candidate (proposed, unsettled — fewer than 3 outcomes on record)"
+   ],
+   "successor": null,
+   "proposition": "proposed",
+   "lifecycle": "current",
+   "validity": null
+  },
+  "wiki/sources/founding-note.md": {
+   "state": "governed",
+   "reasons": [
+    "claim-candidate (proposed, unsettled — fewer than 3 outcomes on record)"
+   ],
+   "successor": null,
+   "proposition": "proposed",
+   "lifecycle": "current",
+   "validity": null
+  },
+  "wiki/syntheses/decision-register.md": {
+   "state": "governed",
+   "reasons": [
+    "claim-candidate (proposed, unsettled — fewer than 3 outcomes on record)",
+    "treatment standing negative for a claim on this page (treatment register)",
+    "named successor for sev-0001 (carries the current form)"
+   ],
+   "successor": null,
+   "proposition": "proposed",
+   "lifecycle": "current",
+   "validity": null,
+   "successor_of": [
+    "sev-0001"
+   ]
+  }
+ },
+ "census": {
+  "pages_total": 40,
+  "ungoverned": 30,
+  "governed": 9,
+  "withheld": 1
+ },
+ "state_hash": "ba548a70bf59fca4e13d0b195d9357afc05199e2cae819ea8c7da5e8495ea824"
+}

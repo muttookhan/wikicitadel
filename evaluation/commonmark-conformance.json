@@ -1,0 +1,272 @@
+{
+  "kind": "commonmark-conformance-subset",
+  "spec": "CommonMark 0.31.2",
+  "spec_url": "https://spec.commonmark.org/0.31.2/",
+  "attribution": "Example inputs and expected HTML are taken from the CommonMark specification, version 0.31.2 (2024-01-28), Copyright (c) John MacFarlane and contributors, licensed under CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/). This file reproduces a bounded subset of the spec's examples, as the licence permits with attribution and share-alike; it is not the full spec.",
+  "full_spec_provenance": "The full specification carries 652 examples across sections 1-6 and an appendix. The canonical source is spec.commonmark.org/0.31.2 (generated from spec.txt in the commonmark/commonmark-spec repository); its machine-readable form is the spec's own example list (spec.json at the same version path). This subset was selected 2026-10-21 from the published 0.31.2 text: the constructs this corpus actually uses (headings, thematic breaks, code blocks and spans, paragraphs, block quotes, lists, emphasis, links, images, escapes, hard breaks).",
+  "selection_rule": "Bounded subset: one or two canonical examples per construct family the corpus uses. Tables are absent because CommonMark 0.31.2 defines no tables; the renderer's pipe-table support is a local extension (see evaluation/markdown-dialect.json).",
+  "comparison_normalisation": "The spec does not mandate renderer presentation details. Before comparison the checker strips the Lens's documented presentation attributes (heading id= anchors; target=/rel= on external links), normalises <hr /> vs <hr> and self-closing tag spelling, and removes inter-tag whitespace and trailing whitespace before a closing tag, collapsing other whitespace runs. Structure, text, href/src and emphasis/code nesting are compared exactly after that normalisation.",
+  "known_divergences": [
+    {
+      "id": "setext-heading-level-1",
+      "section": "4.3 Setext headings",
+      "observed": "<p>Foo <em>bar</em> =========</p>",
+      "note": "Renderer has no setext headings; the underline joins the paragraph text."
+    },
+    {
+      "id": "indented-code-block",
+      "section": "4.4 Indented code blocks",
+      "observed": "<p>foo bar</p>",
+      "note": "Renderer has no indented code blocks; the lines render as a paragraph."
+    },
+    {
+      "id": "blockquote-with-heading",
+      "section": "5.1 Block quotes",
+      "observed": "<blockquote><p># foo</p></blockquote>",
+      "note": "Renderer does not render block structure inside a blockquote; the heading marker stays literal text in one paragraph."
+    },
+    {
+      "id": "list-nested",
+      "section": "5.3 Lists",
+      "observed": "<ul><li>foo</li><li>bar</li></ul>",
+      "note": "Renderer flattens a nested list into the parent list (items preserved, nesting lost)."
+    },
+    {
+      "id": "list-loose",
+      "section": "5.3 Lists",
+      "observed": "<ul><li>foo</li></ul>\n<ul><li>bar</li></ul>",
+      "note": "Renderer splits a loose list at the blank line into two separate lists and drops the <p> wrapping."
+    },
+    {
+      "id": "code-span-double-backtick",
+      "section": "6.1 Code spans",
+      "observed": "<p>`<code>foo </code> bar``</p>",
+      "note": "Renderer's code-span rule takes a single backtick only; a double-backtick span renders literally/incorrectly."
+    },
+    {
+      "id": "strong-underscore",
+      "section": "6.2 Emphasis and strong emphasis",
+      "observed": "<p>__foo__</p>",
+      "note": "Renderer implements _emphasis_ but not __strong__; the markers stay literal."
+    },
+    {
+      "id": "backslash-escape-star",
+      "section": "2.4 Backslash escapes",
+      "observed": "<p>\\<em>foo\\</em></p>",
+      "note": "Renderer does not process backslash escapes; the backslashes stay and the stars still emphasise."
+    },
+    {
+      "id": "link-inline-relative",
+      "section": "6.3 Links",
+      "observed": "<p>link</p>",
+      "note": "Renderer links only http(s)/mailto destinations; a relative destination renders as plain link text with no anchor."
+    },
+    {
+      "id": "link-inline-with-title",
+      "section": "6.3 Links",
+      "observed": "<p>[link](/uri \"title\")</p>",
+      "note": "Renderer does not parse a link title; the whole construct renders literally."
+    },
+    {
+      "id": "link-reference-full",
+      "section": "6.3 Links",
+      "observed": "<p>[foo][bar]</p>\n<p>[bar]: https://example.com</p>",
+      "note": "Renderer has no link reference definitions; both the reference link and the definition render literally."
+    },
+    {
+      "id": "autolink-uri",
+      "section": "6.5 Autolinks",
+      "observed": "<p>&lt;https://example.com&gt;</p>",
+      "note": "Renderer does not recognise <uri> autolinks; the brackets are escaped as text."
+    },
+    {
+      "id": "image-inline",
+      "section": "6.4 Images",
+      "observed": "<figure class=\"page-figure\"><img alt=\"foo\" src=\"/url\" loading=\"lazy\"></figure>",
+      "note": "Renderer wraps a standalone image in <figure class=\"page-figure\"> with loading=\"lazy\" instead of the spec's <p><img /></p> (presentation divergence; alt and src are preserved)."
+    },
+    {
+      "id": "hard-line-break-two-spaces",
+      "section": "6.7 Hard line breaks",
+      "observed": "<p>foo baz</p>",
+      "note": "Renderer joins the lines with a space; the two-space hard break produces no <br>."
+    }
+  ],
+  "cases": [
+    {
+      "id": "atx-headings-simple",
+      "section": "4.2 ATX headings",
+      "markdown": "# foo\n\n## foo\n\n### foo\n",
+      "expected_html": "<h1>foo</h1>\n<h2>foo</h2>\n<h3>foo</h3>"
+    },
+    {
+      "id": "atx-heading-requires-space",
+      "section": "4.2 ATX headings",
+      "markdown": "#5 bolt\n",
+      "expected_html": "<p>#5 bolt</p>"
+    },
+    {
+      "id": "atx-heading-inline-emphasis",
+      "section": "4.2 ATX headings",
+      "markdown": "# foo *bar*\n",
+      "expected_html": "<h1>foo <em>bar</em></h1>"
+    },
+    {
+      "id": "setext-heading-level-1",
+      "section": "4.3 Setext headings",
+      "markdown": "Foo *bar*\n=========\n",
+      "expected_html": "<h1>Foo <em>bar</em></h1>"
+    },
+    {
+      "id": "thematic-break-stars",
+      "section": "4.1 Thematic breaks",
+      "markdown": "***\n",
+      "expected_html": "<hr />"
+    },
+    {
+      "id": "indented-code-block",
+      "section": "4.4 Indented code blocks",
+      "markdown": "    foo\n    bar\n",
+      "expected_html": "<pre><code>foo\nbar\n</code></pre>"
+    },
+    {
+      "id": "fenced-code-block",
+      "section": "4.5 Fenced code blocks",
+      "markdown": "```\nfoo bar\n```\n",
+      "expected_html": "<pre><code>foo bar\n</code></pre>"
+    },
+    {
+      "id": "paragraph-soft-line-break",
+      "section": "4.8 Paragraphs",
+      "markdown": "foo\nbar\n",
+      "expected_html": "<p>foo\nbar</p>"
+    },
+    {
+      "id": "blockquote-simple",
+      "section": "5.1 Block quotes",
+      "markdown": "> foo\n> bar\n",
+      "expected_html": "<blockquote>\n<p>foo bar</p>\n</blockquote>"
+    },
+    {
+      "id": "blockquote-with-heading",
+      "section": "5.1 Block quotes",
+      "markdown": "> # foo\n",
+      "expected_html": "<blockquote>\n<h1>foo</h1>\n</blockquote>"
+    },
+    {
+      "id": "list-bullets-tight",
+      "section": "5.3 Lists",
+      "markdown": "- foo\n- bar\n",
+      "expected_html": "<ul>\n<li>foo</li>\n<li>bar</li>\n</ul>"
+    },
+    {
+      "id": "list-ordered-tight",
+      "section": "5.3 Lists",
+      "markdown": "1. foo\n2. bar\n",
+      "expected_html": "<ol>\n<li>foo</li>\n<li>bar</li>\n</ol>"
+    },
+    {
+      "id": "list-nested",
+      "section": "5.3 Lists",
+      "markdown": "- foo\n  - bar\n",
+      "expected_html": "<ul>\n<li>foo\n<ul>\n<li>bar</li>\n</ul>\n</li>\n</ul>"
+    },
+    {
+      "id": "list-loose",
+      "section": "5.3 Lists",
+      "markdown": "- foo\n\n- bar\n",
+      "expected_html": "<ul>\n<li>\n<p>foo</p>\n</li>\n<li>\n<p>bar</p>\n</li>\n</ul>"
+    },
+    {
+      "id": "code-span-single",
+      "section": "6.1 Code spans",
+      "markdown": "`foo`\n",
+      "expected_html": "<p><code>foo</code></p>"
+    },
+    {
+      "id": "code-span-double-backtick",
+      "section": "6.1 Code spans",
+      "markdown": "``foo ` bar``\n",
+      "expected_html": "<p><code>foo ` bar</code></p>"
+    },
+    {
+      "id": "emphasis-star",
+      "section": "6.2 Emphasis and strong emphasis",
+      "markdown": "*foo*\n",
+      "expected_html": "<p><em>foo</em></p>"
+    },
+    {
+      "id": "strong-star",
+      "section": "6.2 Emphasis and strong emphasis",
+      "markdown": "**foo**\n",
+      "expected_html": "<p><strong>foo</strong></p>"
+    },
+    {
+      "id": "emphasis-underscore",
+      "section": "6.2 Emphasis and strong emphasis",
+      "markdown": "_foo_\n",
+      "expected_html": "<p><em>foo</em></p>"
+    },
+    {
+      "id": "strong-underscore",
+      "section": "6.2 Emphasis and strong emphasis",
+      "markdown": "__foo__\n",
+      "expected_html": "<p><strong>foo</strong></p>"
+    },
+    {
+      "id": "emphasis-nested-strong",
+      "section": "6.2 Emphasis and strong emphasis",
+      "markdown": "*foo **bar** baz*\n",
+      "expected_html": "<p><em>foo <strong>bar</strong> baz</em></p>"
+    },
+    {
+      "id": "backslash-escape-star",
+      "section": "2.4 Backslash escapes",
+      "markdown": "\\*foo\\*\n",
+      "expected_html": "<p>*foo*</p>"
+    },
+    {
+      "id": "link-inline-absolute",
+      "section": "6.3 Links",
+      "markdown": "[link](https://example.com)\n",
+      "expected_html": "<p><a href=\"https://example.com\">link</a></p>"
+    },
+    {
+      "id": "link-inline-relative",
+      "section": "6.3 Links",
+      "markdown": "[link](/uri)\n",
+      "expected_html": "<p><a href=\"/uri\">link</a></p>"
+    },
+    {
+      "id": "link-inline-with-title",
+      "section": "6.3 Links",
+      "markdown": "[link](/uri \"title\")\n",
+      "expected_html": "<p><a href=\"/uri\" title=\"title\">link</a></p>"
+    },
+    {
+      "id": "link-reference-full",
+      "section": "6.3 Links",
+      "markdown": "[foo][bar]\n\n[bar]: https://example.com\n",
+      "expected_html": "<p><a href=\"https://example.com\">foo</a></p>"
+    },
+    {
+      "id": "autolink-uri",
+      "section": "6.5 Autolinks",
+      "markdown": "<https://example.com>\n",
+      "expected_html": "<p><a href=\"https://example.com\">https://example.com</a></p>"
+    },
+    {
+      "id": "image-inline",
+      "section": "6.4 Images",
+      "markdown": "![foo](/url)\n",
+      "expected_html": "<p><img src=\"/url\" alt=\"foo\" /></p>"
+    },
+    {
+      "id": "hard-line-break-two-spaces",
+      "section": "6.7 Hard line breaks",
+      "markdown": "foo  \nbaz\n",
+      "expected_html": "<p>foo<br />\nbaz</p>"
+    }
+  ],
+  "registered": "2026-10-21"
+}
