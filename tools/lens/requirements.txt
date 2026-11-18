@@ -1,0 +1,4 @@
+# Lens compiler dependencies (everything else is Python 3.12 stdlib).
+# Pinned to the lockfile: requirements-lock.txt (PyYAML==6.0.1, verified
+# 2026-11-07). Bump the pin there first, then here, in the same change.
+PyYAML==6.0.1

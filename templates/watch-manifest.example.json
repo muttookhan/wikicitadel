@@ -1,0 +1,46 @@
+{
+  "automation": {
+    "command": [
+      "python3",
+      "scripts/wiki_auto_watch.py",
+      "run",
+      "--manifest",
+      "templates/watch-manifest.example.json"
+    ],
+    "dry_run_default": false,
+    "idempotence_key": "content-hash state file + the ingest queue's own content-hash item identity: a re-offer of unchanged bytes is a no-op at both layers",
+    "idempotent": true,
+    "kill_switch": {
+      "kind": "stop-file",
+      "value": "evaluation/auto-watch.STOP"
+    },
+    "log_path": "evaluation/auto-watch.log",
+    "max_items_per_run": 500,
+    "max_runtime_seconds": 120,
+    "name": "standing-auto-watch",
+    "owner": "owner-or-agent-seat",
+    "owner_notice": "log+chat",
+    "schedule": {
+      "kind": "interval",
+      "seconds": 300
+    },
+    "writes": [
+      "evaluation/auto-watch-state.json",
+      "evaluation/auto-watch.log",
+      "evaluation/ingest-queue.jsonl"
+    ]
+  },
+  "log_path": "evaluation/auto-watch.log",
+  "name": "standing-auto-watch",
+  "state_path": "evaluation/auto-watch-state.json",
+  "watches": [
+    {
+      "kind": "ingest",
+      "path": "raw/inbox"
+    },
+    {
+      "kind": "ingest",
+      "path": "raw/sources/incoming/*.md"
+    }
+  ]
+}
